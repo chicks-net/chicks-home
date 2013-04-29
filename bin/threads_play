@@ -1,0 +1,136 @@
+#!/usr/local/bin/perl
+# This is compiled with threading support
+
+use strict;
+use warnings;
+use threads qw(stringify);
+#use threads::shared;
+
+print "Starting threads_play\n";
+
+# config values
+my @hosts = qw(a b c d e f g h i j k l m n o p q r s t u v w x y z);
+push(@hosts,@hosts);
+#push(@hosts,@hosts);
+my $each = 3;
+my $fan_out = 4;
+
+# spawn threads
+my %foremen;
+while ( scalar @hosts ) {
+	# build up hosts to send to a Foreman
+	my @thishosts;
+	for (1 .. $each) {
+		next unless scalar @hosts;
+		push @thishosts, shift @hosts;
+	}
+
+	# spawn Foreman
+	my $t = threads->new(\&Foreman,@thishosts);
+	$foremen{ "$t" } = $t;
+
+	while ( (scalar keys %foremen) >= $fan_out ) {
+		my $made_progress = 0;
+		foreach my $tid ( keys %foremen ) {
+			my $foreman = $foremen{$tid};
+			if ( $foreman->is_joinable() ) {
+				$foreman->join();
+				$made_progress++;
+				delete $foremen{$tid};
+			}
+		}
+		threads->yield();
+#		sleep 1 unless $made_progress;
+	}
+}
+
+while ( scalar keys %foremen ) {
+	foreach my $tid ( keys %foremen ) {
+		my $foreman = $foremen{$tid};
+		if ( $foreman->is_joinable() ) {
+			$foreman->join();
+			delete $foremen{$tid};
+		}
+	}
+	threads->yield();
+#	sleep 1;
+}
+
+print "End of threads_play\n";
+
+
+sub Foreman {
+	my @hosts = @_;
+	print threads->tid() . " Foreman() working on " . scalar(@hosts) . " hosts with " . scalar(threads->list()) . " threads.\n";
+
+	# spawn fillers
+	my %fillers;
+	foreach my $host (@hosts) {
+		my $t = threads->new(\&Filler,$host);
+		$fillers{"$t"} = $t;
+
+		# wait for fillers to finish if past fan out
+		while ( (scalar keys %fillers) >= $fan_out ) {
+			foreach my $tid ( keys %fillers ) {
+				my $filler = $fillers{$tid};
+				if ( $filler->is_joinable() ) {
+					$filler->join();
+					delete $fillers{$tid};
+				}
+			}
+			threads->yield();
+		}
+	}
+
+	# wait for the rest of the fillers
+	foreach my $tid ( keys %fillers ) {
+		my $filler = $fillers{$tid};
+		$filler->join();
+		delete $fillers{$tid};
+		threads->yield();
+		print "here2 " . scalar(keys %fillers) . "\n";
+	}
+
+	# spawn updaters
+	my %updaters;
+	foreach my $host (@hosts) {
+		my $t = threads->new(\&Updater,$host);
+		$updaters{"$t"} = $t;
+
+		# wait for updaters to finish if past fan out
+		while ( (scalar keys %updaters) >= $fan_out ) {
+			foreach my $tid ( keys %updaters ) {
+				my $updater = $updaters{$tid};
+				if ( $updater->is_joinable() ) {
+					$updater->join();
+					delete $updaters{$tid};
+				}
+			}
+			threads->yield();
+		}
+	}
+
+	# wait for the rest of the updaters
+	foreach my $tid ( keys %updaters ) {
+		my $updater = $updaters{$tid};
+		$updater->join();
+		delete $updaters{$tid};
+		threads->yield();
+		print "here4 " . scalar(keys %updaters) . "\n";
+	}
+}
+
+sub Filler {
+	my @hosts = @_;
+	foreach my $host (@hosts) {
+		print threads->tid() . " Filler() working on $host with " . scalar(threads->list()) . " threads.\n";
+
+	}
+}
+
+sub Updater {
+	my @hosts = @_;
+	foreach my $host (@hosts) {
+		print threads->tid() . " Updater() working on $host with " . scalar(threads->list()) . " threads.\n";
+	}
+}

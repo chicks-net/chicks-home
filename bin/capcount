@@ -1,0 +1,41 @@
+#!/usr/bin/perl
+
+use warnings;
+use strict;
+
+my @datacenters = qw( xv ca xa xf lc );
+print join("\t",@datacenters,"role"),"\n";
+
+foreach my $role (qw(
+	ox3-http-gateway.prod
+	ox3-broker.prod
+	ox3-market-opportunity.prod
+	ox3-frequency.prod
+	ssrtb.prod
+	cassandra-retarget.prod
+	journaller.prod.market
+	journaller.prod.ox3-delivery
+	overlord.prod
+	underlord.prod
+	retarget.prod
+	riak.prod
+        ox3-api-riak.prod
+        ox3-advertiser-data-service.prod
+        ox3-publisher-data-service.prod
+        ox3-user-data-service.prod
+	cassandra-trafficking.prod
+	ox3-grid-node.prod
+	storage-grid-node.prod
+)) {
+	my @row;
+	foreach my $dc (@datacenters) {
+		my $rw_role = $role;
+		$rw_role =~ s/\$dc/$dc/;
+
+		my $c = `ox-list-machines -r $rw_role -c $dc | wc -l`;
+		$c =~ s/\s+$//; # or chomp
+		push(@row,$c);
+	}
+	push(@row,$role);
+	print join("\t",@row),"\n";
+}

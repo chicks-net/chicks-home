@@ -1,0 +1,159 @@
+#!/usr/local/bin/perl 
+
+use OX::Std;
+use Data::Dumper;
+#use OX::MCP::DB;
+use DBI;
+#use OX::MCP::CmdLine;
+
+# config
+my @mal_strings = qw(
+	stats1.in
+	baner3.in
+	cccstyle.in
+	mixer1.
+	dddstyle.in
+	harborirs.com
+	c48a765e4f75baeb85f0a755fc3ec09c
+	chickstest
+	kolossbanner.com
+);
+
+sub program_description {
+  "malware detector"
+}
+
+sub program_help_text {
+  my $progname = basename( $0 );
+qq{
+  $progname 
+}
+}
+
+my $debug = $ENV{DEBUG};
+
+# database connections
+#OX::Config->read;
+my $dbh = DBI->connect('DBI:mysql:28instances:leading-gur-masterconfig','28instances','uByKrlJX4O') or die "couldn't connect: " . $DBI::errstr;
+
+# produce like-ness
+my @fields = qw(
+	banners.append
+	banners.prepend
+	banners.htmlcache
+	banners.htmltemplate
+	zones.append
+	zones.prepend
+);
+my %tables = map { my $x = $_;  $x =~ s/\..+$//; ($x, 1) } @fields;
+my %all_likes;
+foreach my $table (keys %tables) {
+	my @table_fields = map { $_ =~ s/^.*\.//; $_ } grep /^$table\./, @fields;
+	$tables{$table} = \@table_fields;
+	my @likes;
+	foreach my $field ( @table_fields ) {
+		my $like = join (' or ', map "$field like '\%$_%'", @mal_strings);
+		push(@likes,$like);
+	}
+	$all_likes{$table} = join(' or ',@likes);
+}
+#die Dumper(\%tables,\%all_likes);
+
+my %show_fields = (
+	banners => [qw( bannerid description htmlcache append prepend )],
+	zones => [qw( zoneid description append prepend )],
+);
+
+# idiot detector
+if (scalar @ARGV) {
+	die "this is what happens when you try every command with -h first";
+	# there is no help! hahaha
+	# or wasn't this helpful?
+}
+
+# get customers
+my $sql = "select * from customers where cluster='leading' and active=1 order by shortname";
+my $sth = $dbh->prepare($sql) or die $DBI::errstr;
+$sth->execute() or die $DBI::errstr;
+
+my $grandtotal = 0;
+my $content = '';
+my %bad_count;
+
+# foreach customer
+while (my $row = $sth->fetchrow_hashref()) {
+	my $shortname = $row->{shortname};
+	my $delivery = $row->{delivery};
+	my $dbhost = "dedicated-db-$shortname";
+	my $maint = "maintenance.$delivery";
+
+#	next unless $shortname eq 'sap';
+
+	my $custdbh = DBI->connect("DBI:mysql:$shortname;host=$dbhost",'ox_readonly','jQC312GpmkVmSXYVdhW') or do {
+		warn "couldn't connect: " . $DBI::errstr;
+		next;
+	};
+	foreach my $table (keys %all_likes) {
+		my $total = 0;
+		my $like = $all_likes{$table};
+		my $sql = "select * from $table where $like";
+		my $csth = $custdbh->prepare($sql) or die $DBI::errstr;
+		$csth->execute() or die $DBI::errstr;
+
+		while (my $mal_banner = $csth->fetchrow_hashref()) {
+			my %print_fields = map { ( $_, $mal_banner->{$_} ) } @{$show_fields{$table}} ;
+			# TODO: turn URL's into <A> tags
+			my $badness = join(', ',
+				map {
+					my $f =  $print_fields{$_};
+					$f =~ s/\&/&amp;/g;
+					$f =~ s/\</&lt;/g;
+					$f =~ s/\>/&gt;/g;
+					"<B>$_</b>='$f'"
+				}
+				@{$show_fields{$table}}
+			);
+#			die Dumper(\$show_fields{$table},\%print_fields,$badness);
+
+			$content .= "BAD in $shortname: $badness\n";
+			$bad_count{$shortname}++;
+			$total++;
+		}
+
+		$grandtotal += $total;
+#		say "$shortname\t$total";
+	} ## end foreach my $table
+}
+
+# mail headers
+if (!$debug and $grandtotal) {
+	# not-debug and there is badness, so we'll mail the world...
+	my $out = '';
+	$out .= "From: malware-reports\@openx.com\n";
+	$out .= "To: malware-reports\@openx.com\n";
+	#$out .= "To: chris.hicks\@openx.org\n";
+	my $bad_custs = join(',',keys %bad_count);
+	$out .= "Subject: more 2.8 malware in $bad_custs\n";
+	$out .= "Content-Type: text/html; charset=\"us-ascii\"\n";
+	$out .= "\n";
+	$out .= "<HTML>\n";
+	$out .= "<P><PRE>\n";
+	$out .= $content;
+	$out .= "</PRE></P>\n";
+	$out .= "<br>\n";
+	$out .= "<P>$grandtotal malware banners detected\n";
+	$out .= "</HTML>\n";
+
+	# | /usr/sbin/sendmail -f black-reports@openx.org -t
+	open(SENDMAIL,"| /usr/sbin/sendmail -f black-reports\@openx.org -t") or die "could not start sendmail: $!";
+	print SENDMAIL $out;
+	close(SENDMAIL);
+} elsif ($debug) {
+	# debug
+	print $content;
+	say "\n";
+	say "$grandtotal malware banners detected";
+} else {
+	# no debug or malware - life is good
+}
+

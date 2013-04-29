@@ -1,0 +1,284 @@
+#!/usr/bin/perl -w
+
+print "From: black-reports\@openx.org\n";
+print "To: black-reports\@openx.org\n";
+#print "To: chris.hicks\@openx.org\n";
+print "Subject: weekly ox3 ec2 equivalence\n";
+print "Content-Type: text/html; charset=\"us-ascii\"\n";
+print "\n";
+print "<html>\n";
+print "<body>\n";
+print "<PRE>\n";
+
+
+my %config = (
+	'delivery-xa' => { 
+		role => 'ox3-http-gateway.prod.xa',
+		type => 'physical',
+		dc => 'xa',
+		description => "prod\tdelivery",
+	},
+	'delivery-xf' => { 
+		role => 'ox3-http-gateway.prod.xf',
+		type => 'physical',
+		dc => 'xf',
+		description => "prod\tdelivery",
+	},
+	'delivery-xv' => { 
+		role => 'ox3-http-gateway.prod.xv',
+		type => 'physical',
+		dc => 'xv',
+		description => "prod\tdelivery",
+	},
+	'delivery-ca' => { 
+		role => 'ox3-http-gateway.prod.ca',
+		type => 'physical',
+		dc => 'ca',
+		description => "prod\tdelivery",
+	},
+
+	'retarget-xa' => { 
+		role => 'ox3-cassandra.prod.xa',
+		type => 'physical',
+		dc => 'xa',
+		description => "prod\tretarget",
+	},
+	'retarget-xf' => { 
+		role => 'ox3-cassandra.prod.xf',
+		type => 'physical',
+		dc => 'xf',
+		description => "prod\tretarget",
+	},
+	'retarget-xv' => { 
+		role => 'ox3-cassandra.prod.xv',
+		type => 'physical',
+		dc => 'xv',
+		description => "prod\tretarget",
+	},
+	'retarget-ca' => { 
+		role => 'ox3-cassandra.prod.ca',
+		type => 'physical',
+		dc => 'ca',
+		description => "prod\tretarget",
+	},
+
+	'frequency-xa' => { 
+		role => 'ox3-frequency.prod.xa',
+		type => 'physical',
+		dc => 'xa',
+		description => "prod\tfrequency",
+	},
+	'frequency-xf' => { 
+		role => 'ox3-frequency.prod.xf',
+		type => 'physical',
+		dc => 'xf',
+		description => "prod\tfrequency",
+	},
+	'frequency-xv' => { 
+		role => 'ox3-frequency.prod.xv',
+		type => 'physical',
+		dc => 'xv',
+		description => "prod\tfrequency",
+	},
+	'frequency-ca' => { 
+		role => 'ox3-frequency.prod.ca',
+		type => 'physical',
+		dc => 'ca',
+		description => "prod\tfrequency",
+	},
+
+	'mops-xv' => { 
+		role => 'ox3-market-opportunity.prod.xv',
+		type => 'physical',
+		dc => 'xv',
+		description => "prod\tmops",
+	},
+	'mops-xa' => { 
+		role => 'ox3-market-opportunity.prod.xa',
+		type => 'physical',
+		dc => 'xa',
+		description => "prod\tmops",
+	},
+	'mops-xf' => { 
+		role => 'ox3-market-opportunity.prod.xf',
+		type => 'physical',
+		dc => 'xf',
+		description => "prod\tmops",
+	},
+	'mops-ca' => { 
+		role => 'ox3-market-opportunity.prod.ca',
+		type => 'physical',
+		dc => 'ca',
+		description => "prod\tmops",
+	},
+
+	'riak-xv' => { 
+		role => 'riak.prod.xv',
+		type => 'physical',
+		dc => 'xv',
+		description => "prod\triak",
+	},
+	'riak-xa' => { 
+		role => 'riak.prod.xa',
+		type => 'physical',
+		dc => 'xa',
+		description => "prod\triak",
+	},
+	'riak-xf' => { 
+		role => 'riak.prod.xf',
+		type => 'physical',
+		dc => 'xf',
+		description => "prod\triak",
+	},
+	'riak-ca' => { 
+		role => 'riak.prod.ca',
+		type => 'physical',
+		dc => 'ca',
+		description => "prod\triak",
+},
+
+##	'legacy-retarget-xv' => { 
+##		role => 'retarget.prod.xv',
+##		type => 'physical',
+##		dc => 'xv',
+##		description => "prod\tlegacy retarget",
+##	},
+##	'legacy-retarget-xa' => { 
+##		role => 'retarget.prod.xa',
+##		type => 'physical',
+##		dc => 'xa',
+##		description => "prod\tlegacy retarget",
+##	},
+##	'legacy-retarget-xf' => { 
+##		role => 'retarget.prod.xf',
+##		type => 'physical',
+##		dc => 'xf',
+##		description => "prod\tlegacy retarget",
+##	},
+###	'legacy-retarget-ca' => { 
+###		role => 'retarget.prod.ca',
+###		type => 'physical',
+###		dc => 'ca',
+###		description => "prod\tlegacy retarget",
+###	},
+##
+##	'legacy-broker-xv' => { 
+##		role => 'broker.prod.xv',
+##		type => 'physical',
+##		dc => 'xv',
+##		description => "prod\tlegacy broker",
+##	},
+##	'legacy-broker-xa' => { 
+##		role => 'broker.prod.xa',
+##		type => 'physical',
+##		dc => 'xa',
+##		description => "prod\tlegacy broker",
+##	},
+##	'legacy-broker-xf' => { 
+##		role => 'broker.prod.xf',
+##		type => 'physical',
+##		dc => 'xf',
+##		description => "prod\tlegacy broker",
+##	},
+###	'legacy-broker-ca' => { 
+###		role => 'broker.prod.ca',
+###		type => 'physical',
+###		dc => 'ca',
+###		description => "prod\tlegacy broker",
+###	},
+
+	'db' => { 
+		role => 'ox3-database',
+		type => 'physical',
+		dc => '*',
+		description => "prod\tdatabase",
+	},
+#	'staging-delivery-xv' => { 
+#		role => 'ox3-http-gateway.staging',
+#		type => 'physical',
+#		dc => 'xv',
+#		description => "staging\tdelivery",
+#	},
+);
+
+print "# ox3 ec2 equivalence\n";
+my $format = "%-10s %-15s %-3s %4d %-10s %7.3f\n";
+my $total = 0;
+
+foreach my $key (sort keys %config) {
+#	print "$key\n";
+
+	my $conf = $config{$key};
+
+	my $type = $conf->{type};
+	my $role = $conf->{role};
+	my $dc = $conf->{dc};
+	my $description = $conf->{description};
+	my ($cluster,$function) = split (/\t/,$description);
+
+	my $lmopt = '';
+	my ($count,$extended);
+	if ($type eq 'physical') {
+		$count = `ox-list-machines -p -r $role | wc -l`;
+		chomp($count);
+		$extended = $count;
+	} else {
+		die "bad $key: $type is not a valid type";
+	}
+	#print "$description\t$dc\t$count\t$type\t$extended\n";
+	$total += $extended;
+	printf($format,$cluster,$function,$dc,$count,$type,$extended);
+}
+
+my $out = `ox-list-machines -f region size | grep ox3`;
+chomp($out);
+my %virtual_counts;
+my @machines = split(/\n/,$out);
+foreach my $machine (@machines) {
+	my ($name,$dc,$size) = split(/\s+/,$machine);
+	my ($cluster) = split(/-/,$name);
+
+	unless (defined $dc) {
+		warn "$name has no data center";
+		next;
+	}
+	next if $dc =~ /^e/; # exclude ec2
+	next if $dc =~ /^(us|eu)-/; # exclude ec2
+
+	my $key = "$cluster\t$dc\t$size";
+	$virtual_counts{$key}++;
+}
+
+my %factor = (
+	large => .5,
+	medium => .25,
+	small => 1/8,
+);
+
+foreach my $vkey (sort keys %virtual_counts) {
+	my ($cluster,$dc,$size) = split (/\t/,$vkey);
+	my $count = $virtual_counts{$vkey};
+	my $extended = $count * $factor{$size};
+	my $function = '*';
+	$total += $extended;
+	#print "$cluster\t*\t$dc\t$count\t$size\t$extended\n";
+	printf($format,$cluster,$function,$dc,$count,$size,$extended);
+}
+
+$format = "%-46s %7.3f\n";
+printf("%-46s %-7s\n","",'='x7);
+printf($format,"ox dc physical equivalents",$total);
+my $aws  = $total * 5;
+printf($format,"aws m1.large equivalents",$aws);
+my $hourly = $aws * .34;
+printf($format,"hourly expense",$hourly);
+my $monthly = $hourly * 24 * (365.25/12);
+$format = "%-46s \$%-10.2f\n";
+printf($format,"monthly expense",$monthly);
+
+print "\n";
+print "</PRE>\n";
+print "</body>\n";
+print "</html>\n";
+
+__END__

@@ -1,0 +1,9 @@
+#!/bin/bash
+
+while [[ 1 ]]
+do
+	# use ExitOnForwardFailure if upgrade to openssh 4.4
+	#ssh -o ExitOnForwardFailure=yes -o ConnectTimeout=2 -o TCPKeepAlive=yes -o ServerAliveInterval=2 -o ServerAliveCountMax=2 -N -D 8888 root@xvaaa-xx-01.xa.dc.openx.org
+	ssh -o ConnectTimeout=2 -o TCPKeepAlive=yes -o ServerAliveInterval=2 -o ServerAliveCountMax=2 -N -D 8888 root@xvaaa-xx-01.xv.dc.openx.org
+	sleep 1
+done

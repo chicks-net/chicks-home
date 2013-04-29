@@ -1,0 +1,13 @@
+#!/bin/bash
+
+BRANCH=$1
+
+if [[ -z $BRANCH ]]
+then
+	echo "specify branch fool!"
+	exit 1
+fi
+
+svn cp --parents $SVNROOT/trunk/ops/MCP $SVNROOT/branches/ops/MCP/$1
+cd ~/svn
+svn co $SVNROOT/branches/ops/MCP/$1

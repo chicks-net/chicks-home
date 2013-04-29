@@ -1,0 +1,80 @@
+#!/usr/local/bin/perl 
+
+use OX::Std;
+use DBI;
+
+sub program_description {
+  "autorepublish stuck stats"
+}
+
+sub program_help_text {
+  my $progname = basename( $0 );
+qq{
+  $progname 
+}
+}
+
+my $debug = 0;
+
+# config and database connections
+my $dbh = DBI->connect('DBI:mysql:mcp2;host=x.openx.org','mcpread','td11dfbo') or die "couldn't connect: " . $DBI::errstr;
+
+# get customers
+my $sql = "select * from customers where cluster='leading' and active=1 order by shortname";
+my $sth = $dbh->prepare($sql) or die $DBI::errstr;
+$sth->execute() or die $DBI::errstr;
+
+my $grandtotal = 0;
+
+# foreach customer
+while (my $row = $sth->fetchrow_hashref()) {
+	my $shortname = $row->{shortname};
+	my $delivery = $row->{delivery};
+	my $db_hostname = $row->{db_hostname};
+	my $dbhost = "dedicated-db-$shortname";
+	my $maint = "maintenance.$delivery";
+	my $total = 0;
+
+#	next unless $shortname eq 'sap';
+	say $shortname;
+#	say "$shortname ($maint)";
+	say '-' x length($shortname);
+
+	my $custdbh = DBI->connect("DBI:mysql:$shortname;host=$dbhost;mysql_connect_timeout=5",'ox_readonly','jQC312GpmkVmSXYVdhW') or do {
+		warn "couldn't connect: " . $DBI::errstr;
+		next;
+	};
+	my $sql = "select	date(interval_start) as interval_day,
+				min(interval_start) as begin,
+				date_add(max(interval_start), interval 3599 second) as end,
+				sum(count) as c
+			from data_bkt_m
+			where interval_start < date_sub(now(), interval 1 day)
+			group by 1 
+			order by 1 desc";
+#die $sql;
+	my $csth = $custdbh->prepare($sql) or die $DBI::errstr;
+	$csth->execute() or die $DBI::errstr;
+
+	# foreach day of stuck stats
+	while (my $hour = $csth->fetchrow_hashref()) {
+		my $interval = $hour->{interval_day};
+		my $begin = $hour->{begin};
+		my $end = $hour->{end};
+		my $c = $hour->{c};
+		say "$interval\t$c";
+		$total += $c;
+
+#		warn "end undefined for $interval" unless defined $end;
+#		my $remote_cmd = "/usr/bin/php /opt/ox/adserver/openx/scripts/maintenance/tools/republish.php $maint '$begin' '$end' -f";
+#		my $local_cmd = "ssh $dbhost \"$remote_cmd\"";
+#		my $out = `$local_cmd` unless $debug;
+#		say $local_cmd if $debug;
+#		say "repubilshed $c stats on $interval for $shortname";
+	}
+
+	# TODO: handle data_bkt_r
+
+#	say "$shortname\t$total";
+	say "";
+}

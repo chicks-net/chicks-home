@@ -1,0 +1,9 @@
+#!/bin/bash
+
+ox-cron slack
+
+for h in leading-gur-ui-xv-001 leading-gur-ui-xv-002 leading-gur-ui-xv-003
+do
+	echo -ne "\n\n$h\n\n"
+	ssh $h "ox-cron slack ; service httpd restart"
+done

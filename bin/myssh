@@ -1,0 +1,22 @@
+#!/bin/bash
+
+# ssh -t qa-ox3-db-xv-01 "bash --rcfile /root/.x -i"
+
+if [ "$UID" -eq "0" ]  # Will the real "root" please stand up?
+then
+	SSHCMD="ssh"
+else
+	SSHCMD="sudo ssh"
+fi
+
+HOST=$1
+
+# TODO: only search in ox-list-machines if there are no dots in HOST
+FQDN=`ox-list-machines -n $HOST -f fullname | awk '{print $2}'`
+
+if host $FQDN
+then
+	$SSHCMD -t $FQDN "bash --rcfile /root/.x -i"
+else
+	echo ERROR: host failed
+fi

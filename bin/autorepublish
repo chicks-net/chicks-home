@@ -1,0 +1,94 @@
+#!/usr/local/bin/perl 
+
+use OX::Std;
+use OX::MCP::DB;
+use OX::MCP::CmdLine;
+
+sub program_description {
+  "autorepublish stuck stats"
+}
+
+sub program_help_text {
+  my $progname = basename( $0 );
+qq{
+  $progname 
+}
+}
+
+my $debug = 0;
+
+# config and database connections
+OX::Config->read;
+my $db = OX::MCP::DB->connect;
+my $dbh = DBI->connect('DBI:mysql:mcp2','mcpread','td11dfbo') or die "couldn't connect: " . $DBI::errstr;
+
+# mail headers
+unless ($debug) {
+	print "From: black-reports\@openx.org\n";
+	print "To: black-reports\@openx.org\n";
+	#print "To: chris.hicks\@openx.org\n";
+	print "Subject: daily autorepublish\n";
+	#print "Content-Type: text/html; charset=\"us-ascii\"\n";
+	print "\n";
+}
+
+# get customers
+my $sql = "select * from customers where cluster='leading' and active=1 order by shortname";
+my $sth = $dbh->prepare($sql) or die $DBI::errstr;
+$sth->execute() or die $DBI::errstr;
+
+my $grandtotal = 0;
+
+# foreach customer
+while (my $row = $sth->fetchrow_hashref()) {
+	my $shortname = $row->{shortname};
+	my $delivery = $row->{delivery};
+	my $dbhost = "dedicated-db-$shortname";
+	my $maint = "maintenance.$delivery";
+	my $total = 0;
+
+#	next unless $shortname eq 'sap';
+#	say $shortname;
+#	say "$shortname ($maint)";
+#	say '-' x length($shortname);
+
+	my $custdbh = DBI->connect("DBI:mysql:$shortname;host=$dbhost",'ox_readonly','jQC312GpmkVmSXYVdhW') or do {
+		warn "couldn't connect: " . $DBI::errstr;
+		next;
+	};
+	foreach my $table (qw(data_bkt_m data_bkt_r)) {
+		my $sql = "select	date(interval_start) as interval_day,
+					min(interval_start) as begin,
+					date_add(max(interval_start), interval 3599 second) as end,
+					sum(count) as c
+				from $table
+				where interval_start > date_sub(now(), interval 3 day)
+				  and interval_start < date_sub(now(), interval 1 day)
+				group by 1 
+				order by 1 desc";
+		my $csth = $custdbh->prepare($sql) or die $DBI::errstr;
+		$csth->execute() or die $DBI::errstr;
+
+		# foreach day of stuck stats
+		while (my $hour = $csth->fetchrow_hashref()) {
+			my $interval = $hour->{interval_day};
+			my $begin = $hour->{begin};
+			my $end = $hour->{end};
+			my $c = $hour->{c};
+			$total += $c;
+
+			my $remote_cmd = "/usr/bin/php /opt/ox/adserver/openx/scripts/maintenance/tools/republish.php $maint '$begin' '$end' -f";
+			my $local_cmd = "ssh $dbhost \"$remote_cmd\"";
+			my $out = `$local_cmd` unless $debug;
+#			say $local_cmd if $debug;
+			say "repubilshed $c $table stats on $interval for $shortname";
+		}
+
+		$grandtotal += $total;
+#		say "$shortname\t$total";
+	}
+#	say "";
+}
+
+say "nothing to do, yay!" unless $grandtotal;
+say "\n$grandtotal stats republished for everyone" if $grandtotal;

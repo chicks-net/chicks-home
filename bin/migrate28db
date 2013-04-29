@@ -1,0 +1,182 @@
+#!/usr/bin/perl
+
+# based on http://wiki.pasadena.openx.org/display/TECH/Rebuilding+GUR+DB#RebuildingGURDB-Tomigrateacustomer%27sDBfromEC2%3EXV%3A
+
+use strict;
+use warnings;
+
+use DBI;
+use Data::Dumper;
+use Socket;
+
+my ($destination,@shortnames) = @ARGV;
+
+# config
+my $mypw = 'J04xl*4e!h';
+my $mysql_backups = "/var/lib/mysql/BACKUPS";
+my $dry_run = 1;
+
+# check destination
+die "FAIL: shouldn't this be going to xv, which $destination isn't in?\n" unless $destination =~ /^xv/;
+$destination .= '.xv.dc.openx.org' unless $destination =~ /openx.org$/;
+unless (gethostbyname($destination)) {
+	die "FAIL: destination $destination is not in DNS\n";
+}
+
+# short_destination for ox-ssh/ox-scp
+my $short_destination = $destination;
+$short_destination =~ s/.xv\.dc\.openx\.org$//;
+
+# mysql connect
+my $dbh = DBI->connect('dbi:mysql:mcp2','root',$mypw,{ AutoCommit => 0 }) or die "couldn't connect to mysql:lbstats: " . $DBI::errstr;
+
+my %custs;
+
+foreach my $shortname (@shortnames) {
+	# find customer
+	my $sql = "select delivery,db_hostname from customers where shortname=" . $dbh->quote($shortname);
+	my $sth = $dbh->prepare($sql) or die "prepare($sql): $DBI::errstr";
+	$sth->execute() or die "prepare($sql): $DBI::errstr";
+	my $row = $sth->fetchrow_hashref();
+	$sth->finish();
+
+	unless ($row) {
+		$dbh->disconnect();
+		die "FAIL: no customer $shortname\n";
+	}
+
+	my $db_hostname = $row->{'db_hostname'};
+	my $delivery = $row->{'delivery'};
+	#my $conf = "~chicks/$delivery.conf.php";
+	my $conf = "/opt/ox/adserver/openx/var/$delivery.conf.php";
+
+	$custs{$shortname} = {
+		db_hostname	=> $db_hostname,
+		conf		=> $conf,
+	};
+
+	title("$shortname from $db_hostname to $destination: disabling UI access");
+
+	mysystem("ox-ssh leading-gur-masterconfig-xv-001 '~chicks/uienable $conf 0'"); # disable UI access
+}
+
+push_ui_update();
+
+foreach my $shortname (@shortnames) {
+	my $db_hostname = $custs{$shortname}->{db_hostname};
+
+	# truncate sessions table
+	title("truncate sessions for $shortname");
+	mysystem("ox-ssh $db_hostname 'echo \"delete from session;\" | mysql $shortname'");
+
+	# snapshot db
+	title("snapshot db for $shortname");
+	my $snapshot = "$mysql_backups/${shortname}_xv_migration.sql.gz";
+	print "backing up to $snapshot\n";
+	mysystem("ox-ssh $db_hostname 'mysqldump $shortname -uroot --extended-insert --single-transaction --opt --master-data=2 | gzip > $snapshot'");
+
+	# copy snapshot to x
+	mysystem("ox-scp $db_hostname:$snapshot /tmp");
+
+	# copy snapshot to destination
+	$snapshot =~ s{.*/}{/tmp/};
+	mysystem("ox-scp $snapshot $short_destination:$mysql_backups");
+
+	# update customers table
+	title("update customers table for $shortname");
+	my $sql = "update customers set db_hostname=" . $dbh->quote("${destination}.") .
+				", db_instance_id=" . $dbh->quote($short_destination) .
+				" where shortname=" . $dbh->quote($shortname) ;
+	if ($dry_run) {
+		print "do( $sql )\n";
+	} else {
+		$dbh->do( $sql );
+		$dbh->commit();
+	}
+}
+
+# customerxmldump/configcopy
+title("customerxmldump/configcopy");
+mysystem("ox-ssh leading-gur-masterconfig-xv-001 'ox-cron customerxmldump ; ox-cron configcopy'"); 
+
+# slack sync to xv
+title("slack sync to xv");
+mysystem("ssh xvx 'ox-cron slack'");	
+
+# slack/dbcreator on destination
+title("slack/dbcreator/dumptide/httpd reload on $short_destination");
+mysystem("ox-ssh $short_destination 'ox-cron slack ; /opt/ox/adserver/tools/dbcreator.pl'");
+
+foreach my $shortname (@shortnames) {
+	# load db snapshot on destination
+	title("load snapshot for $shortname on $short_destination");
+	my $snapshot = "$mysql_backups/${shortname}_xv_migration.sql.gz";
+	print "create mysql db $shortname on $short_destination:\n";
+	mysystem("ox-ssh $short_destination 'echo \"create database if not exists $shortname\" | mysql '");
+	print "load mysql db $shortname on $short_destination:\n";
+	mysystem("ox-ssh $short_destination 'zcat $snapshot | mysql -B $shortname'");
+}
+
+# update DNS
+title("update DNS");
+mysystem("dyndns.sh; ox-build-all-dns");
+
+# dumptide/httpd reload on destination
+title("dumptide/httpd reload on $short_destination");
+mysystem("ox-ssh $short_destination '/opt/ox/adserver/tools/dumptide.pl ; service httpd reload'");
+
+foreach my $shortname (@shortnames) {
+	my $db_hostname = $custs{$shortname}->{db_hostname};
+	my $conf = $custs{$shortname}->{conf};
+
+	# drop db
+	title("drop db");
+	mysystem("ox-ssh $db_hostname 'echo \"drop database $shortname;\" | mysql'");
+
+	# enable UI access
+	title("enable UI access");
+	mysystem("ox-ssh leading-gur-masterconfig-xv-001 '~chicks/uienable $conf 1'");
+}
+
+push_ui_update();
+
+# cleanup
+$dbh->disconnect();
+
+sub push_ui_update {
+	title("push_ui_update()");
+	mysystem("ox-ssh leading-gur-masterconfig-xv-001 'ox-cron configcopy'");	# configcopy
+	mysystem("ssh xvx 'ox-cron slack'");					# slack sync to xv
+
+	# bounceui servers
+	foreach my $ui (qw( leading-gur-ui-xv-001 leading-gur-ui-xv-002 leading-gur-ui-xv-003 )) {
+		title("bouncing $ui");
+		mysystem("ox-ssh $ui 'ox-cron slack'");
+	}
+}
+
+sub title {
+	my ($title) = @_;
+	print "\n$title:\n";
+	print '-' x (1+length($title)), "\n";
+}
+
+sub mysystem {
+	my($run) = @_;
+
+	if ($dry_run) {
+		print "system('$run');\n";
+	} else {
+		system($run);
+
+		if ($? == -1) {
+			print "failed to execute: $!\n";
+		} elsif ($? & 127) {
+			printf "child died with signal %d, %s coredump\n",
+				($? & 127),  ($? & 128) ? 'with' : 'without';
+			die;
+		} else {
+			die "system('$run') exited with value " .($? >> 8). "\n" ;
+		}
+	}
+}

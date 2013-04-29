@@ -1,0 +1,115 @@
+#!/usr/bin/perl
+
+use warnings;
+use strict;
+use DBI;
+
+# config
+my $lbs = "/home/chicks/lbs"; # list of load balancers
+
+my $mypw = 'J04xl*4e!h';
+
+# connect to MySQL
+my $dbh = DBI->connect('dbi:mysql:lbstats','root',$mypw) or die "couldn't connect to mysql:lbstats: " . $DBI::errstr;
+
+# grab load balancers
+open(LBS,"<",$lbs) or die "couldn't open $lbs: $!";
+my @lbs = <LBS>;
+close(LBS);
+chomp(@lbs);
+#print @lbs;
+
+my $sql = "select max(logwhen) - interval 8 minute as start from stats10";
+my $sth = $dbh->prepare($sql) or die "prepare($sql): $DBI::errstr";
+$sth->execute() or die "prepare($sql): $DBI::errstr";
+my $row = $sth->fetchrow_hashref();
+my $start = $row->{start};
+my $startwhere = "logwhen>" . $dbh->quote($start);
+
+foreach my $lb (@lbs) {
+	# get architecture
+	my $sql = "select * from hosts where hostname=";
+	$sql .= $dbh->quote($lb);
+
+	my $sth = $dbh->prepare($sql) or die "prepare($sql): $DBI::errstr";
+	$sth->execute() or die "prepare($sql): $DBI::errstr";
+	my $row = $sth->fetchrow_hashref();
+	my $arch = $row->{architecture};
+
+	# mysql> describe rawstats;
+	# +----------+------------------+------+-----+---------+----------------+
+	# | Field    | Type             | Null | Key | Default | Extra          |
+	# +----------+------------------+------+-----+---------+----------------+
+	# | id       | int(14) unsigned | NO   | PRI | NULL    | auto_increment | 
+	# | hostname | char(100)        | NO   |     |         |                | 
+	# | logwhen  | datetime         | NO   |     |         |                | 
+	# | rx       | bigint(20)       | NO   |     |         |                | 
+	# | tx       | bigint(20)       | NO   |     |         |                | 
+	# +----------+------------------+------+-----+---------+----------------+
+	$sql = "select * from rawstats where hostname=";
+	$sql .= $dbh->quote($lb);
+	$sql .= " and $startwhere";
+	$sql .= " order by logwhen";
+
+	$sth = $dbh->prepare($sql) or die "prepare($sql): $DBI::errstr";
+	$sth->execute() or die "prepare($sql): $DBI::errstr";
+
+	my ($rx,$tx,$maxwhen,$basis);
+	my $backwards = 0;
+	my $max = 0;
+	while (my $row = $sth->fetchrow_hashref()) {
+		unless (defined $rx) {
+			$rx = $row->{rx};
+			$tx = $row->{tx};
+			next;
+		}
+		my $newrx = $row->{rx};
+		my $newtx = $row->{tx};
+		my $when = $row->{logwhen};
+
+		$backwards = 0;
+		my($rxdiff,$txdiff);
+		if ($newrx < $rx or $newtx < $tx) {
+			unless ($arch eq 'i386') {
+				warn "$lb ($arch) went backwards at $when: $rx -> $newrx ... $tx -> $newtx";
+				$rx = $newrx;
+				$tx = $newtx;
+				next;
+			} else {
+				if ($newrx < $rx) {
+					$rxdiff = 2**32 - $rx + $newrx;
+					$backwards = 1;
+				} else {
+					$rxdiff = $newrx - $rx;
+				}
+				if ($newtx < $tx) {
+					$txdiff = 2**32 - $tx + $newtx;
+					$backwards = 1;
+				} else {
+					$txdiff = $newtx - $tx;
+				}
+			}
+		} else {
+			$rxdiff = $newrx - $rx;
+			$txdiff = $newtx - $tx;
+		}
+
+		my $bytes10min = ( $rxdiff + $txdiff ) /2;
+		my $bytespersecond = $bytes10min / 600;
+
+		if ($bytespersecond > $max) {
+			$max = $bytespersecond;
+			$maxwhen = $when;
+			$basis = "(($newtx-$tx)+($newrx-$rx)) ($rxdiff+$txdiff) backwards=$backwards";
+		}	
+
+		my $sql = "insert into stats10 (hostname,logwhen,bw) values (";
+		$sql .= $dbh->quote($lb) . "," . $dbh->quote($when) . ",$bytespersecond)";
+		#print $sql, "\n";
+		$dbh->do($sql) or die "$sql\nFAILED";
+
+		$rx = $newrx;
+		$tx = $newtx;
+	}
+	#print "$lb: " . sprintf("%0.1f",$max) . " at $maxwhen\n" if defined $maxwhen;
+}

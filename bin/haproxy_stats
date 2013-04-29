@@ -1,0 +1,82 @@
+#!/usr/bin/perl
+
+use warnings;
+use strict;
+
+my $log = "/mnt/log/haproxy.log";
+
+open(LOG,"<",$log) or die "couldn't open $log: $!";
+
+my %states = (
+	'--' => 'normal',
+	'CD' => 'client abort in DATA phase',
+	'PR--' => 'proxy abort, probably connection limit',
+	'SC' => 'server abort while connecting',
+	'SC--' => 'server abort while connecting',
+	'sC' => 'server timeout while connecting',
+);
+
+my $curminute = 0;
+my $tt_sum = 0;
+my $tc_sum = 0;
+my $tt_count = 0;
+my %terms;
+
+while(my $line = <LOG>) {
+	chomp($line);
+
+	my($syslog,$line) = split(/: /,$line);
+	next unless $line =~ /^[0-9]/;
+	my($client,$accept_date,$fe,$be,$times,$bytes,$term_state,$conn,$queue) = split(/ /,$line);
+
+	my ($status_code,$req_cookie,$resp_cookie);
+	my $httpflag = 0;
+	my $timescp = $times;
+	$timescp =~ s/[^\/]//g;
+	if (length($timescp) == 4) {
+		$httpflag = 1;
+		($client,$accept_date,$fe,$be,$times,$status_code,$bytes,$req_cookie,$resp_cookie,$term_state,$conn,$queue) = split(/ /,$line);
+	}
+
+	if (0) {
+		#print join("\n",$client,$accept_date,$fe,$be,$bytes,$term_state,$conn,$queue),"\n";
+		print join("\n",$client,$accept_date,$fe,$be,$times,$bytes,"term: ".$term_state,$conn,$queue),"\n";
+		die;
+	}
+#	unless ($term_state eq "--") {
+#		warn $line;
+#	}
+	my($mon,$day,$time,$server,$process) = split(/ /,$syslog);
+	my($hour,$minute,$second) = split(/:/,$time);
+	my $aminute = $hour . $minute;
+	my($timewait,$timeconn,$timetotal) = split(/\//,$times);
+
+	if ($term_state eq "----") {
+		$term_state = "--";
+	}
+	
+	$tt_sum += $timetotal;
+	$tc_sum += $timeconn;
+	$tt_count++;
+	$terms{$term_state}++;
+	
+	unless ($aminute == $curminute) {
+		print "$curminute: " . sprintf("%.0fms conn,",($tc_sum/$tt_count)) . sprintf(" %.0fms total",($tt_sum/$tt_count)) . " for $tt_count conns\n";
+
+		foreach my $state (sort keys %terms) {
+			my $c = $terms{$state};
+			print "\t$state = $c " . sprintf("(%.1f%%)",100*$c/$tt_count ) . "    # " . ($states{$state} || undef) . "\n";
+		}
+
+		# start over
+		$tt_sum = 0;
+		$tc_sum = 0;
+		$tt_count = 0;
+		%terms = ();
+		$curminute = $aminute;
+	}
+}
+
+print "# done\n";
+
+close(LOG);

@@ -1,0 +1,5 @@
+#!/bin/bash
+
+perltidy -ce -t -nola -l=110 rt
+perltidy -html rt.tdy
+mv rt.tdy.html ~/public_html

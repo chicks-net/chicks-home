@@ -1,0 +1,8 @@
+#!/bin/bash
+
+for a in `ls /var/ox/vars`
+do
+	echo $a
+	. /var/ox/vars/$a
+	ec2-describe-group
+done

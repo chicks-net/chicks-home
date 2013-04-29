@@ -1,0 +1,499 @@
+#!/usr/local/bin/perl
+
+# this script will query the MCP to update motd's everywhere
+
+package OX::MCP::Tool::Automotd;
+
+# ox modules
+use OX::Std::Moose;
+extends 'OX::MCP::Tool';
+
+use OX::MCP::DB;
+use OX::MCP::DB::Auth;
+use OX::Net::ONE;
+use OX::Config options => {
+	'datacenter|dc=s@' => [ 'OX abbreviation for data center', [] ],
+	'doit' => [ 'make it go', 0 ],
+};
+
+# std modules
+use DBI;
+use File::Copy;
+use Data::Dumper;
+use threads qw(stringify);
+
+# config values
+my $each = 5;
+my $fan_out = 5;
+
+my $datacenters = {
+	# Amazon EC2 Dublin
+	'ez' => {
+		region => 'eu-west-1',
+		ourvms => 0,
+	},
+	# Equinix Virginia
+	'xv' => {
+		region => 'xv',
+		ourvms => 1,
+	},
+	# Equinix Amsterdam
+	'xa' => {
+		region => 'xa',
+		ourvms => 1,
+	},
+	# Equinix Japan
+	'xj' => {
+		region => 'xj',
+		ourvms => 1,
+	},
+	# LA
+	'iw' => {
+		region => 'iw',
+		ourvms => 1,
+	},
+};
+
+#
+# threads
+#
+sub Foreman {
+	my @hosts = @_;
+	print threads->tid() . " Foreman() working on " . scalar(@hosts) . " hosts with " . scalar(threads->list()) . " threads.\n";
+
+	# spawn fillers
+	my %fillers;
+	foreach my $host (@hosts) {
+		my $t = threads->new(\&Filler,$host);
+		$fillers{"$t"} = $t;
+
+		# wait for fillers to finish if past fan out
+		while ( (scalar keys %fillers) >= $fan_out ) {
+			foreach my $tid ( keys %fillers ) {
+				my $filler = $fillers{$tid};
+				if ( $filler->is_joinable() ) {
+					$filler->join();
+					delete $fillers{$tid};
+				}
+			}
+			threads->yield();
+		}
+	}
+
+	# wait for the rest of the fillers
+	foreach my $tid ( keys %fillers ) {
+		my $filler = $fillers{$tid};
+		$filler->join();
+		delete $fillers{$tid};
+	}
+
+	# spawn updaters
+	my %updaters;
+	foreach my $host (@hosts) {
+		my $t = threads->new(\&Updater,$host);
+		$updaters{"$t"} = $t;
+
+		# wait for updaters to finish if past fan out
+		while ( (scalar keys %updaters) >= $fan_out ) {
+			foreach my $tid ( keys %updaters ) {
+				my $updater = $updaters{$tid};
+				if ( $updater->is_joinable() ) {
+					$updater->join();
+					delete $updaters{$tid};
+				}
+			}
+			threads->yield();
+		}
+	}
+
+	# wait for the rest of the updaters
+	foreach my $tid ( keys %updaters ) {
+		my $updater = $updaters{$tid};
+		$updater->join();
+		delete $updaters{$tid};
+	}
+}
+
+sub Filler {
+	my @hosts = @_;
+	foreach my $host (@hosts) {
+		my $hostname = $host->{hostname};
+		print threads->tid() . " Filler() working on $hostname\n";
+	}
+}
+
+sub Updater {
+	my @hosts = @_;
+	foreach my $host (@hosts) {
+		my $hostname = $host->{hostname};
+		print threads->tid() . " Updater() working on $hostname\n";
+	}
+}
+
+#
+# subs
+#
+method connect_to_db($db_name) {
+	my $auth = OX::MCP::DB::Auth->new( default => 'l-readonly' );
+	return DBI->connect( 'DBI:mysql:' . $db_name, $auth->username, $auth->password, { RaiseError => 1 } )
+		or die "couldn't connect: " . $DBI::errstr;
+}
+
+sub write_file {
+	my ($hostsfile,@array) = @_;
+	open( FH, ">$hostsfile" );
+	print FH @array;
+	close(FH);
+}
+
+sub process_host {
+	my ($host) = @_;
+	my $hostname = $host->{hostname};
+	my $copy = 0;
+
+	my $motd = print_host($host);
+
+	my $dbh; die; #TODO
+
+	my $sql = "select * from motd where hostname = " . $dbh->quote($hostname);
+	my $sth = $dbh->prepare($sql) or die "bad prepare('$sql'): " . $DBI::errstr;
+	$sth->execute() or die "bad execute: " . $DBI::errstr;
+
+	my $rows = $sth->rows;
+
+	if ($rows == 0) {
+		# new, insert it
+		my $sql = "insert into motd values(" . $dbh->quote($hostname) . ",0," . $dbh->quote($motd) . ")";
+		$dbh->do($sql);
+		$copy = 1; # put it on end machine
+		print "preserving old motd on $hostname.....\n";
+		system("/home/chicks/bin/ox-ssh -t 5 $hostname 'cp /etc/motd /etc/motd.preserve'");
+	} elsif ($rows == 1) {
+		my $row = $sth->fetchrow_hashref();
+		my $oldmotd = $row->{motd};
+		if ($motd eq $oldmotd) {
+			# no changes
+			#print "no changes for $hostname\n";
+		} else {
+			# update
+			my $sql = "update motd set motd=" . $dbh->quote($motd) . " where hostname=" . $dbh->quote($hostname);
+			$dbh->do($sql);
+			$copy = 1; # put it on end machine
+		}
+	} else {
+		die "impossible";
+	}
+
+	if ($copy) {
+		my $alias = $hostname;
+		$alias =~ s/\.(xa|xv|ew|ed)$//;
+
+		my $tmpfile = "/tmp/motd.$hostname";
+		write_file($tmpfile,$motd);
+		system("/home/chicks/bin/ox-scp -o ConnectTimeout=5 $tmpfile $alias:/etc/motd");
+		if ($?) {
+			print "scp screwed up on $hostname\n";
+		} else {
+			my $sql = "update motd set last_updated=now() where hostname=" . $dbh->quote($hostname);
+			$dbh->do($sql);
+		}
+		#die 'test';
+	}
+}
+
+sub print_host {
+	my ($host) = @_;
+	my $hostname = $host->{hostname};
+	my $alias = $host->{alias};
+	my $ip = $host->{ip};
+	my $parent = $host->{parent};
+	my $purpose = $host->{purpose};
+	my $ipmi_web = $host->{ipmi_web};
+	my $roles = $host->{roles};
+	my $comments = $host->{comments};
+
+	my $entry;
+	$entry .= "\n";
+	$entry .= "\n";
+	$entry .= "OpenX automotd\n";
+	$entry .= "\n";
+	$entry .= "hostname:\t$hostname ( aka $alias )\n";
+	$entry .= "\n";
+	$entry .= "purpose:\t$purpose\n\n" if defined $purpose;
+	$entry .= "ip:\t$ip\n";
+	$entry .= "phys:\t$parent\n" if defined $parent;
+	$entry .= "ipmi:\t$ipmi_web\n" if defined $ipmi_web;
+	$entry .= "\n";
+	$entry .= "roles:\t" . join("\n\t",@$roles) . "\n";
+	$entry .= "\n";
+	$entry .= $comments;
+	$entry .= "\n";
+	return $entry;
+}
+
+sub print_comments {
+	my ($entity) = @_; 
+	my( %search, %opts );
+	my $output = '';
+
+	$opts{ order_by } = { '-asc'  => 'created_at' };
+	$opts{ rows } = 10;
+
+	my $comments =
+		$entity->search(
+			\%search,
+			\%opts
+		);
+
+	while( my $comment = $comments->next ) {
+		$output .= sprintf "%-25s   %-10.10s %-8.8s    %25s\n",
+			$comment->user || '-',
+			$comment->created_at->mdy('/'), $comment->created_at->hms,
+			$comment->type;
+		$output .= sprintf "%s\n\n", $comment->text;
+	}
+	
+	return $output;
+}
+
+sub get_roles {
+	my ($machine) = @_;
+	my $roles = $machine->roles;
+	my @rolenames;
+	foreach my $role (@$roles) {
+		my $name = $role->name;
+		push(@rolenames, $name);
+	}
+	return sort @rolenames;
+}
+
+sub getswitches {
+	# this is a temporary hack - eventually this will be through DBIC
+	my $dbh = DBI->connect('DBI:mysql:chicks','root','J04xl*4e!h') or die "couldn't connect: " . $DBI::errstr;
+
+	my $sql = "select es.hostname as hostname,
+				es.ip as ip,
+				es.rack_id as rack_id,
+				c.shortname as dc
+			from ether_switches es, mcp2.racks r, mcp2.clusters c
+			where es.rack_id=r.id and r.cluster_id=c.id;";
+	my $sth = $dbh->prepare($sql) or die "bad prepare('$sql'): " . $DBI::errstr;
+	$sth->execute() or die "bad execute: " . $DBI::errstr;
+
+	my (%switches,%rack_switches,%dc_switches);
+	while ( my $row = $sth->fetchrow_hashref() ) {
+		my $hostname = $row->{hostname};
+		my $ip = $row->{ip};
+		my $rack_id = $row->{rack_id};
+		my $dc = $row->{dc};
+		my $alias = "$hostname.$dc";
+
+		$rack_switches{$rack_id} = $hostname;
+		push ( @{ $dc_switches{$dc} }, $hostname );
+	} 
+	return (\%switches,\%rack_switches,\%dc_switches);
+}
+
+sub get_vm_hosts {
+	my ($dc) = @_;
+	my ( %vm_hosts, %host_vms );
+	my $one = OX::Net::ONE->new( account => $dc );
+	my $vms = $one->vm_all_information;
+	foreach my $vm (@$vms) {
+		my $vm_name = $vm->name;
+		my $vm_host = $vm->physical_host;
+		$vm_hosts{$vm_name} = $vm_host;
+		push @{ $host_vms{$vm_host} }, $vm_name;
+	}
+	return ( \%vm_hosts, \%host_vms );
+}
+
+method find_hosts($dcs) {
+	my @hosts;
+
+	foreach my $dc (@$dcs) {
+warn "$dc!\n";
+		my (@groups,%roles);
+		unless (defined $datacenters->{$dc}) {
+			warn "datacenter $dc not configured, skipping";
+			next;
+		}
+		my $region = $datacenters->{$dc}->{region};
+
+		# virtual hosts
+		my ($vm_hosts,$host_vms);
+		if ($datacenters->{$dc}->{ourvms}) {
+			($vm_hosts,$host_vms) = get_vm_hosts($dc);
+		}
+
+		# get virtuals
+		my @vms = $self->mcp->describe_virtual_machines(
+			state   => ['running'],
+			region  => $region,
+			fields  => [qw/ hostname fqdn external_ip internal_ip region /],
+			combine => { vm_role => 'role' }
+		);
+
+		foreach my $vm (@vms) {
+			my $hostname = $vm->fqdn;
+			#warn "$hostname\n";
+			my $ip       = $vm->internal_ip;
+			my $alias    = $hostname;
+			$alias       =~ s/\.e[eswz]1[abcd].*//;
+			$alias       =~ s/\.(xa|xv|ew|ed)$//;
+
+			my @rolenames = get_roles($vm);
+
+			my $parent = $vm_hosts->{$alias};
+			warn "no parent for $hostname" if ($dc =~ /^x[av]$/ and ! defined $parent);
+
+#			my $entity = $db->resultset( 'VirtualMachine' )
+#				->by_name( $hostname )
+#				->related_resultset( 'virtual_machine_comments' )
+#				->related_resultset( 'comment' );
+#			my $comments = print_comments($entity);
+			my $comments = "TODO";
+
+			my $host = {
+				hostname => $hostname,
+				alias => $alias,
+				ip  => $ip,
+				parent => $parent,
+				roles => \@rolenames,
+				comments => $comments,
+			};
+
+			push(@hosts,$host);
+	#		process_host($host);
+		}
+
+		# get physicals
+		my @pms = $self->mcp->describe_physical_machines(
+			state   => [qw/ running special imaged /],
+			filter  => { 'cluster.shortname' => $region },
+			fields  => [qw/ hostname purpose rack_id state /],
+			combine => {
+				pm_role => 'role',
+				pm_ip   => 'ip',
+				pm_feature => 'feature',
+				ipmi_ip => undef
+			}
+		);
+
+		foreach my $pm (@pms) {
+			my $hostname = $pm->hostname;
+			#warn "$hostname\n";
+			my $ip       = $pm->ips->[0]->number;
+			my $ipmi     = $pm->ipmi_ip->number;
+			my $purpose  = $pm->purpose || 'unknown';
+			my $alias    = $hostname . '.' . $region;
+
+			my @rolenames = get_roles($pm);
+
+			my $ipmi_web = "http://$ipmi/";
+
+#			my $entity = $db->resultset( 'PhysicalMachine' )
+#				->by_name( $hostname )
+#				->related_resultset( 'physical_machine_comments' )
+#				->related_resultset( 'comment' );
+#			my $comments = print_comments($entity);
+			my $comments = "TODO";
+
+			my $host = {
+				hostname => $hostname,
+				alias => $alias,
+				ip  => $ip,
+				purpose => $purpose,
+				roles => \@rolenames,
+				ipmi_web=> $ipmi_web,
+				comments => $comments,
+			};
+			if ( defined $host_vms->{$hostname}  ) {
+				$host->{vms} = $host_vms->{$hostname};
+			}
+			push(@hosts,$host);
+	#		process_host($host);
+		}
+
+	} # foreach my $dc
+
+	return @hosts;
+}
+
+method cmd {
+	OX::Config->read;		# read config
+#	my $db = OX::MCP::DB->connect;	# get database handle
+	my $dbh = DBI->connect('DBI:mysql:chicks;host=x.openx.org','root','J04xl*4e!h') or die "couldn't connect: " . $DBI::errstr;
+
+	# setup data centers to build
+	my (%showdc, $dcs);
+	if (Config->datacenter) {
+		$dcs = Config->datacenter;
+	}
+
+	unless (@$dcs) {
+		$dcs = [qw(xv xa xj iw)];
+		$dcs = [qw(xa)];
+	}
+
+	foreach my $dc (@$dcs) {
+		$showdc{$dc} = 1;
+	}
+
+	# get etherswitch data
+	#my ( $switches, $rack_switches, $dc_switches ) = getswitches();
+
+	print "Finding hosts...\n";
+	my @hosts = $self->find_hosts( $dcs );
+
+	print "got " . scalar @hosts . " for " . join(", ",@$dcs) . "\n";
+
+	# spawn threads
+	print "Starting threads...\n";
+
+	my %foremen;
+	while ( scalar @hosts ) {
+		# build up hosts to send to a Foreman
+		my @thishosts;
+		for (1 .. $each) {
+			next unless scalar @hosts;
+			push @thishosts, shift @hosts;
+		}
+
+		# spawn Foreman
+		my $t = threads->new(\&Foreman,@thishosts);
+		$foremen{ "$t" } = $t;
+
+		while ( (scalar keys %foremen) >= $fan_out ) {
+			my $made_progress = 0;
+			foreach my $tid ( keys %foremen ) {
+				my $foreman = $foremen{$tid};
+				if ( $foreman->is_joinable() ) {
+					$foreman->join();
+					print "$tid foreman finished\n";
+					$made_progress++;
+					delete $foremen{$tid};
+				}
+			}
+#			print "foreman collector yielding\n";
+			threads->yield();
+	#		sleep 1 unless $made_progress;
+		}
+	}
+
+	while ( scalar keys %foremen ) {
+		foreach my $tid ( keys %foremen ) {
+			my $foreman = $foremen{$tid};
+			if ( $foreman->is_joinable() ) {
+				$foreman->join();
+				delete $foremen{$tid};
+			}
+		}
+		threads->yield();
+	}
+
+	print "End of automotd\n";
+}
+
+OX::MCP::Tool::Automotd->run();
+

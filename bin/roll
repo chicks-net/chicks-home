@@ -1,0 +1,21 @@
+#!/usr/bin/perl -w
+
+use strict;
+
+foreach my $die (@ARGV) {
+	if ($die =~ /^(\d*)d(\d+)$/) {
+		my $times = $1 || 1;
+		my $sides = $2;
+		print "$die:\n";
+		my $total = 0;
+		foreach my $iter (1..$times) {
+			my $roll = int(rand $sides)+1;
+			$total += $roll;
+			print "\troll $iter: $roll\n";
+		}
+		my $max = $times * $sides;
+		print "\ttotal: $total/$max\n" unless $times == 1;
+	} else {
+		die "$die not in 2d6 format";
+	}
+}

@@ -1,0 +1,110 @@
+#!/usr/bin/perl 
+
+use warnings;
+use strict;
+
+use DBI;
+use Data::Dumper;
+use Socket;
+
+# config
+my $mypw = 'J04xl*4e!h';
+
+# mysql connect
+my $dbh = DBI->connect('dbi:mysql:mcp2','root',$mypw,{ AutoCommit => 0 }) or die "couldn't connect to mysql:lbstats: " . $DBI::errstr;
+
+my @customers = @ARGV;
+my $allmode = 0;
+my (%allgood, %notdone);
+
+if ($customers[0] eq '-a') {
+	$allmode = 1;
+	@customers = ();
+	my $sql = "select shortname from customers where active=1 order by shortname";
+	my $sth = $dbh->prepare($sql) or die "prepare($sql): $DBI::errstr";
+	$sth->execute() or die "prepare($sql): $DBI::errstr";
+
+	while ( my $row = $sth->fetchrow_hashref() ) {
+		my $shortname = $row->{shortname};
+		push(@customers,$shortname);
+	}
+}
+
+# get command line arguments
+foreach my $customer (@customers) {
+	# connect to MySQL
+	my $sql = "select shortname,admin,delivery,deliveryssl,password,image from customers where shortname=" . $dbh->quote($customer);
+	my $sth = $dbh->prepare($sql) or die "prepare($sql): $DBI::errstr";
+	$sth->execute() or die "prepare($sql): $DBI::errstr";
+	my $row = $sth->fetchrow_hashref();
+
+	if ($row) {
+		my $shortname = $customer;
+		my $admin = $row->{'admin'};
+		my $delivery = $row->{'delivery'};
+		my $deliveryssl = $row->{'deliveryssl'};
+		my $image = $row->{'image'};
+		my $password = $row->{'password'};
+
+		my $ui_cname = "$shortname-ui.openxenterprise.com.";
+		my $d_cname = "$shortname-d.openxenterprise.com.";
+		my $ssld_cname = "ssl-$shortname.openxenterprise.com.";
+		
+		if ($image eq 'i.xx.openx.com') {
+			$image = $delivery;
+			$image =~ s/^[^.]+\./i./;
+		}
+
+		my $admin_comment = check_dns($admin,$ui_cname);
+		my $delivery_comment = check_dns($delivery,$d_cname);
+		my $deliveryssl_comment;
+		$deliveryssl_comment = check_dns($deliveryssl,$ssld_cname) if defined $deliveryssl;;
+		my $image_comment = check_dns($image,'i.xx.openx.com');
+
+		print "\n";
+		print "$shortname should have the following DNS:\n";
+		print "\n";
+		print "$admin. CNAME $ui_cname $admin_comment\n";
+		print "$delivery. CNAME $d_cname $delivery_comment\n";
+		print "$deliveryssl. CNAME $ssld_cname $deliveryssl_comment\n" if defined $deliveryssl;
+		print "$image. CNAME i.xx.openx.com. $image_comment\n" unless $image eq 'i.xx.openx.com';
+		print "\n";
+
+		if  ( $admin_comment eq '; done' and $delivery_comment eq '; done' and $image_comment eq '; done' ) {
+			$allgood{$shortname} = 1;
+		} else {
+			$notdone{$shortname} = 1;
+		}
+	} else {
+		warn "no customer $customer";
+	}
+}
+
+$dbh->disconnect();
+
+if ($allmode) {
+	my $allcustomers = scalar @customers;
+	my $good = scalar keys %allgood;
+	my $bad = scalar keys %notdone;
+
+	print "these are done ($good/$allcustomers):\n";
+	print "- ", join ("\n- ", sort keys %allgood), "\n\n";
+
+	print "these are not done ($bad/$allcustomers):\n";
+	print "- ", join ("\n- ", sort keys %notdone), "\n\n";
+}
+
+sub check_dns {
+	my ($hostname,$cname) = @_;
+
+	my $host_out = `host $hostname`;
+
+	if ($host_out =~ /^$hostname is an alias for $cname/) {
+		return '; done';
+	} else {
+		$host_out =~ s/\n.*$//mg;
+		$host_out =~ s/^Host //;
+		$host_out =~ s/^$hostname //;
+		return "; $host_out";
+	}
+}

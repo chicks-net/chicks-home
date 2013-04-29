@@ -1,0 +1,85 @@
+#!/usr/bin/perl 
+
+use warnings;
+use strict;
+
+use DBI;
+use Data::Dumper;
+use Socket;
+
+# config
+my $mypw = 'J04xl*4e!h';
+
+# mysql connect
+my $dbh = DBI->connect('dbi:mysql:mcp2','root',$mypw,{ AutoCommit => 0 }) or die "couldn't connect to mysql:lbstats: " . $DBI::errstr;
+
+chdir("/home/chicks/svn/dns/data") or die "couldn't chdir(/home/chicks/svn/dns/data): $!";
+
+if (getpwuid($>) ne 'chicks') {
+	die "run as chicks so files don't get created as root"
+}
+
+system("svn up");
+if ($?) {
+	die "svn up exited($?)";
+}
+
+open(my $zonefile,"<","openxenterprise.com.db") or die "couldn't open openxenterprise.com.db: $!";
+my @zone = <$zonefile>;
+close($zonefile);
+
+#my @tmpzone;
+foreach my $zoneline (@zone) {
+	if ($zoneline =~ /Serial/) {
+		$zoneline =~ s/^(\s+)(\d+)/"$1" . ($2+1)/e;
+		print $zoneline;
+	}
+	#push(@tmpzone,$zoneline);
+}
+#@zone = @tmpzone;
+
+my $commitmsg = '';
+# get command line arguments
+foreach my $customer (@ARGV) {
+	# connect to MySQL
+	my $sql = "select shortname,admin,delivery,deliveryssl,password,image from customers where shortname=" . $dbh->quote($customer);
+	my $sth = $dbh->prepare($sql) or die "prepare($sql): $DBI::errstr";
+	$sth->execute() or die "prepare($sql): $DBI::errstr";
+	my $row = $sth->fetchrow_hashref();
+
+	if ($row) {
+		my $shortname = $customer;
+		my $admin = $row->{'admin'};
+		my $delivery = $row->{'delivery'};
+		my $deliveryssl = $row->{'deliveryssl'};
+		my $image = $row->{'image'};
+		my $password = $row->{'password'};
+
+		my $ui_cname = "$shortname-ui.openxenterprise.com.";
+		my $d_cname = "$shortname-d.openxenterprise.com.";
+		
+		my $uispace = "\t" x ( 1 + ( 40 - length $ui_cname ) / 8 );
+		$uispace = " " if length($ui_cname) >= 40;
+		my $dspace = "\t" x ( 1 + ( 40 - length $d_cname ) / 8 );
+		$dspace = " " if length($d_cname) >= 40;
+
+		push(@zone, "$d_cname${dspace}300\tIN CNAME\tprod28-d.d.xx.openx.com.akadns.net.\n");
+		push(@zone, "$ui_cname${uispace}300\tIN CNAME\tadmin.ee.openx.com.\n");
+		$commitmsg .= "-adding $shortname\n";
+	} else {
+		warn "no customer $customer";
+	}
+}
+
+open(my $zoneout,">","openxenterprise.com.db.tmp") or die "couldn't open openxenterprise.com.db.tmp: $!";
+print $zoneout @zone;
+close($zoneout);
+
+system("mv openxenterprise.com.db.tmp openxenterprise.com.db");
+
+system("svn commit -m '$commitmsg'");
+if ($?) {
+	die "svn commit exited($?)";
+}
+
+$dbh->disconnect();

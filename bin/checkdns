@@ -1,0 +1,117 @@
+#!/usr/bin/perl
+
+use warnings;
+use strict;
+use Socket;
+
+my $debug_file;
+open($debug_file,">","/home/chicks/tmp/checkdns_debug.txt") or die "could not open debug file";
+
+my $checks = {
+	xv => {
+		zone => 'xv.dc.openx.org',
+		verify => {
+			'xvaaa-xx-01' => '10.1.254.10',
+			'xvaaa-xx-02' => '10.1.254.11',
+			'xvaa-b01' => '10.1.1.20',
+			'xvaa-c01' => '10.1.2.24',
+			'xvac-d01' => '10.1.29.12',
+			'xvad-c01' => '10.1.36.12',
+			'foo' => 'FAIL',
+			'xaaa-b01' => 'FAIL',
+			'xfaa-b01' => 'FAIL',
+			'caaa-d01' => 'FAIL',
+		},
+	},
+	xa => {
+		zone => 'xa.dc.openx.org',
+		verify => {
+			'xaaa-b01' => '10.16.1.11',
+			'xaaa-c01' => '10.16.2.11',
+			'xaaa-d01' => '10.16.3.11',
+			'xaaa-e01' => '10.16.4.8',
+			'xaaai-xx-01' => '10.16.254.10',
+			'xaaai-xx-02' => '10.16.254.11',
+			'xvaa-b01' => 'FAIL',
+			'xvaa-c01' => 'FAIL',
+			'xvac-d01' => 'FAIL',
+			'foo' => 'FAIL',
+			'xfaa-b01' => 'FAIL',
+			'caaa-d01' => 'FAIL',
+		},
+	},
+	xf => {
+		zone => 'xf.dc.openx.org',
+		verify => {
+			'xfaa-b01' => '10.33.1.40',
+			'xfaa-c01' => '10.33.2.12',
+			'xfab-a01' => '10.33.5.12',
+			'xfab-b01' => '10.33.6.12',
+			'xfaaa-xx-01' => '10.33.254.10',
+			'xfaaa-xx-02' => '10.33.254.11',
+			'xfaaa-xx-03' => '10.33.254.13',
+			'xfab-d36' => '10.33.8.47',
+			'xfaa-e01' => 'FAIL',
+			'xfab-d36' => '10.33.8.47',
+			'xvaa-b01' => 'FAIL',
+			'xvaa-c01' => 'FAIL',
+			'xvac-d01' => 'FAIL',
+			'foo' => 'FAIL',
+			'caaa-d01' => 'FAIL',
+			'xaaa-b01' => 'FAIL',
+		},
+	},
+	ca => {
+		zone => 'ca.dc.openx.org',
+		verify => {
+			'caaa-d01' => '10.5.3.12',
+			'caaa-e01' => '10.5.4.12',
+			'caaad-sg-09' => '10.5.3.20',
+			'caaap-db-01' => '10.5.254.12',
+			'caaap-db-02' => '10.5.254.13',
+			'caaap-xx-01' => '10.5.254.10',
+			'caaap-xx-02' => '10.5.254.11',
+			'caab-a01' => '10.5.16.12',
+			'caab-b01' => '10.5.17.12',
+			'xfaa-e01' => 'FAIL',
+			'xfab-d36' => 'FAIL',
+			'xvaa-b01' => 'FAIL',
+			'xvaa-c01' => 'FAIL',
+			'xvac-d01' => 'FAIL',
+			'foo' => 'FAIL',
+			'xaaa-b01' => 'FAIL',
+		},
+	},
+};
+
+foreach my $group_name (sort keys %$checks) {
+	my $group = $checks->{$group_name};
+	my $zone = $group->{zone};
+	
+	my $good_count = 0;
+	my $try_count = 0;
+	print "checking '$group_name' ($zone):\n";
+
+	foreach my $hostname (sort keys %{ $group->{verify} } ) {
+		$try_count++;
+		my $expected_ip = $group->{verify}->{$hostname};
+		my $fqdn = $hostname . '.' . $zone;
+		my $got_ip_binary = inet_aton($fqdn);
+		my $got_ip;
+		if (defined $got_ip_binary) {
+			$got_ip = inet_ntoa($got_ip_binary);
+		} else {
+			$got_ip = 'FAIL';
+		}
+		
+		if ($expected_ip eq $got_ip) {
+			# yay
+			$good_count++;
+		} else {
+			print " * $fqdn returned $got_ip instead of $expected_ip\n";
+			print $debug_file "\t\t\t'$hostname' => '$got_ip',\n";
+		}
+	}
+
+	print " * $good_count/$try_count checks are good\n";
+}

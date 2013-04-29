@@ -1,0 +1,132 @@
+#!/usr/local/bin/perl
+
+use OX::Std;
+use File::Find;
+#use File::Copy "cp";
+use File::Compare;
+
+my $qa_dir = '/nfs/slack-repos/slack-repo-qa/roles/';
+my $prod_dir = '/nfs/slack-repos/slack-repo-prod/roles/';
+
+my ($role) = @ARGV;
+
+my $qa_role_dir = $qa_dir . $role;
+my $prod_role_dir = $prod_dir . $role;
+
+unless (-d $qa_role_dir) {
+	die "no $qa_role_dir";
+}
+
+unless (-d $prod_role_dir) {
+	die "no $prod_role_dir";
+}
+
+say "merging $role....";
+
+# make sure destination is svn clean - update and/or status
+
+# check $qa_role_dir for cleanliness
+chdir($qa_role_dir);
+my $svn_out = `svn st`;
+#if (length $svn_out and 0) {
+if (length $svn_out) {
+	warn "svn status returned:\n" . $svn_out;
+	die "svn not clean in $qa_role_dir, aborting\n";
+}
+
+# check $prod_role_dir for cleanliness
+chdir($prod_role_dir);
+$svn_out = `svn st`;
+if (length $svn_out) {
+	warn "svn status returned:\n" . $svn_out;
+	die "svn not clean in $prod_role_dir, aborting\n";
+}
+
+# copy files from qa into prod
+find(\&cp_forward,$qa_role_dir);
+
+# TODO: remove files from prod that aren't in qa
+find(\&rm_backward,$prod_role_dir);
+
+say "svn status:";
+system("svn st");
+sleep(1);
+system("svn commit -m '-merging qarepo into prodrepo'");
+
+sub cp_forward {
+	my $file =  $File::Find::name;
+	return if $file =~ /\/.svn/;
+	return if $file =~ /\/\..*\.swp$/;
+
+#	my $say_file = $file;
+#	$say_file =~ s/^$qa_dir//;
+
+	my $relative_file = $file;
+	$relative_file =~ s/^$qa_role_dir//;
+	my $prod_file = $prod_role_dir . $relative_file;
+
+	if (-d $file) {
+		# directory
+		if (-d $prod_file) {
+			# directory exists - all good
+			return;
+		} elsif (-e $prod_file) {
+			# something exists that isn't a directory
+			say "$prod_file conflicts with directory that needs to be created, removing";
+			system("svn rm $prod_file");
+		} else {
+			# nothing is there, make it
+		}
+		say "creating directory $prod_file";
+		mkdir($prod_file) or die "couldn't mkdir($prod_file): $!";
+		system("svn add $prod_file");
+	} elsif (-f $file) {
+		# file
+		if (-f $prod_file) {
+			# destination file exists
+			# check that it's the same
+			if (compare($file,$prod_file) == 0) {
+				# they're the same, nothing to do
+				return;
+			} else {
+				# copy over
+				cp($file,$prod_file);
+			}
+		} elsif (-e $prod_file) {
+			# something exists that isn't a file
+			say "$prod_file conflicts with file that needs to be copied, removing";
+			system("svn rm $prod_file"); # may not handle every possibility
+		} else {
+			# nothing is there, copy
+			cp($file,$prod_file);
+			system("svn add $prod_file");
+		}
+	} else {
+		die "$file is not a dir or file, how? why? death..."
+	}
+}
+
+sub rm_backward {
+	my $file =  $File::Find::name;
+	return if $file =~ /\/.svn/;
+
+	my $say_file = $file;
+	$say_file =~ s/^$prod_dir//;
+
+	my $relative_file = $file;
+	$relative_file =~ s/^$prod_role_dir//;
+	my $qa_file = $qa_role_dir . $relative_file;
+
+	unless (-e $qa_file) {
+		say "$say_file in slack_repo_prod but not slack_repo_qa";
+		system("svn rm $file");
+	}
+}
+
+sub cp {
+	my ($src,$dest,@fail) = @_;
+
+	die "only two arguments to cp() please" if scalar @fail;
+	die "$src should be a file to cp()" unless -f $src;
+	system("cp -p $src $dest");
+}

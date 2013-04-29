@@ -1,0 +1,3 @@
+#!/bin/bash
+
+apg | grep -vi [io10]

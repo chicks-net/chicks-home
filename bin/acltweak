@@ -1,0 +1,15 @@
+#!/bin/bash
+
+let n=0
+for a in `ls /var/ox/vars`
+do
+	let n++
+	echo echo $n
+	echo \# account $a
+	echo . /var/ox/vars/$a
+	. /var/ox/vars/$a
+	#ec2-describe-group | grep  216.1.199.99 | sed -e 's/PERMISSION[ \t]*[0-9]*[ \t]*/ec2-authorize /' -e 's/\t/ /' -e 's/ALLOWS\t/-P /' -e 's/\t/ -p /' -e 's/\t/-/' -e 's/\tFROM\tCIDR\t/ -s /' -e 's/216.1.199.99/209.234.162.210/'
+	#ec2-describe-group | grep  216.1.199.99 | sed -e 's/PERMISSION[ \t]*[0-9]*[ \t]*/ec2-authorize /' -e 's/\t/ /' -e 's/ALLOWS\t/-P /' -e 's/\t/ -p /' -e 's/\t/-/' -e 's/\tFROM\tCIDR\t/ -s /' -e 's/216.1.199.99\/32/206.190.85.160\/28/'
+	#ec2-describe-group | grep  216.1.199.99 | sed -e 's/PERMISSION[ \t]*[0-9]*[ \t]*/ec2-revoke /' -e 's/\t/ /' -e 's/ALLOWS\t/-P /' -e 's/\t/ -p /' -e 's/\t/-/' -e 's/\tFROM\tCIDR\t/ -s /'
+	ec2-describe-group | grep 209.234.162.210 | sed -e 's/PERMISSION[ \t]*[0-9]*[ \t]*/ec2-authorize /' -e 's/\t/ /' -e 's/ALLOWS\t/-P /' -e 's/\t/ -p /' -e 's/\t/-/' -e 's/\tFROM\tCIDR\t/ -s /' -e 's/209.234.162.210/173.241.242.1/' -e '=' | sed -e "s/^\([0-9]\+\)/echo $n:\\1/"
+done

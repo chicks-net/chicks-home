@@ -1,0 +1,35 @@
+#!/usr/bin/perl 
+
+use warnings;
+use strict;
+
+use DBI;
+use Data::Dumper;
+use Socket;
+use File::Copy;
+
+# config
+my $mypw = 'J04xl*4e!h';
+my $rolesfile = '/slack_repos/roles_dev2prod.conf';
+my $rolesfiletmp = $rolesfile . '.tmp';
+
+# mysql connect
+my $dbh = DBI->connect('dbi:mysql:mcp2','root',$mypw,{ AutoCommit => 0 }) or die "couldn't connect to mysql:lbstats: " . $DBI::errstr;
+
+my $sql = "select name from roles where dev_prod_merge = 1";
+my $sth = $dbh->prepare($sql) or die "prepare($sql): $DBI::errstr";
+$sth->execute() or die "prepare($sql): $DBI::errstr";
+
+open(ROLES,'>',$rolesfiletmp) or die "couldn't write $rolesfiletmp";
+
+while ( my $row = $sth->fetchrow_hashref() ) {
+	my $name = $row->{'name'};
+	next if $name =~ /\./;
+	print ROLES "$name\n";
+}
+close(ROLES);
+
+move ($rolesfiletmp,$rolesfile);
+
+$sth->finish();
+$dbh->disconnect();

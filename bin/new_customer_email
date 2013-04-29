@@ -1,0 +1,66 @@
+#!/usr/bin/perl 
+
+use warnings;
+use strict;
+
+use DBI;
+use Data::Dumper;
+use Socket;
+
+# config
+my $mypw = 'J04xl*4e!h';
+
+# mysql connect
+my $dbh = DBI->connect('dbi:mysql:mcp2','root',$mypw,{ AutoCommit => 0 }) or die "couldn't connect to mysql:lbstats: " . $DBI::errstr;
+
+# get command line arguments
+foreach my $customer (@ARGV) {
+	# connect to MySQL
+	my $sql = "select shortname,admin,delivery,deliveryssl,password,image from customers where shortname=" . $dbh->quote($customer);
+	my $sth = $dbh->prepare($sql) or die "prepare($sql): $DBI::errstr";
+	$sth->execute() or die "prepare($sql): $DBI::errstr";
+	my $row = $sth->fetchrow_hashref();
+
+	if ($row) {
+		my $shortname = $customer;
+		my $admin = $row->{'admin'};
+		my $delivery = $row->{'delivery'};
+		my $deliveryssl = $row->{'deliveryssl'};
+		my $image = $row->{'image'};
+		my $password = $row->{'password'};
+
+		my $ui_cname = "$shortname-ui.openxenterprise.com.";
+		my $d_cname = "$shortname-d.openxenterprise.com.";
+		
+		unless (gethostbyname($ui_cname)) {
+			$sth->finish(); $dbh->disconnect();
+			die "$ui_cname isn't in DNS";
+		}
+
+		unless (gethostbyname($d_cname)) {
+			$sth->finish(); $dbh->disconnect();
+			die "$d_cname isn't in DNS";
+		}
+
+		print "\n";
+		print "I have finished setting up new customer $shortname.  They need to setup the following DNS:\n";
+		print "\n";
+		print "$admin. CNAME $ui_cname\n";
+		print "$delivery. CNAME $d_cname\n";
+		print "$image. CNAME i.xx.openx.com.\n" unless $image eq 'i.xx.openx.com';
+		print "\n";
+		print "Advise the client that if they want SSL delivery that $deliveryssl would be the hostname and more setup will be required.\n";
+		print "\n";
+		print "Their admin UI login is:";
+		print "\n";
+		print "username: admin\n";
+		print "password: $password\n";
+		print "\n";
+		print "If you have any questions, please let me know.\n";
+		print "\n";
+	} else {
+		warn "no customer $customer";
+	}
+}
+
+$dbh->disconnect();

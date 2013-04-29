@@ -1,0 +1,36 @@
+#!/usr/bin/perl
+
+use strict;
+use warnings;
+
+#use Sys::Hostname;
+use Socket;
+
+my @ips = @ARGV;
+
+my %ips;
+
+foreach my $ip (@ips) {
+	# avoid invalid
+	unless ($ip =~ /\d+\.\d+\.\d+\.\d+/) {
+		warn "$ip looks invalid";
+		next;
+	}
+
+	# avoid dupes
+	if (defined $ips{$ip}) {
+		warn "$ip is dupe";
+		next;
+	}
+	$ips{$ip}++;
+
+	my $hostname = gethostbyaddr(inet_aton($ip), AF_INET) or die "Can't resolve $ip: $!\n";
+	$hostname =~ s/\..*$//;
+
+	#print "$ip: $hostname\n";
+
+	my $roles = `ox-list-roles -n $hostname`;
+	$roles =~ s/\n/ /g;
+	
+	print "$ip: $hostname: $roles\n";
+}

@@ -1,0 +1,64 @@
+#!/usr/bin/perl
+
+# TODO: let if fail on a host and keep going
+# TODO: don't pull the hosts from a file
+
+use warnings;
+use strict;
+use DBI;
+
+# config
+#my $lbs = "/home/chicks/lbs"; # list of load balancers
+
+my $mypw = 'J04xl*4e!h';
+
+# connect to MySQL
+my $dbh = DBI->connect('dbi:mysql:lbstats','root',$mypw) or die "couldn't connect to mysql:lbstats: " . $DBI::errstr;
+
+# grab load balancers
+#open(LBS,"<",$lbs) or die "couldn't open $lbs: $!";
+my $getlbs = "/opt/bin/ox-list-machines | grep ^lb | sed -e 's/\\.openx\\.org\$//' |";
+#print $getlbs, "\n";
+open(LBS,$getlbs) or die "couldn't run \"$getlbs\": $!";
+my @lbs = <LBS>;
+close(LBS);
+chomp(@lbs);
+#print @lbs;
+
+foreach my $lb (@lbs) {
+	open(SSH,"ssh $lb \"ifconfig eth0 | grep bytes\" |") or die "couldn't ssh $lb: $!";
+	my $data = <SSH>;
+	my $test = <SSH>;
+	if ($test) {
+		die "really shouldn't get here";
+	}
+	close(SSH);
+	chomp($data);
+#	print "$lb: $data\n";
+
+	# mysql> describe rawstats;
+	# +----------+------------------+------+-----+---------+----------------+
+	# | Field    | Type             | Null | Key | Default | Extra          |
+	# +----------+------------------+------+-----+---------+----------------+
+	# | id       | int(14) unsigned | NO   | PRI | NULL    | auto_increment | 
+	# | hostname | char(100)        | NO   |     |         |                | 
+	# | logwhen  | datetime         | NO   |     |         |                | 
+	# | rx       | bigint(20)       | NO   |     |         |                | 
+	# | tx       | bigint(20)       | NO   |     |         |                | 
+	# +----------+------------------+------+-----+---------+----------------+
+
+	#      RX bytes:32501714473303 (29.5 TiB)  TX bytes:33270048928596 (30.2 TiB)
+	if ($data =~ / RX bytes:(\d+) .*TX bytes:(\d+) /) {
+		my $rx = $1;
+		my $tx = $2;
+		#print "\t rx=$1 tx=$2\n";
+
+		my $sql = "insert into rawstats (hostname,logwhen,rx,tx) values (";
+		$sql .= $dbh->quote($lb) . ",now(),$rx,$tx)";
+		#print $sql, "\n";
+		$dbh->do($sql) or die "$sql\nFAILED";
+	} else {
+		warn "nothing matches from $lb: $data";
+	}
+
+}

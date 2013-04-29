@@ -1,0 +1,91 @@
+#!/usr/bin/perl 
+
+use warnings;
+use strict;
+
+use DBI;
+use Data::Dumper;
+
+# config
+my $mcp_user = '28instances';
+my $mcp_pass = 'uByKrlJX4O';
+my $mfs_db = '/mnt/mfs/backup/black/2.8_customer_db/';
+my $mfs_cust = '/mnt/mfs/services/dumps/';
+
+# mysql connect
+my $dbh = DBI->connect('dbi:mysql:28instances;host=leading-gur-masterconfig',$mcp_user,$mcp_pass,{ AutoCommit => 0 }) or die "couldn't connect to mysql:28instances: " . $DBI::errstr;
+
+# get command line arguments
+foreach my $customer (@ARGV) {
+	# connect to MySQL
+	my $sql = "select count(*) as c from customers where shortname=" . $dbh->quote($customer);
+	my $sth = $dbh->prepare($sql) or die "prepare($sql): $DBI::errstr";
+	$sth->execute() or die "prepare($sql): $DBI::errstr";
+	my $row = $sth->fetchrow_hashref();
+	my $customer_count = $row->{c};
+
+	if ($customer_count == 1) { # proceed
+		print "$customer........\n";
+
+		$sql = "select * from customers where shortname=" . $dbh->quote($customer);
+		$sth = $dbh->prepare($sql) or die "prepare($sql): $DBI::errstr";
+		$sth->execute() or die "prepare($sql): $DBI::errstr";
+		$row = $sth->fetchrow_hashref();
+
+		my $akamai_url = $row->{akamai_url};
+		my $akamai_cpcode = $row->{akamai_cpcode};
+		my $imagehost = $row->{image};
+		my $db_hostname = $row->{db_hostname};
+
+		
+		$sql = "select count(*) as c from customers where db_hostname=" . $dbh->quote($db_hostname);
+		$sth = $dbh->prepare($sql) or die "prepare($sql): $DBI::errstr";
+		$sth->execute() or die "prepare($sql): $DBI::errstr";
+		my $crow = $sth->fetchrow_hashref();
+		my $db_customer_count = $crow->{c};
+
+		# fix local mcp
+		my $update = "update customers set akamai_url=NULL,
+							active=0,
+							akamai_cpcode=0,
+							db_instance_id=CONCAT('was-',db_instance_id),
+							db_hostname=NULL,
+							mpe_state='inactive'";
+		$update .= " where shortname=" . $dbh->quote($customer);
+		my $ret = $dbh->do($update);
+		if ($ret == 1) {
+			print "\tmcp updated for $customer\n";
+			$dbh->commit();
+		} else {
+			warn "mcp update failed for $customer (ret=$ret), skipping remote database backup";
+			$dbh->rollback();
+			next;
+		}
+
+		system("ox-build-nagios");
+
+		# backup/delete remote database
+		system("sudo ssh dedicated-db-$customer \"/opt/ox/adserver/tools/shutdown_customer $customer\"");
+
+		# cp mysqlbackup to customer-downloadable directory
+		my $dest = "$mfs_cust$customer";
+		if (-d $dest) {
+			my $src = "$mfs_db${customer}.sql.gz";
+			print "\tcopying $src to $dest\n";
+			system("sudo cp $src $dest");
+		} else {
+			print "\tno $dest, no cp\n";
+		}
+		print "\n";
+
+		# silly reminders
+		print "\n\tDON'T FORGET TO REMOVE $customer FROM AKAMAI GTM\n\n" unless $akamai_url =~ /^prod.*-d.d.xx.openx.com.akadns.net$/;
+		print "\n\tDON'T FORGET TO REMOVE $customer FROM AKAMAI CDN\n\n" unless $imagehost eq 'i.xx.openx.com';
+		print "\n\tDON'T FORGET TO REMOVE $customer FROM openxenterprise.com DNS\n\n";
+		print "\n\tTHIS WAS THE LAST CUSTOMER on $db_hostname\n\n" if $db_customer_count == 1;
+	} else {
+		warn "customer_count $customer_count <> 1 for $customer ... not doing anything";
+	}
+}
+
+$dbh->disconnect();

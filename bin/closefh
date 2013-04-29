@@ -1,0 +1,39 @@
+#!/usr/bin/perl -w
+
+use strict;
+
+my ($file) = @ARGV;
+
+die "specify a file please" unless defined $file;
+
+open(LSOF,"lsof -Ffn -p$$ |") or die "couldn't invoke lsof: $!";
+
+my $fh;
+my $gotit = 0;
+
+while (my $line = <LSOF>) {
+	chomp($line);
+	my $linetype = substr($line,0,1);
+	my $linedata = substr($line,1);
+#	print "$linetype // $linedata \n";
+
+	if ($linetype eq 'f') {
+		if ($linedata =~ /^\d+$/) {
+			$fh = $linedata;
+		}
+	}
+
+	if ($linetype eq 'n') {
+		if ($linedata eq $file) {
+			$gotit = 1;
+			last;
+		}
+	}
+}
+close(LSOF);
+
+if ($gotit) {
+	print "exec $fh>&-\n";
+} else {
+	warn "$file not opened by this process";
+}
