@@ -6,7 +6,7 @@ use DBI;
 use Data::Dumper;
 
 # config
-my $mypw = 'J04xl*4e!h';
+my $mypw = 'REDACTED';
 
 # data ceners
 my %dc = (

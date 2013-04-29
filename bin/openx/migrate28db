@@ -12,7 +12,7 @@ use Socket;
 my ($destination,@shortnames) = @ARGV;
 
 # config
-my $mypw = 'J04xl*4e!h';
+my $mypw = 'REDACTED';
 my $mysql_backups = "/var/lib/mysql/BACKUPS";
 my $dry_run = 1;
 

@@ -8,7 +8,7 @@ use Data::Dumper;
 use Socket;
 
 # config
-my $mypw = 'J04xl*4e!h';
+my $mypw = 'REDACTED';
 
 # mysql connect
 my $dbh = DBI->connect('dbi:mysql:mcp2','root',$mypw,{ AutoCommit => 0 }) or die "couldn't connect to mysql:lbstats: " . $DBI::errstr;

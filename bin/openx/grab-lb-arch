@@ -7,7 +7,7 @@ use DBI;
 # config
 my $lbs = "/home/chicks/lbs"; # list of load balancers
 
-my $mypw = 'J04xl*4e!h';
+my $mypw = 'REDACTED';
 
 # connect to MySQL
 my $dbh = DBI->connect('dbi:mysql:lbstats','root',$mypw) or die "couldn't connect to mysql:lbstats: " . $DBI::errstr;

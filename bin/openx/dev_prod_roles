@@ -9,7 +9,7 @@ use Socket;
 use File::Copy;
 
 # config
-my $mypw = 'J04xl*4e!h';
+my $mypw = 'REDACTED';
 my $rolesfile = '/slack_repos/roles_dev2prod.conf';
 my $rolesfiletmp = $rolesfile . '.tmp';
 
