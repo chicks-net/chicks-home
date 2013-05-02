@@ -17,6 +17,9 @@ pm_to_blib
 .bash_history
 .viminfo
 Mail
+Downloads
+tmp
+Desktop
 backups
 .ssh/id*
 .ssh/known*
