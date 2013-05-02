@@ -25,3 +25,5 @@ backups
 .config
 .thunderbird
 .Xauthority
+.my.cnf
+.mysql_history
