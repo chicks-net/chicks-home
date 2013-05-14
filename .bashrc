@@ -19,6 +19,7 @@ do
 	if rpm -q $rpm > /dev/null 2>&1
 	then
 		#echo good $rpm
+		true
 	else
 		echo bad $rpm
 	fi
