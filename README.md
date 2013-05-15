@@ -7,4 +7,5 @@ TODO
 ----
 
 * detect package management system
+* make sure desired packages are installed
 * prompt to install them
