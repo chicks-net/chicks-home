@@ -1,0 +1,8 @@
+#!/bin/bash
+
+while true;
+do
+	synergys --config /etc/synergy.conf 
+	sleep 15
+done
+
