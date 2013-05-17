@@ -1,8 +1,31 @@
 #!/bin/bash
 
+#
+# functions
+#
+
+function run_synergy {
+	# runs synergy in a nonblocking fashion
+	synergys --config /etc/synergy.conf 
+}
+
+function synergy_make_running {
+	lsof -iTCP -sTCP:LISTEN | grep ^synergys
+	RETURN=$?
+
+	if [[ $RETURN > 0 ]]; do
+		logger synergy DIED, restarting in 10s...
+		sleep 10
+		run_synergy
+	else
+		logger synergy is RUNNING, doing nothing
+	done
+}
+
+# keep an eye on it forever
 while true;
 do
-	synergys --config /etc/synergy.conf 
-	sleep 15
+	synergy_make_running
+	sleep 3
 done
 
