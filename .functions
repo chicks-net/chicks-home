@@ -1,0 +1,27 @@
+#!/bin/bash
+
+#
+# source /home/chicks/.functions
+#
+# to get these funcitons in your script.
+#
+
+# RH or Deb/Ub/Mint?
+#
+# set CHICKOS environment variable with RPM_CENTOS or DEB_MINT or broken_shit
+#
+function check_os {
+	export CHICKOS=broken_shit
+
+	if [[ -f /etc/redhat_release ]]
+	then
+		CHICKOS=RPM_CENTOS
+	else
+		if [[ -f /etc/debian_version ]]
+		then
+			CHICKOS=DEB_MINT
+		else
+			echo dunno, left CHICKOS=$CHICKOS
+		fi
+	fi
+}
