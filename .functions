@@ -29,23 +29,46 @@ function check_os {
 function check_packages {
 	check_os # set CHICKOS
 
-	UNIVERSAL_PKGS="vim screen mtr"
-	RPM_PKGS="vim-enhanced"
-	DEB_PKGS=""
+	echo "check_packages()..."
 
+	UNIVERSAL_PKGS="vim screen mtr perl bash"
+	RPM_PKGS="vim-enhanced pcgrep"
+	DEB_PKGS=""
+	NEED_PKGS=""
+
+	# debian mint
 	if [[ $CHICKOS == "DEB_MINT" ]]
 	then
 		for deb_pkg in $UNIVERSAL_PKGS $DEB_PKGS
 		do
-			dpkg-query -W -f '${binary:Package}\n' | grep "^$deb_pkg\$" > /dev/null || echo $deb_pkg is not installed
+			if dpkg-query -W -f '${binary:Package}\n' | grep "^$deb_pkg\$" > /dev/null 
+			then
+				#echo -e "\t$deb_pkg IS installed"
+				true
+			else
+				echo -e "\t$deb_pkg is not installed"
+				NEED_PKGS="$NEED_PKGS $deb_pkg"
+			fi
 		done
+		echo  -e "\t# sudo apt-get install $NEED_PKGS"
 	fi
 
+	# rpm centos
 	if [[ $CHICKOS == "RPM_CENTOS" ]]
 	then
 		for rpm_pkg in $UNIVERSAL_PKGS $RPM_PKGS
 		do
-			rpm -q --quiet $rpm_pkg || echo $rpm_pkg is not installed
+			if rpm -q --quiet $rpm_pkg 
+			then
+				#echo -e "\t$rpm_pkg IS installed"
+				true
+			else
+				echo $rpm_pkg is not installed
+				NEED_PKGS="$NEED_PKGS $rpm_pkg"
+			fi
 		done
+		echo  -e "\t# sudo yum install -y $NEED_PKGS"
 	fi
+
+	echo "check done."
 }
