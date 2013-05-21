@@ -10,16 +10,16 @@ function run_synergy {
 }
 
 function synergy_make_running {
-	lsof -iTCP -sTCP:LISTEN | grep ^synergys
+	lsof -iTCP -sTCP:LISTEN | grep ^synergys > /dev/null
 	RETURN=$?
 
-	if [[ $RETURN > 0 ]]; do
+	if [[ $RETURN > 0 ]]; then
 		logger synergy DIED, restarting in 10s...
 		sleep 10
 		run_synergy
 	else
 		logger synergy is RUNNING, doing nothing
-	done
+	fi
 }
 
 # keep an eye on it forever
