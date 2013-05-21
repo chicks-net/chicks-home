@@ -25,3 +25,27 @@ function check_os {
 		fi
 	fi
 }
+
+function check_packages {
+	check_os # set CHICKOS
+
+	UNIVERSAL_PKGS="vim screen mtr"
+	RPM_PKGS="vim-enhanced"
+	DEB_PKGS=""
+
+	if [[ $CHICKOS == "DEB_MINT" ]]
+	then
+		for deb_pkg in $UNIVERSAL_PKGS $DEB_PKGS
+		do
+			dpkg-query -W -f '${binary:Package}\n' | grep "^$deb_pkg\$" > /dev/null || echo $deb_pkg is not installed
+		done
+	fi
+
+	if [[ $CHICKOS == "RPM_CENTOS" ]]
+	then
+		for rpm_pkg in $UNIVERSAL_PKGS $RPM_PKGS
+		do
+			rpm -q --quiet $rpm_pkg || echo $rpm_pkg is not installed
+		done
+	fi
+}
