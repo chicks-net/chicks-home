@@ -31,8 +31,8 @@ function check_packages {
 
 	echo "check_packages()..."
 
-	UNIVERSAL_PKGS="vim screen mtr perl bash whois"
-	RPM_PKGS="vim-enhanced pcgrep"
+	UNIVERSAL_PKGS="vim screen mtr perl bash whois pcregrep"
+	RPM_PKGS="vim-enhanced"
 	DEB_PKGS=""
 	NEED_PKGS=""
 
