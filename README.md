@@ -7,6 +7,3 @@ TODO
 ----
 
 * prompt to install missing packages
-* check if in sudoers
-* are we in an interactive shell before running checks on login
-* check for correct ssh permissions
