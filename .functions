@@ -159,4 +159,4 @@ function is_interactive {
 	return $RET
 }
 
-echo processed all of .functions
+#echo processed all of .functions
