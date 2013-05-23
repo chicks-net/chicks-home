@@ -72,3 +72,30 @@ function check_packages {
 
 	echo "check done."
 }
+
+function check_permissions {
+	if [[ $# < 2 ]]
+	then
+		echo you need 2 arguments to 'check_permissions()', not $#
+		exit 3
+	fi
+
+	if [[ $# > 2 ]]
+	then
+		echo you need 2 arguments, not $# to 'check_permisisons()'
+		exit 3
+	fi
+}
+
+function get_perm {
+	if [[ $# < 1 ]]
+	then
+		echo you need to pass filenames 'get_perm()'
+		exit 3
+	fi
+
+	FILE=$1
+	RET=`stat -c %a $FILE`
+	echo got $RET for $FILE
+	PERM=$RET
+}
