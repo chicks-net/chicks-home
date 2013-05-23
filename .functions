@@ -75,6 +75,8 @@ function check_packages {
 
 #
 function check_all_permissions {
+	echo checking ~/.ssh/\* permisisons...
+
 	# should always exist
 	check_file_permissions ~/.ssh 700
 	check_file_permissions ~/.ssh/config 600
@@ -101,12 +103,12 @@ function check_file_permissions {
 	FILE=$1
 	DESIRED=$2
 
-	get_perm $FILE
+	get_perm $FILE # set RETURN_PERM
 	ACTUAL=$RETURN_PERM
 
 	if [[ $ACTUAL != $DESIRED ]]
 	then
-		echo $FILE has $ACTUAL permissions instead of desired $DESIRED
+		echo -e "\t$FILE has $ACTUAL permissions instead of desired $DESIRED"
 	fi
 }
 
@@ -134,3 +136,22 @@ function get_perm {
 
 	return 0
 }
+
+function is_interactive {
+	RET=3
+
+	if [[ -z $PS1 ]] # no prompt?
+	### if [ -v PS1 ]   # On Bash 4.2+ ...
+	then
+		# non-interactive
+		RET=0
+	else
+		# interactive
+		RET=1
+	fi
+
+#	echo return $RET
+	return $RET
+}
+
+echo processed all of .functions
