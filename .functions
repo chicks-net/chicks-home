@@ -82,8 +82,13 @@ function check_all_permissions {
 	check_file_permissions ~/.ssh/config 600
 
 	# should be optional
-	check_file_permissions ~/.ssh/id_rsa 600
-	check_file_permissions ~/.ssh/id_rsa.pub 644
+	if [[ -e ~/.ssh/id_rsa ]]
+	then
+		check_file_permissions ~/.ssh/id_rsa 600
+		check_file_permissions ~/.ssh/id_rsa.pub 644
+	else
+		echo -e "\tyour local ssh key is missing"
+	fi
 }
 
 # arguments: filename permisison
