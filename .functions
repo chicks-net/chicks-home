@@ -73,29 +73,64 @@ function check_packages {
 	echo "check done."
 }
 
-function check_permissions {
-	if [[ $# < 2 ]]
+#
+function check_all_permissions {
+	# should always exist
+	check_file_permissions ~/.ssh 700
+	check_file_permissions ~/.ssh/config 600
+
+	# should be optional
+	check_file_permissions ~/.ssh/id_rsa 600
+	check_file_permissions ~/.ssh/id_rsa.pub 644
+}
+
+# arguments: filename permisison
+function check_file_permissions {
+	if [[ $# -lt 2 ]]
 	then
 		echo you need 2 arguments to 'check_permissions()', not $#
 		exit 3
 	fi
 
-	if [[ $# > 2 ]]
+	if [[ $# -gt 2 ]]
 	then
 		echo you need 2 arguments, not $# to 'check_permisisons()'
 		exit 3
 	fi
+
+	FILE=$1
+	DESIRED=$2
+
+	get_perm $FILE
+	ACTUAL=$RETURN_PERM
+
+	if [[ $ACTUAL != $DESIRED ]]
+	then
+		echo $FILE has $ACTUAL permissions instead of desired $DESIRED
+	fi
 }
 
+# arguments: filename
+# returns value in $RETURN_PERM
 function get_perm {
-	if [[ $# < 1 ]]
+	if [[ $# -lt 1 ]]
 	then
 		echo you need to pass filenames 'get_perm()'
-		exit 3
+		return 1
 	fi
 
 	FILE=$1
+
+	# we want -e not -f so we can get permissions on non-files
+	if [[ ! -e $FILE ]]
+	then
+		echo "get_perm($FILE): no such file"
+		return 2
+	fi
+
 	RET=`stat -c %a $FILE`
-	echo got $RET for $FILE
-	PERM=$RET
+#	echo got $RET for $FILE
+	RETURN_PERM=$RET
+
+	return 0
 }
