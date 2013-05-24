@@ -31,9 +31,14 @@ function check_packages {
 
 	echo "check_packages()..."
 
-	UNIVERSAL_PKGS="vim screen mtr perl bash whois pcregrep curl wget"
+	#
+	# UPDATE PACKAGE LISTS HERE
+	#
+	UNIVERSAL_PKGS="vim screen mtr perl bash whois pcregrep curl wget tmux"
 	RPM_PKGS="vim-enhanced"
 	DEB_PKGS=""
+
+	# you should leave this one blank
 	NEED_PKGS=""
 
 	# debian mint
