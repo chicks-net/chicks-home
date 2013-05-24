@@ -17,4 +17,17 @@ PS1="\[\e[32m\]\u@\h \t \W \\$\[\e[0m\] "
 
 # TODO: does bashrc run only for interactive mode?
 
-check_packages # should only run in interactive
+if is_interactive; then
+	#echo non-interactive
+	false
+else
+	check_packages
+	echo ""
+
+	check_all_permissions
+	echo ""
+
+	uptime
+	echo ""
+fi
+

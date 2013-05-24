@@ -31,9 +31,14 @@ function check_packages {
 
 	echo "check_packages()..."
 
-	UNIVERSAL_PKGS="vim screen mtr perl bash whois pcregrep"
+	#
+	# UPDATE PACKAGE LISTS HERE
+	#
+	UNIVERSAL_PKGS="vim screen mtr perl bash whois pcregrep curl wget tmux"
 	RPM_PKGS="vim-enhanced"
 	DEB_PKGS=""
+
+	# you should leave this one blank
 	NEED_PKGS=""
 
 	# debian mint
@@ -72,3 +77,91 @@ function check_packages {
 
 	echo "check done."
 }
+
+#
+function check_all_permissions {
+	echo checking ~/.ssh/\* permisisons...
+
+	# should always exist
+	check_file_permissions ~/.ssh 700
+	check_file_permissions ~/.ssh/config 600
+
+	# should be optional
+	if [[ -e ~/.ssh/id_rsa ]]
+	then
+		check_file_permissions ~/.ssh/id_rsa 600
+		check_file_permissions ~/.ssh/id_rsa.pub 644
+	else
+		echo -e "\tyour local ssh key is missing"
+	fi
+}
+
+# arguments: filename permisison
+function check_file_permissions {
+	if [[ $# -lt 2 ]]
+	then
+		echo you need 2 arguments to 'check_permissions()', not $#
+		exit 3
+	fi
+
+	if [[ $# -gt 2 ]]
+	then
+		echo you need 2 arguments, not $# to 'check_permisisons()'
+		exit 3
+	fi
+
+	FILE=$1
+	DESIRED=$2
+
+	get_perm $FILE # set RETURN_PERM
+	ACTUAL=$RETURN_PERM
+
+	if [[ $ACTUAL != $DESIRED ]]
+	then
+		echo -e "\t$FILE has $ACTUAL permissions instead of desired $DESIRED"
+	fi
+}
+
+# arguments: filename
+# returns value in $RETURN_PERM
+function get_perm {
+	if [[ $# -lt 1 ]]
+	then
+		echo you need to pass filenames 'get_perm()'
+		return 1
+	fi
+
+	FILE=$1
+
+	# we want -e not -f so we can get permissions on non-files
+	if [[ ! -e $FILE ]]
+	then
+		echo "get_perm($FILE): no such file"
+		return 2
+	fi
+
+	RET=`stat -c %a $FILE`
+#	echo got $RET for $FILE
+	RETURN_PERM=$RET
+
+	return 0
+}
+
+function is_interactive {
+	RET=3
+
+	if [[ -z $PS1 ]] # no prompt?
+	### if [ -v PS1 ]   # On Bash 4.2+ ...
+	then
+		# non-interactive
+		RET=0
+	else
+		# interactive
+		RET=1
+	fi
+
+#	echo return $RET
+	return $RET
+}
+
+#echo processed all of .functions
