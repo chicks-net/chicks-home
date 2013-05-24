@@ -1,0 +1,4 @@
+alias grep='grep --colour=auto'
+alias ls='ls --color=auto'
+alias goodtail='tail --follow=name --retry'
+alias greattail='tail --follow=name --retry $1 | /home/chicks/colorlog2'
