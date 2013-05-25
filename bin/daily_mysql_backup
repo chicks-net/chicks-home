@@ -3,11 +3,40 @@
 # daily_mysql_backup
 #
 # args:
+#	-s server	target server
+#	-a		all databases
+#	DB1 DB2 DB3
 #
 # TODO:
 # * process args
 # * everything
 
 use strict;
+use AppConfig;
 
-print "nada\n";
+# create a new AppConfig object
+my $app_config = {};
+my $config = AppConfig->new( $app_config );
+
+# define a new variable
+$config->define( 's|server=s' );
+
+# read configuration file
+my $config_file = '/etc/fini/daily_mysql_backup.conf';
+if (-r $config_file) {
+	$config->file($config_file);
+}
+
+# parse command line options
+$config->args();      # default to \@ARGV
+
+# advanced command line options with Getopt::Long
+#$config->getopt();    # default to \@ARGV
+
+# shortcut form
+#$config->varname($value);
+#$config->varname;
+
+my $server = $config->server or die "no server";
+print "print backup up to $server\n";
+
