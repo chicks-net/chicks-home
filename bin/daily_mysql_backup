@@ -144,7 +144,8 @@ if ($xtra_found) {
 # verify mysql login
 #
 
-unless (-f "$ENV{HOME}/.my.cnf") {
+my $credentials_filename =  "$ENV{HOME}/.my.cnf";
+unless (-f $credentials_filename) {
 	die "you need personal mysql credentials - create ~/.my.cnf";
 }
 
