@@ -127,7 +127,9 @@ foreach my $dir (@path_dirs) {
 
 my $backup_command = 'xtrabackup';
 if ($xtra_found) {
-	print "  xtrabackup found in $xtra_found\n";
+	print "  xtrabackup found in $xtra_found, using innobackupex\n";
+	$backup_command = "$xtra_found/innobackupex";
+	die "missing $backup_command" unless -x $backup_command;
 } else {
 	# do it with mysqlbackup
 	$backup_command = 'mysqlbackup';
@@ -142,7 +144,11 @@ unless (-f "$ENV{HOME}/.my.cnf") {
 	die "you need personal mysql credentials - create ~/.my.cnf";
 }
 
-system('echo "select 3 as c;" | mysql > /dev/null');
+if ($all) {
+	system('echo "select 3 as c;" | mysql > /dev/null');
+} else {
+	system('echo "select 3 as c;" | mysql ' . $databases[0] . ' > /dev/null');
+}
 
 if ($? == -1) {
 	die "  ERROR: mysql check failed to execute: $!\n";
@@ -160,6 +166,8 @@ if ($? == -1) {
 # backup to local text file
 #
 
+#my @do_backup_command = ($backup_command, 
+#run \@command, '>', \$out, '2>', \$err, timeout(15) or die "remote df failed: $?";
 die "unimplemented";
 
 #
