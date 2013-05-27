@@ -81,13 +81,20 @@ my ( $out, $err );
 run \@command, '>', \$out, '2>', \$err, timeout(15) or die "remote df failed: $?";
 die "no output from remote df" unless length $out;
 
-#TOOD: check for actual space 
-
 # Filesystem            Size  Used Avail Use% Mounted on
 # /dev/mapper/VolGroup00-LogVol00
 #                        33G  4.0G   27G  13% /
 
+my @out_ws = split(/\s+/,$out);
+#print "- " . join ("\n- ",@out_ws) . "\n";
+my $remote_path_mounted = pop @out_ws;
+my $remote_free_percentage = pop @out_ws;
+my $remote_free_space_human = pop @out_ws;
+
+# TODO: check for actual space 
+
 print "backing up from $local_hostname_short to $remote_server [$remote_ip]\n";
+print "  $remote_server:$remote_path_mounted has $remote_free_percentage free ($remote_free_space_human)\n";
 
 #
 # detect mysql tools flavor
