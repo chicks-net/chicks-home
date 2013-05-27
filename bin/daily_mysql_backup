@@ -14,6 +14,10 @@
 use strict;
 use AppConfig;
 
+#
+# CONFIGURATION
+#
+
 # create a new AppConfig object
 my $app_config = {};
 my $config = AppConfig->new( $app_config );
@@ -30,13 +34,28 @@ if (-r $config_file) {
 # parse command line options
 $config->args();      # default to \@ARGV
 
-# advanced command line options with Getopt::Long
-#$config->getopt();    # default to \@ARGV
-
-# shortcut form
 #$config->varname($value);
 #$config->varname;
 
+# validate
 my $server = $config->server or die "no server";
-print "print backup up to $server\n";
 
+print "ARGV=@ARGV\N";
+
+#
+# detect mysql flavor
+#
+
+die "unimplemented";
+
+#
+# check connectivity and disk space to server
+#
+
+print "backing up to $server\n";
+
+#
+# do the backup
+#
+
+die "unimplemented";
