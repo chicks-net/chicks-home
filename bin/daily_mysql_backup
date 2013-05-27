@@ -14,6 +14,7 @@
 use strict;
 use AppConfig;
 use Sys::Hostname;
+use Socket; # for inet_ntoa
 
 #
 # CONFIGURATION
@@ -66,8 +67,17 @@ $local_hostname_short =~ s/\..*$//; # remove everything after initial dot
 # check connectivity and disk space to server
 #
 
-print "backing up from $local_hostname_short to $remote_server\n";
-die "unimplemented";
+# lookup ip for remote
+my $packed_remote_ip = gethostbyname($remote_server);
+die "lookup failed for $remote_server: $!" unless defined $packed_remote_ip;
+my $remote_ip = inet_ntoa($packed_remote_ip);
+
+# ssh df
+#die "unimplemented";
+my $command = "ssh $remote_server 'df -h /home'";
+system($command) or die "'ssh $remote_server df' failed: $!";
+
+print "backing up from $local_hostname_short to $remote_server [$remote_ip]\n";
 
 #
 # detect mysql flavor
