@@ -27,6 +27,7 @@ my $config = AppConfig->new( $app_config );
 
 # define variables
 $config->define( 's|server=s' );	# target server
+$config->define( 'd|dir|localdir=s' );	# local work directory
 $config->define( 'a|all!' );		# all databases
 
 # read configuration file
@@ -54,6 +55,9 @@ unless (scalar @databases or $all) {
 if (scalar @databases and $all) {
 	warn "superfulous database specification when -all catches all databases";
 }
+
+my $local_dir = $config->localdir || $ENV{HOME} . '/Documents/backups/mysql';
+die "no directory $local_dir" unless -d $local_dir;
 
 #
 # get local hostname
@@ -166,9 +170,10 @@ if ($? == -1) {
 # backup to local text file
 #
 
-#my @do_backup_command = ($backup_command, 
-#run \@command, '>', \$out, '2>', \$err, timeout(15) or die "remote df failed: $?";
-die "unimplemented";
+my @do_backup_command = ($backup_command, $local_dir);
+print "  running ", join(' ', @do_backup_command), "\n";
+print "\n";
+run \@do_backup_command or die "$backup_command $local_dir failed: $?";
 
 #
 # rsync to remote server
