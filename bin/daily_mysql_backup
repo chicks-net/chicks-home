@@ -23,7 +23,8 @@ my $app_config = {};
 my $config = AppConfig->new( $app_config );
 
 # define variables
-$config->define( 's|server=s' );
+$config->define( 's|server=s' );	# target server
+$config->define( 'a|all!' );		# all databases
 
 # read configuration file
 my $config_file = '/etc/fini/daily_mysql_backup.conf';
@@ -39,8 +40,17 @@ $config->args();      # default to \@ARGV
 
 # validate
 my $server = $config->server or die "no server";
+# server validation is below under "check connectivity"
 
-print "ARGV=@ARGV\N";
+my $all = $config->all;
+my @databases = @ARGV;
+unless (scalar @databases or $all) {
+	die "no databases to backup, list some or specify -all";
+}
+
+if (scalar @databases and $all) {
+	warn "superfulous database specification when -all catches all databases";
+}
 
 #
 # get local hostname
