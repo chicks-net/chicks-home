@@ -15,6 +15,7 @@ use strict;
 use AppConfig;
 use Sys::Hostname;
 use Socket; # for inet_ntoa
+use IPC::Run qw( run timeout );
 
 #
 # CONFIGURATION
@@ -73,9 +74,18 @@ die "lookup failed for $remote_server: $!" unless defined $packed_remote_ip;
 my $remote_ip = inet_ntoa($packed_remote_ip);
 
 # ssh df
-#die "unimplemented";
-my $command = "ssh $remote_server 'df -h /home'";
-system($command) or die "'ssh $remote_server df' failed: $!";
+my @command = ('ssh', $remote_server, "df -h /home");
+#print "COMMAND: ", join(' ', @command), "\n";
+
+my ( $out, $err );
+run \@command, '>', \$out, '2>', \$err, timeout(15) or die "remote df failed: $?";
+die "no output from remote df" unless length $out;
+
+#TOOD: check for actual space 
+
+# Filesystem            Size  Used Avail Use% Mounted on
+# /dev/mapper/VolGroup00-LogVol00
+#                        33G  4.0G   27G  13% /
 
 print "backing up from $local_hostname_short to $remote_server [$remote_ip]\n";
 
@@ -88,7 +98,7 @@ my @path_dirs = split (/:/,$env_path);
 
 my $xtra_found = 0;
 foreach my $dir (@path_dirs) {
-	if (-x 'xtrabackup') {
+	if (-x "$dir/xtrabackup") {
 		$xtra_found = $dir;
 		last;
 	}
@@ -96,7 +106,7 @@ foreach my $dir (@path_dirs) {
 
 my $backup_command = 'xtrabackup';
 if ($xtra_found) {
-	print "xtrabackup found in $xtra_found\n";
+	print "  xtrabackup found in $xtra_found\n";
 } else {
 	# do it with mysqlbackup
 	$backup_command = 'mysqlbackup';
