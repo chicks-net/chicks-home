@@ -131,8 +131,30 @@ if ($xtra_found) {
 } else {
 	# do it with mysqlbackup
 	$backup_command = 'mysqlbackup';
-	die "untested";
+	die "  ERROR: mysqldump is untested";
 }
+
+#
+# verify mysql login
+#
+
+unless (-f "$ENV{HOME}/.my.cnf") {
+	die "you need personal mysql credentials - create ~/.my.cnf";
+}
+
+system('echo "select 3 as c;" | mysql > /dev/null');
+
+if ($? == -1) {
+	die "  ERROR: mysql check failed to execute: $!\n";
+} elsif ($? & 127) {
+	printf "child died with signal %d, %s coredump\n",
+		($? & 127),  ($? & 128) ? 'with' : 'without';
+} elsif ( ($? >> 8) == 0 ) {
+	# it worked, move on
+} else {
+	die sprintf "  ERROR: mysql login check failed: child exited with value %d\n", $? >> 8;
+}
+
 
 #
 # backup to local text file
