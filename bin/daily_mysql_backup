@@ -88,13 +88,27 @@ die "no output from remote df" unless length $out;
 my @out_ws = split(/\s+/,$out);
 #print "- " . join ("\n- ",@out_ws) . "\n";
 my $remote_path_mounted = pop @out_ws;
-my $remote_free_percentage = pop @out_ws;
+my $remote_used_percentage = pop @out_ws;
 my $remote_free_space_human = pop @out_ws;
 
-# TODO: check for actual space 
+my $remote_used_percentage_clean = $remote_used_percentage;
+$remote_used_percentage_clean =~ s/%$//;
+if ($remote_used_percentage_clean > 80 ) {
+	die "free up disk space ($remote_used_percentage > 80)";
+} 
+
+if ($remote_free_space_human =~ /G$/) {
+	my $remote_free_space_human_clean = $remote_free_space_human;
+	$remote_free_space_human_clean =~ s/G$//;
+	if ($remote_free_space_human_clean < 2) {
+		die "free up disk space ($remote_free_space_human < 2)";
+	}
+} else {
+	die "no gigs, no backups";
+}
 
 print "backing up from $local_hostname_short to $remote_server [$remote_ip]\n";
-print "  $remote_server:$remote_path_mounted has $remote_free_percentage free ($remote_free_space_human)\n";
+print "  $remote_server:$remote_path_mounted has $remote_used_percentage used and $remote_free_space_human free\n";
 
 #
 # detect mysql tools flavor
