@@ -80,10 +80,28 @@ system($command) or die "'ssh $remote_server df' failed: $!";
 print "backing up from $local_hostname_short to $remote_server [$remote_ip]\n";
 
 #
-# detect mysql flavor
+# detect mysql tools flavor
 #
 
-die "unimplemented";
+my $env_path = $ENV{PATH} or die "no PATH in the environment";
+my @path_dirs = split (/:/,$env_path);
+
+my $xtra_found = 0;
+foreach my $dir (@path_dirs) {
+	if (-x 'xtrabackup') {
+		$xtra_found = $dir;
+		last;
+	}
+}
+
+my $backup_command = 'xtrabackup';
+if ($xtra_found) {
+	print "xtrabackup found in $xtra_found\n";
+} else {
+	# do it with mysqlbackup
+	$backup_command = 'mysqlbackup';
+	die "untested";
+}
 
 #
 # backup to local text file
@@ -95,7 +113,16 @@ die "unimplemented";
 # rsync to remote server
 #
 
+die "unimplemented";
+
 #
 # kick off diff/compress on remote server
 #
 
+die "unimplemented";
+
+#
+# SUBROUTINES
+#
+
+__END__
