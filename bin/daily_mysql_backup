@@ -132,7 +132,7 @@ foreach my $dir (@path_dirs) {
 my $backup_command = 'xtrabackup';
 if ($xtra_found) {
 	print "  xtrabackup found in $xtra_found, using innobackupex\n";
-	$backup_command = "$xtra_found/innobackupex";
+	$backup_command = "$xtra_found/$backup_command";
 	die "missing $backup_command" unless -x $backup_command;
 } else {
 	# do it with mysqlbackup
@@ -171,7 +171,7 @@ if ($? == -1) {
 # backup to local text file
 #
 
-my @do_backup_command = ($backup_command, $local_dir);
+my @do_backup_command = ($backup_command, "--target-dir=$local_dir", '--backup', '--skip-innodb-checksums' , '--skip-innodb-adaptive-hash-index');
 print "  running ", join(' ', @do_backup_command), "\n";
 print "\n";
 run \@do_backup_command or die "$backup_command $local_dir failed: $?";
