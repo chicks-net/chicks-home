@@ -22,7 +22,7 @@ use AppConfig;
 my $app_config = {};
 my $config = AppConfig->new( $app_config );
 
-# define a new variable
+# define variables
 $config->define( 's|server=s' );
 
 # read configuration file
@@ -43,6 +43,13 @@ my $server = $config->server or die "no server";
 print "ARGV=@ARGV\N";
 
 #
+# get local hostname
+#
+
+die "unimplemented";
+
+
+#
 # detect mysql flavor
 #
 
@@ -53,9 +60,19 @@ die "unimplemented";
 #
 
 print "backing up to $server\n";
+die "unimplemented";
 
 #
-# do the backup
+# backup to local text file
 #
 
 die "unimplemented";
+
+#
+# rsync to remote server
+#
+
+#
+# kick off diff/compress on remote server
+#
+
