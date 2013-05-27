@@ -13,6 +13,7 @@
 
 use strict;
 use AppConfig;
+use Sys::Hostname;
 
 #
 # CONFIGURATION
@@ -39,7 +40,7 @@ $config->args();      # default to \@ARGV
 #$config->varname;
 
 # validate
-my $server = $config->server or die "no server";
+my $remote_server = $config->server or die "no server";
 # server validation is below under "check connectivity"
 
 my $all = $config->all;
@@ -55,21 +56,23 @@ if (scalar @databases and $all) {
 #
 # get local hostname
 #
+my $local_hostname = hostname;
+die "no local hostname" unless length $local_hostname;
 
-die "unimplemented";
-
-
-#
-# detect mysql flavor
-#
-
-die "unimplemented";
+my $local_hostname_short = $local_hostname;
+$local_hostname_short =~ s/\..*$//; # remove everything after initial dot
 
 #
 # check connectivity and disk space to server
 #
 
-print "backing up to $server\n";
+print "backing up from $local_hostname_short to $remote_server\n";
+die "unimplemented";
+
+#
+# detect mysql flavor
+#
+
 die "unimplemented";
 
 #
