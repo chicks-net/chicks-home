@@ -7,9 +7,9 @@ use Net::Telnet;
 use Time::HiRes;
 
 
-my $host='10.0.0.1';	# cisco phone host name
-my $password='cisco';	# cisco phone password
-my $mute=0;		# mute on a dial 0/1
+my $host='10.154.110.217';	# cisco phone host name
+my $password='cisco';		# cisco phone password
+my $mute=0;			# mute on a dial 0/1
 
 my $sleeptime=.2;
 my $prompt='/> $/';
