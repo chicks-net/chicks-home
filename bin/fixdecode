@@ -1,0 +1,3 @@
+#!/bin/bash
+
+grep $* | sed -e 's/^A/   /g' -e 's/ 35=/ type=/' -e 's/ 44=/ price=/'
