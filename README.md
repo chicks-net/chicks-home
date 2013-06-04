@@ -3,6 +3,17 @@ chicks-home
 
 My home directory with various scripts and configs.
 
+INSTALL
+-------
+
+	adduser chicks
+	cd /home
+	mv chicks chicks.sys
+	# setup keys
+	git clone git@github.com:chicks-net/chicks-home.git
+	mv chicks-home chicks
+	chown -r chicks.chicks chicks
+
 TODO
 ----
 
