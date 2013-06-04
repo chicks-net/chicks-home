@@ -9,10 +9,14 @@ INSTALL
 	adduser chicks
 	cd /home
 	mv chicks chicks.sys
-	# setup keys
+	# setup temp keys
 	git clone git@github.com:chicks-net/chicks-home.git
 	mv chicks-home chicks
 	chown -r chicks.chicks chicks
+	cd chicks
+	mkdir Documents Desktop tmp Mail Documents/git
+	# keygen for chicks, add to github and authorized_keys
+	# download dnetc
 
 TODO
 ----
