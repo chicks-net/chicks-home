@@ -32,3 +32,5 @@ tmp
 .Xauthority
 .my.cnf
 .mysql_history
+dead.letter
+.lesshst
