@@ -1,0 +1,47 @@
+#!/usr/bin/perl
+
+use strict;
+use warnings;
+
+my $session = 'mint-chicks:3.0';
+
+my $password = `cat ~/.creds`;
+chomp($password);
+
+my @dcs = qw( );
+
+foreach my $dc (@dcs) {
+	print "$dc:\n";
+	# ssh and login
+	tmux_send("ssh init.$dc");
+	sleep 2;
+	tmux_send('yes'); # for ssh host key, TODO: check if ssh is prompting
+	sleep 3;
+	tmux_send($password);
+	sleep 8;
+
+	#
+	# do something
+	#
+	#tmux_send('hostname');
+
+	# tmux send-keys -t $TARGET 'mkdir .ssh; chmod 700 .ssh; cd .ssh;  wget https://raw.github.com/chicks-net/chicks-home/master/.ssh/authorized_keys; chmod 600 authorized_keys; ls -al; cd ..' C-m
+	system("/home/chicks/bin/infect $session");
+	sleep 2;
+
+	# logout
+	sleep 1;
+	tmux_send('exit');
+	sleep 1;
+}
+
+sub tmux_send {
+	my($cmd) = @_;
+
+	unless ( length($cmd) ) {
+		$cmd = "# hi";
+		warn "missing command, sending hi instead";
+	}
+	system( "tmux send-keys -t $session '$cmd' C-m");
+}
+
