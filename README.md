@@ -21,10 +21,11 @@ INSTALL
 TODO
 ----
 
+* fix prompt under Mint
 * finish mysql backups scripts
 * test as real home dir in Mint
-* fix prompt under Mint
-* prompt to install missing packages
+* build script to install missing packages
 * fix permissions on logout
+* find solution to git/permissions issues generally "would you trust it with /etc?"
 * write cron to keep home dirs up to date
 * write script to populate home directory from github on new machines
