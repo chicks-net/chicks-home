@@ -34,7 +34,7 @@ function check_packages {
 	#
 	# UPDATE PACKAGE LISTS HERE
 	#
-	UNIVERSAL_PKGS="vim screen mtr perl bash whois pcregrep curl wget tmux"
+	UNIVERSAL_PKGS="vim screen mtr perl bash whois pcregrep curl wget tmux arduino"
 	RPM_PKGS="vim-enhanced"
 	DEB_PKGS=""
 
@@ -55,7 +55,10 @@ function check_packages {
 				NEED_PKGS="$NEED_PKGS $deb_pkg"
 			fi
 		done
-		echo  -e "\t# sudo apt-get install $NEED_PKGS"
+		if [[ -n $NEED_PKGS ]]
+		then
+			echo  -e "\t# sudo apt-get install $NEED_PKGS"
+		fi
 	fi
 
 	# rpm centos
@@ -72,7 +75,10 @@ function check_packages {
 				NEED_PKGS="$NEED_PKGS $rpm_pkg"
 			fi
 		done
-		echo  -e "\t# sudo yum install -y $NEED_PKGS"
+		if [[ -n $NEED_PKGS ]]
+		then
+			echo  -e "\t# sudo yum install -y $NEED_PKGS"
+		fi
 	fi
 
 	echo "check done."
