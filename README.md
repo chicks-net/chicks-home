@@ -24,7 +24,6 @@ TODO
 * fix prompt under Mint
 * finish mysql backups scripts
 * test as real home dir in Mint
-* build script to install missing packages
 * fix permissions on logout
 * find solution to git/permissions issues generally "would you trust it with /etc?"
 * write cron to keep home dirs up to date

@@ -29,7 +29,17 @@ function check_os {
 function check_packages {
 	check_os # set CHICKOS
 
-	echo "check_packages()..."
+	echo "check_packages($1)..."
+
+	if [[ -n $1 ]]
+	then
+		if [[ "$1" == "-i" ]]
+		then
+			INSTALLNOW=1
+		else
+			echo unknown argument: "'$1'"
+		fi
+	fi
 
 	#
 	# UPDATE PACKAGE LISTS HERE
@@ -57,7 +67,14 @@ function check_packages {
 		done
 		if [[ -n $NEED_PKGS ]]
 		then
-			echo  -e "\t# sudo apt-get install $NEED_PKGS"
+			CMD="sudo apt-get install $NEED_PKGS"
+			if [[ $INSTALLNOW ]]
+			then
+				$CMD
+			else
+				# don't install now
+				echo  -e "\t# $CMD"
+			fi
 		fi
 	fi
 
@@ -77,7 +94,14 @@ function check_packages {
 		done
 		if [[ -n $NEED_PKGS ]]
 		then
-			echo  -e "\t# sudo yum install -y $NEED_PKGS"
+			CMD="sudo yum install $NEED_PKGS"
+			if [[ $INSTALLNOW ]]
+			then
+				$CMD
+			else
+				# don't install now
+				echo  -e "\t# $CMD"
+			fi
 		fi
 	fi
 
