@@ -13,7 +13,7 @@
 function check_os {
 	export CHICKOS=broken_shit
 
-	if [[ -f /etc/redhat_release ]]
+	if [[ -f /etc/redhat-release ]]
 	then
 		CHICKOS=RPM_CENTOS
 	else
