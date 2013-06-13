@@ -115,7 +115,7 @@ function check_all_permissions {
 	# should always exist
 	check_file_permissions ~/.ssh 700
 	check_file_permissions ~/.ssh/config 600
-	check_file_permissions ~/.ssh/authorized_keys 600
+	check_file_permissions ~/.ssh/authorized_keys 644
 
 	# should be optional
 	if [[ -e ~/.ssh/id_rsa ]]
