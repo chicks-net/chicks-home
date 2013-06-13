@@ -40,6 +40,8 @@ if is_interactive; then
 	false
 else
 	# interactive, do stuff
+	echo ""
+
 	check_packages
 	echo ""
 
