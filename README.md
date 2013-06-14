@@ -1,7 +1,7 @@
 chicks-home
 ===========
 
-s project was begun to simplify my life for maintaining my home directory across numerous servers running different version of Linux. It checks to make sure that useful packages are installed and makes it easy to install the missing ones. I am testing it on Mint and CentOS.
+This project was begun to simplify my life for maintaining my home directory across numerous servers running different version of Linux. It checks to make sure that useful packages are installed and makes it easy to install the missing ones. I am testing it on Mint and CentOS.
 
 INSTALL
 -------
@@ -28,7 +28,8 @@ I've started friendlier docs at http://chicks-net.github.io/chicks-home/
 TODO
 ----
 
-* fix prompt under Mint
+* fix terminal titles under Mint
+* merge prompt coolness from Mint
 * finish mysql backups scripts
 * find solution to git/permissions issues generally "would you trust it with /etc?"
 * write cron to keep home dirs up to date
