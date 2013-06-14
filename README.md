@@ -1,7 +1,7 @@
 chicks-home
 ===========
 
-My home directory with various scripts and configs.
+s project was begun to simplify my life for maintaining my home directory across numerous servers running different version of Linux. It checks to make sure that useful packages are installed and makes it easy to install the missing ones. I am testing it on Mint and CentOS.
 
 INSTALL
 -------
@@ -17,6 +17,13 @@ INSTALL
 	mkdir Documents Desktop tmp Mail Documents/git
 	# keygen for chicks, add to github and authorized_keys
 	# download dnetc
+
+SUPPORT
+-------
+
+Nobody is using this but me so feel free to file issues on github or send pull requests.
+
+I've started friendlier docs at http://chicks-net.github.io/chicks-home/
 
 TODO
 ----
