@@ -24,15 +24,6 @@ if [ -z "$debian_chroot" ] && [ -r /etc/debian_chroot ]; then
     debian_chroot=$(cat /etc/debian_chroot)
 fi
 
-if [[ ${EUID} == 0 ]] ; then
-	PS1='${debian_chroot:+($debian_chroot)}\[\033[01;31m\]\h\[\033[01;34m\] \W \$\[\033[00m\] '
-else
-	PS1='${debian_chroot:+($debian_chroot)}\[\033[01;32m\]\u@\h\[\033[01;34m\] \w \$\[\033[00m\] '
-fi
-
-# ignore all of that for now and go with the old thing
-# dark purple
-PS1="\[\e[32m\]\u@\h \t \W \\$\[\e[0m\] "
 
 
 if is_interactive; then
@@ -41,6 +32,16 @@ if is_interactive; then
 else
 	# interactive, do stuff
 	echo ""
+
+	if [[ ${EUID} == 0 ]] ; then
+		PS1='${debian_chroot:+($debian_chroot)}\[\033[01;31m\]\h\[\033[01;34m\] \W \$\[\033[00m\] '
+	else
+		PS1='${debian_chroot:+($debian_chroot)}\[\033[01;32m\]\u@\h\[\033[01;34m\] \w \$\[\033[00m\] '
+	fi
+
+	# ignore all of that for now and go with the old thing
+	# dark purple
+	PS1="\[\e[32m\]\u@\h \t \W \\$\[\e[0m\] "
 
 	check_packages
 	echo ""
