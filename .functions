@@ -44,9 +44,9 @@ function check_packages {
 	#
 	# UPDATE PACKAGE LISTS HERE
 	#
-	UNIVERSAL_PKGS="vim screen mtr perl bash whois pcregrep curl wget tmux arduino"
+	UNIVERSAL_PKGS="screen mtr perl bash whois pcregrep curl wget tmux arduino"
 	RPM_PKGS="vim-enhanced"
-	DEB_PKGS=""
+	DEB_PKGS="vim"
 
 	# you should leave this one blank
 	NEED_PKGS=""
