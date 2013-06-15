@@ -15,16 +15,10 @@ if [ -f /home/chicks/.aliases ]; then
 	. /home/chicks/.aliases
 fi
 
-# environment variables
-#PATH=$PATH:/sbin:/usr/sbin
-
-# PS1 = bash prompt
 # set variable identifying the chroot you work in (used in the prompt below)
 if [ -z "$debian_chroot" ] && [ -r /etc/debian_chroot ]; then
     debian_chroot=$(cat /etc/debian_chroot)
 fi
-
-
 
 if is_interactive; then
 	# non-interactive, stay quiet
@@ -33,6 +27,7 @@ else
 	# interactive, do stuff
 	echo ""
 
+	# PS1 = bash prompt
 	if [[ ${EUID} == 0 ]] ; then
 		PS1='${debian_chroot:+($debian_chroot)}\[\033[01;31m\]\h\[\033[01;34m\] \W \$\[\033[00m\] '
 	else
