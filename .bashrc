@@ -16,7 +16,7 @@ if [ -f /home/chicks/.aliases ]; then
 fi
 
 # environment variables
-PATH=$PATH:/sbin:/usr/sbin
+#PATH=$PATH:/sbin:/usr/sbin
 
 # PS1 = bash prompt
 # set variable identifying the chroot you work in (used in the prompt below)
