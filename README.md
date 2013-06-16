@@ -28,8 +28,6 @@ I've started friendlier docs at http://chicks-net.github.io/chicks-home/
 TODO
 ----
 
-* fix terminal titles under Mint
-* merge prompt coolness from Mint
 * finish mysql backups scripts
 * find solution to git/permissions issues generally "would you trust it with /etc?"
 * write cron to keep home dirs up to date
