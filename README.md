@@ -1,7 +1,16 @@
 chicks-home
 ===========
 
-This project was begun to simplify my life for maintaining my home directory across numerous servers running different version of Linux. It checks to make sure that useful packages are installed and makes it easy to install the missing ones. I am testing it on Mint and CentOS.
+This project was begun to simplify my life for maintaining my home directory across numerous servers running different versions of Linux.
+It checks to make sure that useful packages are installed and makes it easy to install the missing ones.
+I am testing it on Mint and CentOS.
+
+This is also where a few of my scripts live that don't deserve their own repo:
+
+* closefh - when you don't want to inheret a file handle, close it
+* roll - a D&D-style dice roller.  This is critical infrastructure when the Magic 8-Ball (TM) is not available.
+* ruler - counting characters is silly, use a ruler
+* comify - turn newlines into commas
 
 INSTALL
 -------
