@@ -29,14 +29,16 @@ else
 
 	# PS1 = bash prompt
 	if [[ ${EUID} == 0 ]] ; then
-		PS1='${debian_chroot:+($debian_chroot)}\[\033[01;31m\]\h\[\033[01;34m\] \W \$\[\033[00m\] '
+		PS1='${debian_chroot:+($debian_chroot)}\[\033[01;31m\]\h\[\033[01;34m\] \t \W \$\[\033[00m\] '
 	else
-		PS1='${debian_chroot:+($debian_chroot)}\[\033[01;32m\]\u@\h\[\033[01;34m\] \w \$\[\033[00m\] '
+		PS1='${debian_chroot:+($debian_chroot)}\[\033[01;32m\]\u@\h\[\033[01;34m\] \t \W \$\[\033[00m\] '
 	fi
 
 	# ignore all of that for now and go with the old thing
 	# dark purple
-	PS1="\[\e[32m\]\u@\h \t \W \\$\[\e[0m\] "
+	#PS1="\[\e[32m\]\u@\h \t \W \\$\[\e[0m\] "
+
+	PROMPT_COMMAND='echo -ne "\033]0;${USER}@${HOSTNAME}: ${PWD/$HOME/~}\007"'
 
 	check_packages
 	echo ""
