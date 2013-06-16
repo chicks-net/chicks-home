@@ -33,9 +33,9 @@ else
 
 	# red for root, green for users
 	if [[ ${EUID} == 0 ]] ; then
-		PS1='${debian_chroot:+($debian_chroot)}\[\e[01;31m\]\h\[\e[01;34m\] \t \W \$\[\e[00m\] '
+		PS1='${debian_chroot:+($debian_chroot)}\[\e[01;31m\]\h\[\e[01;34m\] \t \W !\! \$\[\e[00m\] '
 	else
-		PS1='${debian_chroot:+($debian_chroot)}\[\e[01;32m\]\u@\h\[\e[01;34m\] \t \W \$\[\e[00m\] '
+		PS1='${debian_chroot:+($debian_chroot)}\[\e[01;32m\]\u@\h\[\e[01;34m\] \t \W !\! \$\[\e[00m\] '
 	fi
 
 	# fix xterm titles
