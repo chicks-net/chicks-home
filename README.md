@@ -36,6 +36,7 @@ TODO
 * write cron to keep home dirs up to date
 * write script to populate home directory from github on new machines (the INSTALL section above should be a guideline)
 * find solution to git/permissions issues generally "would you trust it with /etc?"
+* integrate one of the cleaner ANSI color implementations
 
 
 EXPERIMENTS
@@ -44,7 +45,7 @@ EXPERIMENTS
 There are a few areas where work is in progress:
 
 * `daily_mysql_backup` is 50% done but hopes to make maintaining remote SQL-level backups easy and efficient
-
+* *tmux* setup.  I'm reading an e-book and starting to integrate it into my workflow.  I've also started [libtmux](https://github.com/chicks-net/libtmux) for automation via tmux.
 
 SUPPORT
 -------
