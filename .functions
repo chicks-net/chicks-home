@@ -34,6 +34,7 @@ function check_packages {
 	check_os # set CHICKOS
 
 	echo "check_packages($1)..."
+	INSTALLNOW=0
 
 	if [[ -n $1 ]]
 	then
@@ -48,7 +49,7 @@ function check_packages {
 	#
 	# UPDATE PACKAGE LISTS HERE
 	#
-	UNIVERSAL_PKGS="screen mtr perl bash whois pcregrep curl wget tmux arduino"
+	UNIVERSAL_PKGS="screen mtr perl bash whois pcregrep curl wget tmux arduino git git-svn"
 	RPM_PKGS="vim-enhanced"
 	DEB_PKGS="vim"
 
@@ -72,7 +73,7 @@ function check_packages {
 		if [[ -n $NEED_PKGS ]]
 		then
 			CMD="sudo apt-get install $NEED_PKGS"
-			if [[ $INSTALLNOW ]]
+			if [[ $INSTALLNOW -gt 0 ]]
 			then
 				$CMD
 			else
@@ -99,7 +100,7 @@ function check_packages {
 		if [[ -n $NEED_PKGS ]]
 		then
 			CMD="sudo yum install $NEED_PKGS"
-			if [[ $INSTALLNOW ]]
+			if [[ $INSTALLNOW -gt 0 ]]
 			then
 				$CMD
 			else
