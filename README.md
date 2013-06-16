@@ -27,9 +27,6 @@ USAGE
 	Reading package lists... Done
 	Building dependency tree       
 	Reading state information... Done
-	The following packages were automatically installed and are no longer required:
-	  apport-hooks-medibuntu libclucene0ldbl libgc1c2 liblapack3gf libllvm3.1:i386 libqapt-runtime libqapt1 libudev0:i386
-	Use 'apt-get autoremove' to remove them.
 	Suggested packages:
 	  subversion
 	The following NEW packages will be installed:
