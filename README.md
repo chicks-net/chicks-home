@@ -65,6 +65,7 @@ TODO
 * retest in RedHat/CentOS
 * finish mysql backups scripts
 * write cron to keep home dirs up to date
+* choose/commit a LICENSE
 * write script to populate home directory from github on new machines (the INSTALL section above should be a guideline)
 * find solution to git/permissions issues generally "would you trust it with /etc?"
 * integrate one of the cleaner ANSI color implementations
