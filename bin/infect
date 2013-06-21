@@ -1,0 +1,13 @@
+#!/bin/bash
+
+TARGET=$1
+if [[ -z $TARGET ]]
+then
+	echo 'no target specified'
+	exit 1
+else
+	echo "infecting $TARGET"
+fi
+
+tmux send-keys -t $TARGET 'mkdir .ssh; chmod 700 .ssh; cd .ssh;  wget https://raw.github.com/chicks-net/chicks-home/master/.ssh/authorized_keys; chmod 600 authorized_keys; ls -al; cd ..' C-m
+
