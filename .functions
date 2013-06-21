@@ -78,7 +78,8 @@ function check_packages {
 				$CMD
 			else
 				# don't install now
-				echo  -e "\t# $CMD"
+				echo  -e "\t#### $CMD"
+				echo  -e "\t# or check_packages -i"
 			fi
 		fi
 	fi
@@ -105,7 +106,8 @@ function check_packages {
 				$CMD
 			else
 				# don't install now
-				echo  -e "\t# $CMD"
+				echo  -e "\t#### $CMD"
+				echo  -e "\t# or check_packages -i"
 			fi
 		fi
 	fi
