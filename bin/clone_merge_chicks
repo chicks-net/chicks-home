@@ -1,0 +1,29 @@
+#!/bin/bash
+
+cd /home
+
+# move old home dir out of the way
+mv chicks chicks.sys
+ln -s chicks.sys chicks
+cd chicks.sys
+mkdir backups.clone
+mv .aliases .bash_logout .bash_profile .bashrc .functions .git .gitconfig .gitignore .perltidyrc .ssh .tmux.conf .vimrc bin backups.clone
+
+cd /home
+
+# setup temp keys
+git clone git@github.com:chicks-net/chicks-home.git
+rm chicks # symlink
+mv chicks-home chicks
+
+# check
+echo ""
+ls chicks
+echo ""
+
+#chown -r chicks.chicks chicks
+#cd chicks
+#mkdir Documents Desktop tmp Mail Documents/git
+
+# keygen for chicks, add to github and authorized_keys
+# download dnetc
