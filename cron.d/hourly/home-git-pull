@@ -1,0 +1,18 @@
+#!/bin/bash
+
+DIRS="~ ~/Documents/git/chicks-home git/chicks-home"
+
+for dir in $DIRS
+do
+	echo checking $dir
+	eval cd $dir || FAIL=chdir
+
+	if [[ -d .git ]]
+	then
+		echo found it
+		break
+	fi
+done
+
+echo "pulling in: " `pwd`
+git pull
