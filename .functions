@@ -52,6 +52,7 @@ function check_packages {
 	UNIVERSAL_PKGS="screen mtr perl bash whois pcregrep curl wget tmux arduino git git-svn"
 	RPM_PKGS="vim-enhanced"
 	DEB_PKGS="vim"
+	# mailutils would be nice but it installs server shit
 
 	# you should leave this one blank
 	NEED_PKGS=""
