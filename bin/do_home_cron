@@ -1,0 +1,22 @@
+#!/usr/bin/perl
+
+# do_home_cron
+#
+# args:
+#	dir	name of directory to run
+#
+# TODO:
+# * everything
+
+use warnings;
+use strict;
+#use AppConfig;
+#use Sys::Hostname;
+#use IPC::Run qw( run timeout );
+
+#
+# CONFIGURATION
+#
+my $cron_top = $ENV{HOME} . '/cron.d';
+die "no $cron_top dir" unless -d $cron_top;
+my($cron_dir) = @ARGV;
