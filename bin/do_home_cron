@@ -6,7 +6,8 @@
 #	dir	name of directory to run
 #
 # TODO:
-# * everything
+# * email people
+# * add environment coolness
 
 use warnings;
 use strict;
@@ -19,4 +20,24 @@ use strict;
 #
 my $cron_top = $ENV{HOME} . '/cron.d';
 die "no $cron_top dir" unless -d $cron_top;
+chdir($cron_top) or die "could not chdir($cron_top): $!";
+
 my($cron_dir) = @ARGV;
+die "no $cron_dir dir" unless -d $cron_dir;
+
+my $dir_handle;
+opendir($dir_handle,$cron_dir) or die "opendir($cron_dir): $!";
+my @scripts = readdir($dir_handle);
+closedir($dir_handle);
+
+foreach my $script (@scripts) {
+	# these operate on the filename itself, use $fuller_name below for most things
+	next if $script =~ /^\./;		# ignore hidden scripts
+	next if $script =~ /\.sw[p-z]$/;	# ignore swap files
+	next if $script =~ /^~/;		# ignore emaca backups
+
+	my $fuller_name = "$cron_dir/$script";
+	die "cannot exec $fuller_name" unless -x $fuller_name;
+	print "running $fuller_name...\n";
+	system("$fuller_name");
+}
