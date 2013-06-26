@@ -32,18 +32,43 @@ function install_packages {
 
 function check_packages {
 	check_os # set CHICKOS
+	DONESTAMP_BASENAME=.done.check_packages
+	DONESTAMP=~/$DONESTAMP_BASENAME
 
 	echo "check_packages($1)..."
 	INSTALLNOW=0
 
 	if [[ -n $1 ]]
 	then
+		# got arguments, ignore timestamps
+
 		if [[ "$1" == "-i" ]]
 		then
 			INSTALLNOW=1
 		else
 			echo unknown argument: "'$1'"
 		fi
+
+	else
+		# no arguments
+
+		if [[ -f $DONESTAMP ]];
+		then
+#			echo $DONESTAMP exists
+			#echo find ~ -name $DONESTAMP_BASENAME -maxdepth 1 -mtime '+0h55m'
+			find ~ -maxdepth 1 -name $DONESTAMP_BASENAME -mmin -20 > /dev/null
+			find_ret=$?
+#			echo find returned $find_ret
+
+			if [[ $find_ret -gt 0 ]];
+			then
+				echo actually running this time
+			else
+				echo SKIPPING running this time
+				return
+			fi
+		fi
+
 	fi
 
 	#
@@ -114,6 +139,7 @@ function check_packages {
 	fi
 
 	echo "check done."
+	touch $DONESTAMP
 }
 
 #
