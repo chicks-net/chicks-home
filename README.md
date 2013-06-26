@@ -77,6 +77,7 @@ There are a few areas where work is in progress:
 
 * `daily_mysql_backup` is 50% done but hopes to make maintaining remote SQL-level backups easy and efficient
 * *tmux* setup.  I'm reading an e-book and starting to integrate it into my workflow.  I've also started [libtmux](https://github.com/chicks-net/libtmux) for automation via tmux.
+* *CLI clock*  I'm proud to be working with tabelspoon on [fun](https://github.com/chicks-net/tablespooon-fun) which includes a sexy console-mode clock which supports multiple time zones and color..
 
 SUPPORT
 -------
