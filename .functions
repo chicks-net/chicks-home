@@ -62,9 +62,10 @@ function check_packages {
 
 			if [[ $find_ret -gt 0 ]];
 			then
-				echo actually running this time
+#				echo -e "\tactually running this time"
+				let NOOP=1
 			else
-				echo SKIPPING running this time
+				echo -e "\tSKIPPING running this time"
 				return
 			fi
 		fi
@@ -138,13 +139,33 @@ function check_packages {
 		fi
 	fi
 
-	echo "check done."
+	#echo "check done."
 	touch $DONESTAMP
 }
 
 #
 function check_all_permissions {
 	echo checking ~/.ssh/\* permisisons...
+	DONESTAMP_BASENAME=.done.check_permissions
+	DONESTAMP=~/$DONESTAMP_BASENAME
+
+	if [[ -f $DONESTAMP ]];
+	then
+#		echo $DONESTAMP exists
+		
+		find_ret=`find ~ -maxdepth 1 -name $DONESTAMP_BASENAME -mmin -10 | wc -l`
+		echo find returned $find_ret
+
+		if [[ $find_ret -gt 0 ]];
+		then
+			# file is older than time range
+			let NOOP=1
+#			echo -e "\tactually running this time"
+		else
+			echo -e "\tSKIPPING running this time"
+			return
+		fi
+	fi
 
 	# should always exist
 	check_file_permissions ~/.ssh 700
@@ -159,6 +180,8 @@ function check_all_permissions {
 	else
 		echo -e "\tyour local ssh key is missing"
 	fi
+
+	touch $DONESTAMP
 }
 
 # arguments: filename permisison
