@@ -34,3 +34,4 @@ tmp
 .mysql_history
 dead.letter
 .lesshst
+.ssh/genkey.log
