@@ -1,0 +1,57 @@
+#!/usr/bin/perl -w
+
+use strict;
+use warnings;
+use diagnostics;
+use Data::Dumper;
+use Socket;
+use Net::Telnet ();
+
+
+$|=1; # flush every write
+
+my (@files) = @ARGV;
+
+foreach my $file (@files) {
+	warn "no file $file" unless -f $file;
+
+	my $fh;
+	open($fh,'<',$file) or die "could not open file: $!";
+	foreach my $host (<$fh>) {
+		chomp($host);
+
+		# get ip
+		my $readable_ip;
+		my $packed_ip = gethostbyname($host);
+		if (defined $packed_ip) {
+			$readable_ip = inet_ntoa($packed_ip);
+		} else {
+			$readable_ip = 'DNS fail';
+		}
+
+		my @up_services;
+		# check ssh
+		my $port = 22;
+		my $t = new Net::Telnet (
+			Timeout => 10,
+			errmode => 'return',
+		);
+		$t->port($port);
+		if ( $t->open($readable_ip) ) {
+			push(@up_services,'ssh');
+			$t->close();
+		}
+
+		# check nrpe
+		$port = 5666;
+		$t->port($port);
+		if ( $t->open($readable_ip) ) {
+			push(@up_services,'nrpe');
+		}
+
+		# print it out
+		print join("\t",$host,$readable_ip,@up_services), "\n";
+
+	}
+	close($fh) or die "could not close file handle for $file: $!";
+}
