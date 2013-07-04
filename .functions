@@ -55,12 +55,16 @@ function check_packages {
 		if [[ -f $DONESTAMP ]];
 		then
 #			echo $DONESTAMP exists
-			#echo find ~ -name $DONESTAMP_BASENAME -maxdepth 1 -mtime '+0h55m'
-			find ~ -maxdepth 1 -name $DONESTAMP_BASENAME -mmin -20 > /dev/null
-			find_ret=$?
-#			echo find returned $find_ret
 
-			if [[ $find_ret -gt 0 ]];
+			DONE_TIME=`stat --printf=%Y $DONESTAMP`
+			EPOCH_SECS=`date "+%s"`
+			diff_secs=$(($EPOCH_SECS - $DONE_TIME))
+
+#			echo epoch $EPOCH_SECS minus done $DONE_TIME equals $diff_secs
+#			echo "done  $DONE_TIME"
+#			echo "$EPOCH_SECS - $DONE_TIME"
+
+			if [[ $diff_secs -gt 3600 ]];
 			then
 #				echo -e "\tactually running this time"
 				let NOOP=1
@@ -152,19 +156,20 @@ function check_all_permissions {
 	if [[ -f $DONESTAMP ]];
 	then
 #		echo $DONESTAMP exists
-		
-		find_ret=`find ~ -maxdepth 1 -name $DONESTAMP_BASENAME -mmin -10 | wc -l`
-		echo find returned $find_ret
 
-		if [[ $find_ret -gt 0 ]];
+		DONE_TIME=`stat --printf=%Y $DONESTAMP`
+		EPOCH_SECS=`date "+%s"`
+		diff_secs=$(($EPOCH_SECS - $DONE_TIME))
+
+		if [[ $diff_secs -gt 3600 ]];
 		then
-			# file is older than time range
-			let NOOP=1
 #			echo -e "\tactually running this time"
+			let NOOP=1
 		else
 			echo -e "\tSKIPPING running this time"
 			return
 		fi
+		
 	fi
 
 	# should always exist
