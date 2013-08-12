@@ -1,0 +1,80 @@
+#!/bin/bash
+
+# install_dnetc installs the distributed.net client in the right place with lots of error checking
+
+#
+# functions
+#
+function die {
+	EXIT_STATUS=42
+	USERMSG="$*"
+	
+	echo "$0 died with $EXIT_STATUS because '$USERMSG'"
+	exit $EXIT_STATUS
+}
+
+# pull down .gitconfig if needed
+GITCONFIG=$HOME/.gitconfig
+if [[ -f $GITCONFIG ]]; then
+	echo '[good]' $GITCONFIG exists, leaving alone
+else
+	cd ~
+	wget https://raw.github.com/chicks-net/chicks-home/master/.gitconfig
+	if [[ ! -f $GITCONFIG ]]; then
+		die '[BAD ]' $GITCONFIG does not exist after wget
+	fi
+fi
+
+# verify git is installed
+GITBIN=/usr/bin/git
+if [[ -f $GITBIN ]]; then
+	echo '[good]' $GITBIN exists, it looks like git is installed
+else
+	#TODO: generalize beyond debian
+	sudo apt-get install git
+fi
+
+# verify DOCS dir, cd into it
+DOCS=$HOME/Documents
+if [[ ! -d $DOCS ]]; then
+	mkdir $DOCS || die could not mkdir $DOCS
+fi
+cd $DOCS || die could not cd $DOCS
+
+# verify hostname
+if [[ -n $HOSTNAME ]]; then
+	echo '[good]' HOSTNAME=$HOSTNAME
+else
+	HOSTNAME=`hostname`
+	if [[ -z $HOSTNAME ]]; then
+		die no HOSTNAME even after running hostname ourselves
+	fi
+fi
+
+# verify non-existance of dnetc dir
+DNETC_DIR=$DOCS/dnetc
+if [[ -d $DNETC_DIR ]]; then
+	# are we already installed?
+	if [[ -d $DNETC_DIR/.git ]]; then
+		die already installed
+	fi
+fi
+
+# clone repo
+git clone https://github.com/chicks-net/chicks-dnetc.git
+CHECK_DIR=$DOCS/chicks-dnetc
+if [[ ! -d $CHECK_DIR ]]; then
+	die no $CHECK_DIR after clone
+fi
+
+mv chicks-dnetc dnetc
+cd $DNETC_DIR || die could not cd $DNETC_DIR
+
+# branch
+git branch $HOSTNAME
+git checkout $HOSTNAME
+cat dnetc.ini | sed -e "s/mint-stmonica/$HOSTNAME/" > dnetc.ini.tmp
+mv dnetc.ini.tmp dnetc.ini
+git commit -m "name logs starting with ${HOSTNAME}_"
+
+echo ready to start dnetc
