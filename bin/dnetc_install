@@ -75,6 +75,7 @@ git branch $HOSTNAME
 git checkout $HOSTNAME
 cat dnetc.ini | sed -e "s/mint-stmonica/$HOSTNAME/" > dnetc.ini.tmp
 mv dnetc.ini.tmp dnetc.ini
+git add dnetc.ini
 git commit -m "name logs starting with ${HOSTNAME}_"
 
 echo ready to start dnetc
