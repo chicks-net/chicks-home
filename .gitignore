@@ -35,3 +35,4 @@ tmp
 dead.letter
 .lesshst
 .ssh/genkey.log
+.done*
