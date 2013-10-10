@@ -1,0 +1,18 @@
+#!/bin/bash
+
+tmux new-session -s freecandy -n root -d "sudo top"
+
+tmux new-window -t freecandy -d -n Personal -c /home/chicks/Documents/dnetc
+tmux split-window -t freecandy:Personal -c /home/chicks/Documents
+
+tmux new-window -t freecandy -d -n Mocentric "ssh server0.mocentric.com"
+tmux split-window -t freecandy:Mocentric "ssh server0.mocentric.com"
+
+tmux new-window -t freecandy -d -n br0 uptime
+
+tmux new-window -t freecandy -d -n br1
+
+tmux new-window -t freecandy -d -n br2
+
+tmux split-window -t freecandy:root "sudo bash"
+tmux attach -t freecandy
