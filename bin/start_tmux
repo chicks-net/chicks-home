@@ -8,9 +8,9 @@ tmux split-window -t freecandy:Personal -c /home/chicks/Documents
 tmux new-window -t freecandy -d -n Mocentric "ssh server0.mocentric.com"
 tmux split-window -t freecandy:Mocentric "ssh server0.mocentric.com"
 
-tmux new-window -t freecandy -d -n br0 uptime
+tmux new-window -t freecandy -d -n br0 "uptime; bash"
 
-tmux new-window -t freecandy -d -n br1
+tmux new-window -t freecandy -d -n br1 "w; bash"
 
 tmux new-window -t freecandy -d -n br2
 
