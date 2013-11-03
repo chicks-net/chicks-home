@@ -27,6 +27,7 @@ tmp
 .ssh/known*
 .gconf
 .steam*
+.local/
 .config
 .thunderbird
 .Xauthority
@@ -36,3 +37,9 @@ dead.letter
 .lesshst
 .ssh/genkey.log
 .done*
+.nv/
+.macromedia/
+.adobe/
+.pki/
+.cache/
+.compiz/
