@@ -41,6 +41,9 @@ else
 	# fix xterm titles
 	PROMPT_COMMAND='echo -ne "\033]0;${USER}@${HOSTNAME}: ${PWD/$HOME/~}\007"'
 
+	# don't let leading spaces cause commands to be forgotten
+	set HISTCONTROL=ignoredups
+
 	check_packages
 	echo ""
 
