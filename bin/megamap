@@ -20,11 +20,15 @@ foreach my $line (@megalines) {
 		my $linux = $line;
 		my $end = hex substr($linux,-2);
 		$end--;
-		$end = sprintf("%x",$end);
+		$end = sprintf("%02x",$end);
 		substr($linux,-2) = $end;
 		$slot_map{$slot}->{linux} = $linux;
 		my $ls_out = `ls -l /dev/disk/by-id | grep $linux | grep -v part`;
 		chomp($ls_out);
+		unless(length $ls_out) {
+			$slot_map{$slot}->{dev} = '?';
+			next;
+		}
 		$ls_out =~ s/.* //;
 		$ls_out =~ s{[./]}{}g;
 		$slot_map{$slot}->{dev} = $ls_out;
@@ -35,6 +39,7 @@ foreach my $line (@megalines) {
 
 foreach my $slot (sort {$a <=> $b} keys %slot_map) {
 	my $dev = $slot_map{$slot}->{dev};
-	print "$slot\t$dev\n";
+	my $linux = $slot_map{$slot}->{linux};
+	print "$slot\t$dev\t$linux\n";
 }
 
