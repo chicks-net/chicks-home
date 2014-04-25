@@ -9,7 +9,7 @@ tmux new-window -t freecandy -d -n Mocentric "ssh server0.mocentric.com"
 tmux split-window -t freecandy:Mocentric "ssh server0.mocentric.com"
 
 tmux new-window -t freecandy -d -n git -c /home/chicks/Documents/brightroll/git
-tmux split-window -t freecandy:git "ssh server0.mocentric.com"
+tmux split-window -t freecandy:git -c /home/chicks/Documents/personal/git
 
 tmux new-window -t freecandy -d -n SJC "uptime; bash"
 tmux split-window -t freecandy:SJC "ssh ops-v01-20a"
