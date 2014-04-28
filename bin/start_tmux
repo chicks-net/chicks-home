@@ -1,23 +1,31 @@
 #!/bin/bash
 
+# root
 tmux new-session -s freecandy -n root -d "sudo top"
 tmux split-window -t freecandy:root "sudo bash"
 
+# Personal
 tmux new-window -t freecandy -d -n Personal -c /home/chicks/Documents/dnetc
 tmux split-window -t freecandy:Personal -c /home/chicks/Documents/personal
 
+# Mocentric
 tmux new-window -t freecandy -d -n Mocentric "ssh server0.mocentric.com"
 tmux split-window -t freecandy:Mocentric "ssh lab0.mocentric.com"
 
+# git
 tmux new-window -t freecandy -d -n git -c /home/chicks/Documents/brightroll/git
 tmux split-window -t freecandy:git -c /home/chicks/Documents/personal/git
 
+# SJC
 tmux new-window -t freecandy -d -n SJC "uptime; bash"
 tmux split-window -t freecandy:SJC "ssh ops-v01-20a"
 
+# IAD
 tmux new-window -t freecandy -d -n IAD "uptime; bash"
 tmux split-window -t freecandy:IAD "ssh ops-v01-21a"
 
+# lab
 tmux new-window -t freecandy -d -n lab "uptime; bash"
 
+# connect to it
 tmux attach -t freecandy
