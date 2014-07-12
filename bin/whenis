@@ -1,0 +1,39 @@
+#!/usr/bin/perl
+
+use strict;
+use warnings;
+#use diagnostics;
+use DateTime;
+
+# lazy options
+my ($local_only,$utc_only) = (0,0);
+if ($ARGV[0] =~ /^-/) {
+	my $option = shift @ARGV;
+	if ($option eq '-l') {
+		$local_only = 1;
+	} elsif ($option eq '-u') {
+		$utc_only = 1;
+	}
+}
+
+my ($now_secs) = @ARGV;
+
+unless (defined $now_secs) {
+	print "now then...\n";
+	$now_secs = time;
+}
+
+my $when = DateTime->from_epoch(epoch => $now_secs);
+my $utc_zone = $when->time_zone_short_name;
+
+print "$when $utc_zone\n" unless $local_only;
+
+my $local_zone = `cat /etc/timezone`;
+chomp($local_zone);
+
+$when->set_time_zone($local_zone);
+$local_zone = $when->time_zone_short_name;
+print "$when $local_zone\n" unless $utc_only;
+
+$when->set_time_zone('America/New_York');
+print "$when Eastern\n" unless $utc_only or $local_only;
