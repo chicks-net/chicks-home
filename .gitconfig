@@ -16,4 +16,4 @@
 	dump = cat-file -p
 
 [push]
-	default = simple
+#	default = simple
