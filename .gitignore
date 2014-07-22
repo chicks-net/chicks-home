@@ -43,3 +43,23 @@ dead.letter
 .pki/
 .cache/
 .compiz/
+.ICEauthority
+.Prison Architect/
+.ZenBound2/
+.coe3/
+.dbus/
+.dmrc
+.elinks/
+.gimp-2.8/
+.gstreamer-0.10/
+.java/
+.mozilla/
+.psensor/
+.pulse-cookie
+.selected_editor
+.thumbnails/
+.vim/
+.xsession-errors*
+Pictures/
+Ubuntu One/
+Videos/
