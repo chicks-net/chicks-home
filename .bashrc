@@ -44,6 +44,9 @@ else
 	# don't let leading spaces cause commands to be forgotten
 	set HISTCONTROL=ignoredups
 
+	# bc needs defaults
+	export BC_ENV_ARGS=~/.bcrc
+
 	check_packages
 	echo ""
 
