@@ -1,0 +1,36 @@
+#!/usr/bin/perl
+
+use strict;
+use warnings;
+
+my @items;
+my $total_weight = 0;
+while (my $line = <STDIN>) {
+	chomp($line);
+	if ($line =~ /^\s*(\d+)\s+(.*)$/) {
+		my $weight = $1;
+		my $item_text = $2;
+
+		$total_weight += $weight;
+		push(@items,{weight=>$weight,description=>$item_text});
+	} else {
+		die "could not parse: $line";
+	}
+}
+
+my $count = scalar @items;
+print "total weight of $total_weight for $count items\n";
+
+my $loop_weight = int(rand($total_weight));
+print "rolled $loop_weight\n";
+
+my $last_item;
+foreach my $item (@items) {
+	my $weight = $item->{weight};
+	my $description = $item->{description};
+	$last_item = $description;
+	$loop_weight -= $weight;
+	last if ($loop_weight < 0);
+}
+
+print "picked $last_item\n";
