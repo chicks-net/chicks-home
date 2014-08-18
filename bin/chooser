@@ -19,7 +19,7 @@ while (my $line = <STDIN>) {
 }
 
 my $count = scalar @items;
-print "total weight of $total_weight for $count items\n";
+print "total weight of $total_weight for $count items, ";
 
 my $loop_weight = int(rand($total_weight));
 print "rolled $loop_weight\n";
@@ -33,4 +33,4 @@ foreach my $item (@items) {
 	last if ($loop_weight < 0);
 }
 
-print "picked $last_item\n";
+print "picked >>> $last_item\n";
