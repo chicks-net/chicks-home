@@ -1,15 +1,15 @@
 #!/bin/bash
 
 # root
-tmux new-session -s freecandy -n root -d "sudo top"
-tmux split-window -t freecandy:root "sudo bash"
+tmux new-session -s bad -n root -d "sudo top"
+tmux split-window -t bad:root "sudo bash"
 
 # Personal
-tmux new-window -t freecandy -d -n Personal -c /home/chicks/Documents/dnetc
-tmux split-window -t freecandy:Personal -c /home/chicks/Documents/personal
+tmux new-window -t bad -d -n Personal -c /home/chicks/Documents/dnetc
+tmux split-window -t bad:Personal -c /home/chicks/Documents/personal
 
 # git
-tmux new-window -t freecandy -d -n git -c /home/chicks/Documents/git
+tmux new-window -t bad -d -n git -c /home/chicks/Documents/git
 
 # connect to it
-tmux attach -t freecandy
+tmux attach -t bad
