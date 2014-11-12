@@ -1,0 +1,9 @@
+#!/bin/bash
+
+while true
+do
+	date
+	netstat -nap | grep ^tcp | egrep ':(2181|3888|53494)'
+	echo ""
+	sleep 10
+done
