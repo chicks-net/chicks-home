@@ -1,0 +1,18 @@
+#!/usr/bin/perl
+
+use strict;
+use warnings;
+
+foreach my $ip (<>) {
+	chomp $ip;
+	my @parts_decimal = split(/[.]/,$ip);
+	my @parts_hex = map { sprintf("%02x",$_) } @parts_decimal;
+	my $hex_ip = join('',@parts_hex);
+	
+	print "++ $hex_ip\n";
+	print "\n";
+	print "menu = $ip\n";
+	print "title = $ip ICMP Latency\n";
+	print "host = $ip\n";
+	print "\n";
+}
