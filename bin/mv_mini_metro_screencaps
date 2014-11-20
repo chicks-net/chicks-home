@@ -1,0 +1,86 @@
+#!/usr/bin/perl
+
+use strict;
+use warnings;
+use File::stat;
+#use Time::localtime;
+use Data::Dumper;
+
+my $home = $ENV{HOME};
+
+my $desktop = $home . "/Desktop/";
+my $minimetro_pictures = $home . "/Pictures/MiniMetro/";
+
+die "no source directory ($desktop)" unless -d $desktop;
+die "no destination directory ($minimetro_pictures)" unless -d $minimetro_pictures;
+
+print "moving Mini Metro screencaps from $desktop to $minimetro_pictures\n";
+
+chdir($desktop) or die "chdir($desktop): $!";
+
+my ($d, %files);
+opendir($d,$desktop) or die "opendir($desktop): $!";
+
+foreach my $file (readdir($d)) {
+	next unless $file =~ /\.png$/;
+	my $timestamp = stat($file)->mtime;
+	#print "$timestamp $file\n";
+	push(@{$files{$timestamp}},$file);
+}
+
+closedir($d);
+
+foreach my $ts (sort keys %files) {
+	my $count = scalar @{ $files{$ts} };
+	next unless $count == 1;
+
+	if ( defined ( $files{ $ts + 1 } ) ) {
+		# we'll get it next time
+	} elsif ( defined ( $files{ $ts - 1 } ) ) {
+		#print "time to fix $ts\n";
+		my $prev = $ts - 1;
+		push( @{ $files{$prev} }, @{ $files{$ts} } );
+		delete $files{$ts};
+	} else {
+		die "programmer is clueless";
+	}
+}
+
+#print Dumper(\%files);
+
+foreach my $ts (sort keys %files) {
+	die "presumptions assert failed" unless 2 == scalar @{ $files{$ts} };
+	my $file_out = join(',', @{ $files{$ts} } );
+	print "$ts $file_out\n";
+
+	my $pop;
+	foreach my $file ( @{ $files{$ts} } ) {
+		if ($file =~ /\((\d+)\)/) {
+			$pop = $1;
+		}
+	}
+	die "no population assert failed" unless defined $pop;
+
+	foreach my $file ( @{ $files{$ts} } ) {
+		my ($new,$old);
+		$old = $desktop . $file;
+		if ( $file =~ /Map/ ) {
+			$new = $file;
+			$new =~ s/Map ?\d*\./_${pop}_Map./; # pop good, count meh
+			$new =~ s/ //g; # no spaces in file names
+			$new = $minimetro_pictures . $new;
+		} elsif ($file =~ /\(/) {
+			$new = $file;
+			$new =~ s/ \(/_/; # underscore in the middle
+			$new =~ s/\)\./_Trace./; # strip final paren
+			$new =~ s/ //g; # no spaces in file names
+			$new = $minimetro_pictures . $new;
+		} else {
+			die "$file unrecognized";
+		}
+		warn "new $new already exists!" if -e $new;
+		my $cmd = "mv '$old' $new";
+		print "\t$cmd\n";
+		system($cmd);
+	}
+}
