@@ -18,11 +18,11 @@ pm_to_blib
 .viminfo
 Mail
 mail
-Downloads
-Desktop
-Documents
-backups
-tmp
+/Downloads/
+/Desktop/
+/Documents/
+/backups/
+/tmp/
 .ssh/id*
 .ssh/known*
 .gconf
@@ -32,8 +32,8 @@ tmp
 .thunderbird
 .Xauthority
 .my.cnf
-.mysql_history
-dead.letter
+/.mysql_history
+/dead.letter
 .lesshst
 .ssh/genkey.log
 .done*
@@ -44,22 +44,25 @@ dead.letter
 .cache/
 .compiz/
 .ICEauthority
-.Prison Architect/
-.ZenBound2/
-.coe3/
+/.Prison Architect/
+/.ZenBound2/
+/.coe3/
+/.revenge_of_the_titans/
+/.revenge_of_the_titans_1.80/
 .dbus/
 .dmrc
 .elinks/
 .gimp-2.8/
 .gstreamer-0.10/
 .java/
-.mozilla/
+/.mozilla/
 .psensor/
 .pulse-cookie
 .selected_editor
 .thumbnails/
 .vim/
+/.wireshark/
 .xsession-errors*
-Pictures/
-Ubuntu One/
-Videos/
+/Pictures/
+/Ubuntu One/
+/Videos/
