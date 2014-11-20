@@ -18,4 +18,4 @@
 	undo = checkout --
 
 [push]
-#	default = simple
+	default = simple
