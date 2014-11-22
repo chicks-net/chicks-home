@@ -1,0 +1,28 @@
+#!/bin/bash
+
+# based on code from http://jeffreyv.hubpages.com/hub/Youtube-to-MP3-on-Ubuntu-Linux
+
+TMPDIR=~/tmp
+if [[ ! -d $TMPDIR ]]
+then
+	echo you have no TMPDIR $TMPDIR... let me try to fix that for you
+	mkdir -p $TMPDIR
+fi
+
+OUTDIR=~/Music/from_youtube
+if [[ ! -d $OUTDIR ]]
+then
+	echo you have no OUTDIR $OUTDIR... let me try to fix that for you
+	mkdir -p $OUTDIR
+fi
+
+YOUTUBEURL=$1
+MP3OUT=$OUTDIR/$2
+# TODO: validate command line arguments
+
+tmpflv=$TMPDIR/youtube-dl-$RANDOM-$RANDOM.flv
+echo creating $tmpflv from "$YOUTUBEURL"
+youtube-dl --output=$tmpflv --format=18 "$YOUTUBEURL"
+echo converting $tmpflv to $MP3OUT
+ffmpeg -i $tmpflv -acodec libmp3lame -ac 2 -ab 128k -vn -y "$MP3OUT"
+#rm $tmpflv
