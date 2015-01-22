@@ -1,15 +1,36 @@
 #!/bin/bash
 
-# root
-tmux new-session -s bad -n root -d "sudo top"
-tmux split-window -t bad:root "sudo bash"
+case `hostname` in
 
-# Personal
-tmux new-window -t bad -d -n Personal -c /home/chicks/Documents/dnetc
-tmux split-window -t bad:Personal -c /home/chicks/Documents/personal
+	bad.* )
 
-# git
-tmux new-window -t bad -d -n git -c /home/chicks/Documents/git
+		# root
+		tmux new-session -s bad -n root -d "sudo top"
+		tmux split-window -t bad:root "sudo bash"
 
-# connect to it
-tmux attach -t bad
+		# Personal
+		tmux new-window -t bad -d -n Personal -c /home/chicks/Documents/dnetc
+		tmux split-window -t bad:Personal -c /home/chicks/Documents/personal
+
+		# git
+		tmux new-window -t bad -d -n git -c /home/chicks/Documents/git
+
+		# connect to it
+		tmux attach -t bad
+
+	;;
+
+	hellonurse.* )
+		tmux new-session -s hellonurse -n top
+		sleep 1
+		tmux new-window -t hellonurse -d -n dnetc -c /home/chicks/Documents/dnetc
+		tmux new-window -t hellonurse -d -n dnetc_meta -c /home/chicks/Documents/dnetc
+		tmux new-window -t hellonurse -d -n logs -c /var/log -d "tail -f /var/log/messages"
+	;;
+
+	* )
+		echo there should a default here
+
+	;;
+
+esac
