@@ -21,12 +21,12 @@ case `hostname` in
 	;;
 
 	hellonurse.* )
-		tmux new-session -s hellonurseX -n logs -d "sudo bash"
+		tmux new-session -s hellonurse -n logs -d "sudo bash"
 		sleep 1
-		tmux new-window -t hellonurseX -d -n dnetc -c /home/chicks/Documents/dnetc
-		tmux new-window -t hellonurseX -d -n dnetc_meta -c /home/chicks/Documents/dnetc
+		tmux new-window -t hellonurse -d -n dnetc -c /home/chicks/Documents/dnetc
+		tmux new-window -t hellonurse -d -n dnetc_meta -c /home/chicks/Documents/dnetc
 		#tmux new-window -t hellonurse -d -n logs -c /var/log -d "tail -f /var/log/messages"
-		tmux attach -t hellonurseX
+		tmux attach -t hellonurse
 	;;
 
 	* )
