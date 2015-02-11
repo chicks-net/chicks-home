@@ -1,0 +1,12 @@
+#!/usr/bin/perl
+
+use strict;
+use warnings;
+
+my ($total) = @ARGV;
+die "no argument" unless $total;
+
+foreach my $numerator ( 1 .. 5 ) {
+	my $portion = ($numerator/5)*$total;
+	print "$total*(${numerator}/5)=$portion\n";
+}
