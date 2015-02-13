@@ -2,6 +2,7 @@
 
 use strict;
 use warnings;
+use DateTime;
 
 my ($interval) = @ARGV;
 
@@ -20,7 +21,7 @@ sub print_results {
 	my ($summary) = @_;
 	my @keys = sort keys %$summary;
 	print join("\t",@keys)," \n";
-	print join("\t", map { $summary->{$_} } @keys ), "\n";
+	print join("\t\t", map { $summary->{$_} } @keys ), "\n";
 }
 
 sub print_headers {
@@ -42,9 +43,12 @@ sub run_netstat {
 			$state = '*';
 		}
 
+		$state = 'ESTAB' if $state eq 'ESTABLISHED';
+
 		#print "$proto $state\n";
 		$summary{"$proto.$state"}++;
 	}
+	$summary{_timestamp} = DateTime->now->format_cldr("HH:mm:ss");
 
 	return \%summary;
 }
