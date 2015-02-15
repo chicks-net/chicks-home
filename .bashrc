@@ -48,7 +48,9 @@ else
 	export BC_ENV_ARGS=~/.bcrc
 
 	# perl local::lib
-	eval "$(perl -I$HOME/perl5/lib/perl5 -Mlocal::lib)"
+	if [ -d /home/chicks/perl5 ]; then
+		eval "$(perl -I$HOME/perl5/lib/perl5 -Mlocal::lib)"
+	fi
 
 	check_packages
 	echo ""
