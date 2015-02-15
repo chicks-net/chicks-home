@@ -1,0 +1,54 @@
+#!/usr/bin/perl
+
+use strict;
+use warnings;
+use DateTime;
+
+my ($interval) = @ARGV;
+
+if ($interval) {
+	print_headers();
+	while (1) {
+		print_results(run_netstat());
+		sleep($interval);
+	}
+} else {
+	print_results(run_netstat());
+}
+
+
+sub print_results {
+	my ($summary) = @_;
+	my @keys = sort keys %$summary;
+	print join("\t",@keys)," \n";
+	print join("\t\t", map { $summary->{$_} } @keys ), "\n";
+}
+
+sub print_headers {
+#	print "unimplemented\n";
+}
+
+sub run_netstat {
+	my $out = `netstat -na --protocol=inet | grep ':'`;
+
+	my @lines = split(/\n/,$out);
+	my %summary;
+
+	foreach my $line (@lines) {
+		# Proto Recv-Q Send-Q Local Address           Foreign Address         State 
+		my ($proto, $recvq, $sendq, $a_local, $a_remote, $state) = 
+			split (/\s+/,$line);
+
+		if ($proto eq 'udp' and $state eq '') {
+			$state = '*';
+		}
+
+		$state = 'ESTAB' if $state eq 'ESTABLISHED';
+
+		#print "$proto $state\n";
+		$summary{"$proto.$state"}++;
+	}
+	$summary{_timestamp} = DateTime->now->format_cldr("HH:mm:ss");
+
+	return \%summary;
+}
