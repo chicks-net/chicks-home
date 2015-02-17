@@ -1,3 +1,4 @@
+###		perl
 blib/
 .build/
 _build/
@@ -7,62 +8,94 @@ Build
 !Build/
 Build.bat
 .last_cover_stats
-Makefile
+/Makefile
 Makefile.old
 MANIFEST.bak
 META.yml
 MYMETA.yml
 nytprof.out
 pm_to_blib
-.bash_history
-.viminfo
-Mail
-mail
-/Downloads/
+/perl5/
+/.cpanm/
+
+###		history
+/.bash_history
+/.lesshst
+
+###		email
+/Mail
+/mail
+/dead.letter
+
+###		typical local directories
+/backups/
 /Desktop/
 /Documents/
-/backups/
+/Downloads/
+/Pictures/
+/Videos/
 /tmp/
-.ssh/id*
-.ssh/known*
-.gconf
-.steam*
-.local/
-.config
-.thunderbird
-.Xauthority
+
+###		ssh
+/.ssh/genkey.log
+/.ssh/id*
+/.ssh/known*
+
+###		mysql
 .my.cnf
 /.mysql_history
-/dead.letter
-.lesshst
-.ssh/genkey.log
-.done*
-.nv/
-.macromedia/
-.adobe/
-.pki/
-.cache/
-.compiz/
-.ICEauthority
+
+###		vim
+/.vim/
+/.viminfo
+
+###		games
+/.steam*
 /.Prison Architect/
 /.ZenBound2/
 /.coe3/
 /.revenge_of_the_titans/
 /.revenge_of_the_titans_1.80/
+
+###		chicks scripts flag files
+/.done*
+
+###		x-windows
+/.Xauthority
+/.xsession-errors*
+
+###		free software
+/.compiz/
+/.cups/
+/.cinnamon/
+/.elinks/
+/.gconf/
+/.gksu.lock
+/.gnome/
+/.gimp-2.8/
+/.gstreamer-0.10/
+/.mozilla/
+/.psensor/
+/.thunderbird/
+/.wireshark/
+/.workrave/
+/Anki/
+
+###		unfree software
+/.macromedia/
+/.adobe/
+/.java/
+/Ubuntu One/
+
+###		random ????
+.local/
+.config
+.nv/
+.pki/
+.cache/
+.ICEauthority
 .dbus/
 .dmrc
-.elinks/
-.gimp-2.8/
-.gstreamer-0.10/
-.java/
-/.mozilla/
-.psensor/
 .pulse-cookie
 .selected_editor
 .thumbnails/
-.vim/
-/.wireshark/
-.xsession-errors*
-/Pictures/
-/Ubuntu One/
-/Videos/
