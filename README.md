@@ -1,9 +1,11 @@
 chicks-home
 ===========
 
-This project was begun to simplify my life for maintaining my home directory across numerous servers running different versions of Linux.
+This project was begun to simplify my life for maintaining my home directory across numerous servers
+running different versions of Linux.
 It checks to make sure that useful packages are installed and makes it easy to install the missing ones.
-I am testing it on Mint and CentOS.  It works around the idiosyncracies of both so you get colorful prompts and xterm/window titles update with your home directory.
+I am testing it on Mint and CentOS.  It works around the idiosyncracies of both so you get colorful
+prompts and `xterm`/window titles update with your home directory.
 
 This is also where a few of my scripts live that don't deserve their own repo:
 
@@ -11,6 +13,8 @@ This is also where a few of my scripts live that don't deserve their own repo:
 * `roll` - a D&D-style dice roller.  This is critical infrastructure when the Magic 8-Ball (TM) is not available.
 * `ruler` - counting characters is silly, use a ruler
 * `comify` - turn newlines into commas
+* `watch_constate` - watch network connection states ala `vmstat` or `iostat`
+* `github_fix_https` - make a repo cloned via `https` have ssh remotes
 
 
 USAGE
@@ -46,6 +50,8 @@ USAGE
 INSTALL
 -------
 
+Via [ansible](https://github.com/chicks-net/fini-ansible) or shell commands:
+
 	adduser chicks
 	cd /home
 	mv chicks chicks.sys
@@ -62,10 +68,8 @@ INSTALL
 TODO
 ----
 
-* retest in RedHat/CentOS
 * finish mysql backups scripts
 * choose/commit a LICENSE
-* write script to populate home directory from github on new machines (the INSTALL section above should be a guideline)
 * find solution to git/permissions issues generally "would you trust it with /etc?"
 * integrate one of the cleaner ANSI color implementations
 
@@ -77,12 +81,11 @@ There are a few areas where work is in progress:
 
 * `daily_mysql_backup` is 50% done but hopes to make maintaining remote SQL-level backups easy and efficient
 * *tmux* setup.  I'm reading an e-book and starting to integrate it into my workflow.  I've also started [libtmux](https://github.com/chicks-net/libtmux) for automation via tmux.
-* *CLI clock*  I'm proud to be working with tabelspoon on [fun](https://github.com/chicks-net/tablespooon-fun) which includes a sexy console-mode clock which supports multiple time zones and color..
 
 SUPPORT
 -------
 
-Feel free to file issues on github or send pull requests.
+Feel free to file [issues](https://github.com/chicks-net/chicks-home/issues) on github or send pull requests.
 
 I've started friendlier docs at http://chicks-net.github.io/chicks-home/ but since I have to maintain them in HTML instead of markdown they are being thoroughly neglected until I find a better workflow.
 
