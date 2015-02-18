@@ -47,6 +47,9 @@ else
 	# bc needs defaults
 	export BC_ENV_ARGS=~/.bcrc
 
+	# cows get old fast
+	export ANSIBLE_NOCOWS=1
+
 	# perl local::lib
 	if [ -d /home/chicks/perl5 ]; then
 		eval "$(perl -I$HOME/perl5/lib/perl5 -Mlocal::lib)"
