@@ -1,0 +1,86 @@
+#!/usr/bin/perl
+
+use strict;
+use warnings;
+use Carp;
+use English;
+use Data::Dumper;
+use DateTime;
+use Chart::Strip;
+use LWP::Simple qw( get );
+
+my $raw_output = get('https://gist.githubusercontent.com/kacy/fa7ae1926c5fb8bd47f8/raw/e8457677d9525b266c567b58fccf51b50ac8225a/gistfile1.txt');
+
+my @raw_lines = split(/\n/,$raw_output);
+
+my ($data, @alltimes, %stamp2epoch);
+while (my $raw_line = shift @raw_lines) {
+	unless ($raw_line =~ /^_time/) {
+		die "titles parse error on $raw_line";
+	}
+
+	my @keys = split(/\s+/,$raw_line);
+
+	my $value_line = shift @raw_lines;
+	unless ($value_line =~ /^[0-9:\s]+$/) {
+		die "values parse error on $value_line";
+	}
+	my @values = split(/\s+/,$value_line);
+
+	unless (scalar(@keys) == scalar(@values)) {
+		die "key/values size mismatch";
+	}
+
+	# timestamp fun
+	my $timestamp = $values[0];
+	push( @alltimes, $timestamp );
+	my ($hour,$minute,$second) = split(/:/,$timestamp);
+	my $ts_obj = DateTime->new(
+		year      => 2015,
+		month     => 2,
+		day       => 17,
+		hour      => $hour,
+		minute    => $minute,
+		second    => $second,
+		time_zone => 'UTC',
+	);
+	$stamp2epoch{$timestamp} = $ts_obj->epoch();
+        
+	for (my $i=0 ; $i < scalar @keys ; $i++ ) {
+		my $k = $keys[$i];
+		my $v = $values[$i];
+		$data->{$k}->{$timestamp} = $v;
+	}
+}
+
+#print Dumper($data);
+
+my $chart = Chart::Strip->new( title => 'connection states form gist', width => 800, height => 200);
+
+foreach my $series (keys %$data) {
+	my @dataset;
+	foreach my $when (@alltimes) {
+		my $data_item = {
+			time => $stamp2epoch{$when},
+			value => $data->{$series}->{$when} || 0
+		};
+		push(@dataset,$data_item);
+	}
+	$chart->add_data(\@dataset, { style => 'line', color => '7aa818' } );
+}
+
+write_file( 'kacy_gist.png', $chart->png() );
+
+sub write_file {
+	my ( $filename, $data ) = @_;
+
+	my $fh;
+	open( $fh, ">", $filename ) or croak "could not open $filename for write: $ERRNO";
+	print $fh $data;
+	close($fh) or croak "could not close $filename: $ERRNO";
+
+	my $size = -s $filename;
+	print "wrote raw $filename ($size bytes)\n";
+
+	return $size;
+}
