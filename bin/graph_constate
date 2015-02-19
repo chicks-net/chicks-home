@@ -55,9 +55,12 @@ while (my $raw_line = shift @raw_lines) {
 
 #print Dumper($data);
 
-my $chart = Chart::Strip->new( title => 'connection states form gist', width => 800, height => 200);
+my $chart = Chart::Strip->new( title => 'connection states from gist', width => 900, height => 500);
 
 foreach my $series (keys %$data) {
+	next if $series =~ /^udp\./;
+	next if $series =~ /^tcp.TIME_WAIT$/;
+	next if $series =~ /^_/;	# starts with underscore -- means hidden
 	my @dataset;
 	foreach my $when (@alltimes) {
 		my $data_item = {
@@ -66,10 +69,23 @@ foreach my $series (keys %$data) {
 		};
 		push(@dataset,$data_item);
 	}
-	$chart->add_data(\@dataset, { style => 'line', color => '7aa818' } );
+	my @more;
+	push(@more, thickness => 5) if $series eq 'tcp.ESTAB';
+	push(@more, style => 'points') if $series =~ /^tcp\.SYN/;
+	push(@more, thickness => 2) if $series =~ /^tcp\.FIN/;
+	$chart->add_data(\@dataset, { style => 'line', color => randocolor(), label => $series, @more } );
 }
 
 write_file( 'kacy_gist.png', $chart->png() );
+
+sub randocolor {
+	my @charset = qw( 0 1 2 3 4 5 6 7 8 9 a b c d e f );
+	my $color;
+	for (1..6) {
+		$color .= $charset[ int(rand(16)) ];
+	}
+	return $color;
+}
 
 sub write_file {
 	my ( $filename, $data ) = @_;
