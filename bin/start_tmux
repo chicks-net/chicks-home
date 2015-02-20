@@ -29,8 +29,20 @@ case `hostname` in
 		tmux attach -t hellonurse
 	;;
 
+	c64.* )
+		tmux new-session -s c64 -n root -d "sudo bash"
+		tmux new-window -t c64 -d -n dnetc_proxy #-c /home/chicks/Documents/git/fini-dnet-proxy
+		tmux new-window -t c64 -d -n dnetc #-c /home/chicks/Documents/dnetc
+		tmux attach -t c64
+	;;
+
 	* )
 		echo there should a default here
+		tmux new-session -s defacto -n root -d "sudo bash"
+		tmux new-window -t defacto -d -n foo
+		tmux new-window -t defacto -d -n bar
+		tmux new-window -t defacto -d -n baz
+		tmux new-window -t defacto -d -n profit
 
 	;;
 
