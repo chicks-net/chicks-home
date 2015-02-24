@@ -19,13 +19,62 @@ if ($interval) {
 
 sub print_results {
 	my ($summary) = @_;
+
+	my $when = $summary->{_timestamp};
+	delete $summary->{_timestamp};
+	my $udp = $summary->{'udp.*'};
+	delete $summary->{'udp.*'};
+
+	my $tcp_est = $summary->{'tcp.ESTABLISHED'} || 0;
+	delete $summary->{'tcp.ESTABLISHED'};
+	my $tcp_listen = $summary->{'tcp.LISTEN'} || 0;
+	delete $summary->{'tcp.LISTEN'};
+
+	my $tcp_syn_recv = $summary->{'tcp.SYN_RECV'} || 0;
+	delete $summary->{'tcp.SYN_RECV'};
+	my $tcp_syn_sent = $summary->{'tcp.SYN_SENT'} || 0;
+	delete $summary->{'tcp.SYN_SENT'};
+
+	my $tcp_fin_wait1 = $summary->{'tcp.FIN_WAIT1'} || 0;
+	delete $summary->{'tcp.FIN_WAIT1'};
+	my $tcp_fin_wait2 = $summary->{'tcp.FIN_WAIT2'} || 0;
+	delete $summary->{'tcp.FIN_WAIT2'};
+
+	my $tcp_time_wait = $summary->{'tcp.TIME_WAIT'} || 0;
+	delete $summary->{'tcp.TIME_WAIT'};
+	my $tcp_close_wait = $summary->{'tcp.CLOSE_WAIT'} || 0;
+	delete $summary->{'tcp.CLOSE_WAIT'};
+
+	my $tcp_last_ack = $summary->{'tcp.LAST_ACK'} || 0;
+	delete $summary->{'tcp.LAST_ACK'};
+
+	my @values = ($when,$udp, $tcp_est,$tcp_listen,
+			$tcp_syn_recv,$tcp_syn_sent,
+			$tcp_fin_wait1,$tcp_fin_wait2,
+			$tcp_time_wait,$tcp_close_wait,
+			$tcp_last_ack,
+	);
+	print join("\t",@values)."\t";
+	
 	my @keys = sort keys %$summary;
-	print join("\t",@keys)," \n";
-	print join("\t\t", map { $summary->{$_} } @keys ), "\n";
+#	print join("\t",@keys)," \n";
+	print join(", ", map { "${_}=" . $summary->{$_} } @keys ), "\n";
 }
 
+# tcp.EST == tcp ESTABLISHED
+# tcp.LIS == tcp LISTEN
+# tcp.SYR == tcp SYN_RECV
+# tcp.SYS == tcp SYN_SENT
+# tcp.FW1 == tcp FIN_WAIT1
+# tcp.FW2 == tcp FIN_WAIT2
+# tcp.TWT == tcp TIME_WAIT
+# tcp.CWT == tcp CLOSE_WAIT
+# tcp.LAK == tcp LAST_ACK
+
 sub print_headers {
-#	print "unimplemented\n";
+	my @headers = qw( when udp.* tcp.EST tcp.LIS tcp.SYR tcp.SYS tcp.FW1 tcp.FW2 tcp.TWT tcp.CWT tcp.LAK);
+	$headers[0] .= "\t";
+	print join("\t",@headers), "\n";
 }
 
 sub run_netstat {
@@ -39,11 +88,11 @@ sub run_netstat {
 		my ($proto, $recvq, $sendq, $a_local, $a_remote, $state) = 
 			split (/\s+/,$line);
 
-		if ($proto eq 'udp' and $state eq '') {
+		if ($proto eq 'udp') {
 			$state = '*';
 		}
 
-		$state = 'ESTAB' if $state eq 'ESTABLISHED';
+		#$state = 'ESTAB' if $state eq 'ESTABLISHED';
 
 		#print "$proto $state\n";
 		$summary{"$proto.$state"}++;

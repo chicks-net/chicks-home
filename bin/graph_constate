@@ -9,6 +9,7 @@ use DateTime;
 use Chart::Strip;
 use LWP::Simple qw( get );
 
+die "redo for new output format";
 my $raw_output = get('https://gist.githubusercontent.com/kacy/fa7ae1926c5fb8bd47f8/raw/e8457677d9525b266c567b58fccf51b50ac8225a/gistfile1.txt');
 
 my @raw_lines = split(/\n/,$raw_output);
