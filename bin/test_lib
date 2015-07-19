@@ -1,0 +1,10 @@
+#!/bin/bash
+
+. lib.sh
+
+run_10s &
+
+echo -n wait
+spinner $!
+
+echo -e "\rdone"
