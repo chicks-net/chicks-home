@@ -19,3 +19,7 @@
 
 [push]
 	default = simple
+
+[color]
+	diff = auto
+	ui = yes
