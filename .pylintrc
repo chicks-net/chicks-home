@@ -1,0 +1,12 @@
+[BASIC]
+const-rgx=[a-z_][a-z0-9_]{2,30}$
+
+[FORMAT]
+indent-string=\t
+
+# Maximum number of characters on a single line.
+max-line-length=100
+
+[REPORTS]
+# set the output format. Available formats are text, parseable, colorized and html
+output-format=colorized
