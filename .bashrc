@@ -46,7 +46,9 @@ else
 	PROMPT_COMMAND='echo -ne "\033]0;${USER}@${HOSTNAME}: ${PWD/$HOME/~}\007"'
 
 	# don't let leading spaces cause commands to be forgotten
-	set HISTCONTROL=ignoredups
+	export HISTCONTROL=ignoredups:erasedups  
+	# When the shell exits, append to the history file instead of overwriting it
+	shopt -s histappend
 
 	# bc needs defaults
 	export BC_ENV_ARGS=~/.bcrc
