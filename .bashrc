@@ -61,6 +61,10 @@ else
 		eval "$(perl -I$HOME/perl5/lib/perl5 -Mlocal::lib)"
 	fi
 
+	# debian packager
+	export DEBFULLNAME="Christopher Hicks"
+	export DEBEMAIL="chicks@uber.com"
+
 	check_packages
 	echo ""
 
