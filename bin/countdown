@@ -1,0 +1,30 @@
+#!/usr/bin/perl
+
+use strict;
+use warnings;
+
+my ($timeout) = @ARGV;
+die "no timeout provided" unless defined $timeout;
+
+while ($timeout > 0) {
+	my $minutes = int($timeout / 60);
+	my $seconds = $timeout - ($minutes * 60);
+
+	my $sleep_time = 0;
+	if ($minutes > 1) {
+		$sleep_time = 60;
+	} elsif ($minutes == 1) {
+		$sleep_time = $seconds || 10;
+	} elsif ($seconds < 11) {
+		$sleep_time = 2 + ($seconds % 2);
+	} elsif ($seconds < 20) {
+		$sleep_time = $seconds % 10;
+	} else {
+		$sleep_time = 10;
+	}
+
+	print scalar(localtime(time)), ": ${minutes}m${seconds}s left, sleeping $sleep_time seconds\n";
+	$timeout -= $sleep_time;
+	sleep($sleep_time);
+}
+		
