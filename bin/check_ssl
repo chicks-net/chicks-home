@@ -1,4 +1,5 @@
-for SITE in dev.sepi.fini.net:443 prod.ireserve.info:443
+SITES="${*:-dev.sepi.fini.net:443 prod.ireserve.info:443}"
+for SITE in $SITES
 do
 	echo $SITE:
 	echo | openssl s_client -connect $SITE 2>/dev/null | openssl x509 -noout -dates

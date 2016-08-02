@@ -19,6 +19,9 @@ This is also where a few of my scripts live that don't deserve their own repo:
 
 USAGE
 -----
+
+The first example shows using the function library and package installation features:
+
 	chicks@chickshp 09:32:10 chicks-home !224 $ . .functions 
 	chicks@chickshp 09:32:14 chicks-home !225 $ check_packages 
 	check_packages()...
@@ -45,6 +48,21 @@ USAGE
 	Setting up git-svn (1:1.8.1.2-1) ...
 	check done.
 	chicks@chickshp 09:32:33 chicks-home !227 $ 
+
+Here is using the `check_ssl` script:
+
+	chicks@waterpark $ ./check_ssl www.google.com:443
+	www.google.com:443:
+	notBefore=Jul 28 11:40:00 2016 GMT
+	notAfter=Oct 20 11:40:00 2016 GMT
+	chicks@waterpark $ ./check_ssl
+	dev.sepi.fini.net:443:
+	notBefore=Jun  5 22:00:00 2016 GMT
+	notAfter=Sep  3 22:00:00 2016 GMT
+	prod.ireserve.info:443:
+	notBefore=Apr 20 22:36:42 2014 GMT
+	notAfter=Aug  5 19:17:16 2016 GMT
+
 
 
 INSTALL
