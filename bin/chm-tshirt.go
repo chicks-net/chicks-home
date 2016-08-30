@@ -18,8 +18,8 @@ func main() {
 		if decimal, err := strconv.ParseInt(bin, 2, 64); err != nil {
 			fmt.Println(err)
 		} else {
-			letter := strconv.Itoa(int(decimal))
-			fmt.Println(bin, decimal, letter, string(decimal))
+			letter := string(decimal)
+			fmt.Println(bin, decimal, letter)
 		}
 	}
 }
