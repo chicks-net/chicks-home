@@ -204,14 +204,21 @@ function check_file_permissions {
 	fi
 
 	FILE=$1
-	DESIRED=$2
 
-	get_perm $FILE # set RETURN_PERM
-	ACTUAL=$RETURN_PERM
-
-	if [[ $ACTUAL != $DESIRED ]]
+	if [[ ! -e $FILE ]]
 	then
-		echo -e "\t$FILE has $ACTUAL permissions instead of desired $DESIRED"
+		echo -e "\tcheck_file_permissions($FILE): no such file"
+		return 2
+	else
+		DESIRED=$2
+
+		get_perm $FILE # set RETURN_PERM
+		ACTUAL=$RETURN_PERM
+
+		if [[ $ACTUAL != $DESIRED ]]
+		then
+			echo -e "\t$FILE has $ACTUAL permissions instead of desired $DESIRED"
+		fi
 	fi
 }
 
