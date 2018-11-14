@@ -1,0 +1,170 @@
+#!/usr/bin/perl
+
+use strict;
+use warnings;
+
+use Cwd            qw( cwd );
+use File::Basename qw( dirname );
+use IO::Prompt;
+use File::Slurp    qw( read_file edit_file );
+
+# find top of repo
+## print "starting in " . Cwd::cwd() . "\n";
+my $git_dir = find_git();
+print "git in $git_dir\n";
+chdir('..') or die "couldn't go up any more"; # back to top
+
+# is it a chef cookbook?
+my $metadata_rb = find_metadata($git_dir);
+
+# find current version
+my $cur_ver = find_version($metadata_rb);
+
+# prompt for ticket
+my $ticket = prompt_ticket();
+
+# prompt for one-liner for CHANGELOG
+my $oneliner = prompt_oneliner();
+
+# branch
+git_branch($ticket);
+
+# update metadata.rb/version
+my $new_ver = next_ver($metadata_rb,$cur_ver);
+
+# update CHANGELOG
+fix_changelog($git_dir,$cur_ver,$new_ver,$oneliner,$ticket);
+
+# fix git push  TODO
+
+sub find_git {
+	while (1) {
+		if (-d '.git') {
+			chdir('.git') or die "couldn't chdir(.git): $!";
+			return Cwd::cwd();
+		}
+
+		chdir('..') or die "couldn't go up any more";
+	}
+}
+
+sub find_metadata {
+	my($git_dir) = (@_);
+	my $metadata_rb = dirname($git_dir) . '/metadata.rb';
+	unless (-f $metadata_rb) {
+		die "this is not a chef repo because there is no $metadata_rb";
+	}
+	return $metadata_rb;
+}
+
+sub find_version {
+	my($metadata_rb) = (@_);
+
+	my @metadata_lines = read_file($metadata_rb);
+	my @version_lines = grep(/^version/, @metadata_lines);
+
+	my $count_versions = scalar(@version_lines);
+	if ($count_versions > 1) {
+		die "you have $count_versions versions (>1 is bad!)";
+	}
+
+	my $version = $version_lines[0]; # only one!
+	chomp($version);
+	$version =~ s/^version\s+//;
+	$version =~ s/'//g;
+
+	print "starting at version $version\n";
+	return $version;
+}
+
+sub prompt_ticket {
+	my $ticket;
+	while (prompt "ticket: ") {
+		if ( length $_ ) {
+			$ticket = $_;
+			last;
+		}
+		print "we need a ticket# to proceed\n";
+	}
+	return $ticket;
+}
+
+sub prompt_oneliner {
+	my $oneliner;
+	while (prompt "CHANGE LOG: ") {
+		if ( length $_ ) {
+			$oneliner = $_;
+			last;
+		}
+		print "we need a one-liner for the CHANGELOG to proceed\n";
+	}
+	return $oneliner;
+}
+
+sub git_branch {
+	my($branch) = (@_);
+
+	unless (git_branch_exists($branch)) {
+		system("git checkout -b $branch");
+		return;
+	}
+	my $start_branch = $branch;
+	my $branch_suffix = 'a';
+	$branch = $start_branch . $branch_suffix;
+	while (git_branch_exists($branch)) {
+		$branch_suffix++;
+		$branch = $start_branch . $branch_suffix;
+	}
+	system("git checkout -b $branch");
+}
+
+sub git_branch_exists {
+	my($branch) = (@_);
+
+	open(my $cmd,"git branch --list $branch |") or die "couldn't start git branch --list: $!";
+	my @lines = <$cmd>;
+	close($cmd);
+	return scalar(@lines); # count
+}
+
+sub next_ver {
+	my ($metadata_rb,$old_ver) = @_;
+
+	# sanity check
+	unless ($old_ver =~ /[.]/) {
+		die "what kind of version is $old_ver?";
+	}
+
+	# parse dotted version string and increment final octet
+	$old_ver =~ /[.](\d+)$/;
+	my $last_part = $1;
+	$last_part++;
+	my $new_ver = $old_ver;
+	$new_ver =~ s/[.](\d+)$/.$last_part/;
+	## print "ver=$old_ver last=$last_part new=$new_ver\n";
+
+	# update metadata.rb
+	edit_file {s/version [\d\'\.]+/version '$new_ver'/} $metadata_rb;
+	#print "tried to edit $metadata_rb\n";
+
+	return $new_ver;
+}
+
+sub fix_changelog {
+	my($git_dir,$old_ver,$new_ver,$oneliner,$ticket) = @_;
+
+	my $changelog = dirname($git_dir) . '/CHANGELOG.md';
+	die "no $changelog" unless -f $changelog;
+
+	# TODO: link to ticket
+	my $jira_base = 'https://engtools.gtl.net/jira/browse/';
+	my $ticket_link = $ticket;
+	$ticket_link =~ y/[a-z]/[A-Z]/; # caps
+	$ticket_link = $jira_base . $ticket_link;
+	$ticket = "[$ticket]($ticket_link)";
+	
+	my $new_blurb = "$new_ver\n--------\n* $oneliner for $ticket\n";
+
+	edit_file {s/$old_ver/$new_blurb\n$old_ver/} $changelog;
+	#print "tried to edit $changelog\n";
+}
