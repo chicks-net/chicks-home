@@ -1,17 +1,22 @@
 chicks-home
 ===========
 
-This project was begun to simplify my life for maintaining my home directory across numerous servers
-running different versions of Linux.
-It checks to make sure that useful packages are installed and makes it easy to install the missing ones.
-I am testing it on Mint and CentOS.  It works around the idiosyncracies of both so you get colorful
-prompts and `xterm`/window titles update with your home directory.
+[![Open Source Love png2](https://badges.frapsoft.com/os/v2/open-source.png?v=103)](https://github.com/ellerbrock/open-source-badges/)
+[![GPLv2 license](https://img.shields.io/badge/License-GPLv2-blue.svg)](https://github.com/chicks-net/fbdata-forensics/blob/master/LICENSE)
+[![Maintenance](https://img.shields.io/badge/Maintained%3F-yes-green.svg)](https://github.com/chicks-net/fbdata-forensics/graphs/commit-activity)
+
+This project was begun to simplify my life for maintaining my home
+directory across numerous servers running different versions of Linux.
+It checks to make sure that useful packages are installed and makes it
+easy to install the missing ones.  I am testing it on Mint and CentOS.  It works
+around the idiosyncracies of both so you get colorful prompts and `xterm`/window
+titles update with your home directory.
 
 This is also where a few of my scripts live that don't deserve their own repo:
 
 * `closefh` - when you don't want to inheret a file handle, close it
 * `roll` - a D&D-style dice roller.  This is critical infrastructure when the Magic 8-Ball (TM) is not available.
-* `ruler` - counting characters is silly, use a ruler
+* `ruler` - counting characters by hand is silly, use a ruler on the command line
 * `comify` - turn newlines into commas
 * `watch_constate` - watch network connection states ala `vmstat` or `iostat`
 * `github_fix_https` - make a repo cloned via `https` have ssh remotes
@@ -103,7 +108,9 @@ There are a few areas where work is in progress:
 SUPPORT
 -------
 
-Feel free to file [issues](https://github.com/chicks-net/chicks-home/issues) on github or send pull requests.
+Feel free to file [issues](https://github.com/chicks-net/chicks-home/issues) on
+github or send pull requests.
 
-I've started friendlier docs at http://chicks-net.github.io/chicks-home/ but since I have to maintain them in HTML instead of markdown they are being thoroughly neglected until I find a better workflow.
-
+I've started friendlier docs at http://chicks-net.github.io/chicks-home/ but
+since I have to maintain them in HTML instead of markdown they are being
+thoroughly neglected until I find a better workflow.
