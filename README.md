@@ -92,7 +92,6 @@ TODO
 ----
 
 * finish mysql backups scripts
-* choose/commit a LICENSE
 * find solution to git/permissions issues generally "would you trust it with /etc?"
 * integrate one of the cleaner ANSI color implementations
 
