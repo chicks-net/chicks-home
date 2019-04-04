@@ -63,7 +63,7 @@ else
 
 	# debian packager
 	export DEBFULLNAME="Christopher Hicks"
-	export DEBEMAIL="chicks@uber.com"
+	export DEBEMAIL="chicks@bastille.io"
 
 	check_packages
 	echo ""
