@@ -1,0 +1,11 @@
+#!/usr/bin/env bash
+
+GIT_BRANCH=$(git describe --contains --all HEAD)
+
+if [[ "$GIT_BRANCH" != "master" ]]; then
+	echo "pushing $GIT_BRANCH"
+	git push --set-upstream origin "$GIT_BRANCH"
+else
+	echo "pushing master would be bad, skipping"
+	exit 1
+fi
