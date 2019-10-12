@@ -1,0 +1,10 @@
+#!/bin/bash
+
+DEST=~/Documents/ScreenShots
+
+if [[ ! -d $DEST ]]; then
+	mkdir $DEST
+fi
+
+echo "moving to ${DEST}..."
+find ~/Desktop -name *.png -mtime +5 -exec mv {} $DEST \; -print
