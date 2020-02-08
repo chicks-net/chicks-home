@@ -1,0 +1,88 @@
+#!/usr/bin/env python3
+"""tim - like time(1) but with Slack notification"""
+
+# based on code from https://gist.github.com/quiver/4134221 (thanks!)
+# vim: set fileencoding=utf8
+
+# TODO: capture output
+# TODO: send to Slack
+
+import argparse
+import os
+import sys
+import time
+
+# thanks to https://stackoverflow.com/a/775075/2002471
+def hms(seconds):
+    m, s = divmod(seconds, 60)
+    h, m = divmod(m, 60)
+    return(h,m,s)
+
+def fmt_hms(seconds):
+    (h,m,s) = hms(seconds)
+
+    output = ''
+
+    if h:
+        output += "%dh" % (h)
+    if m:
+        output += "%dm" % (m)
+
+    output += "%06.3fs" % (s)
+    return(output)
+
+def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument('command', metavar='C',
+                        nargs='+', help='command to time')
+    args = parser.parse_args()
+
+    start  = time.time()
+
+    pgid = os.getpgrp()
+    pid = os.fork()
+    if pid < 0:
+        sys.exit(-1)
+    elif pid == 0: # child
+        print('forked PID %d for %s' % (os.getpid(), " ".join(args.command)))
+        executable = args.command[0]
+        os.execvp(executable,args.command)
+    else: # parent
+        os.setpgid(pid, pgid)
+
+    options = os.WUNTRACED | os.WCONTINUED
+    while True:
+        try:
+            pid, status, resource = os.wait3(options) # reap any child process
+            #print(pid, resource)
+            end = time.time()
+            duration = end - start
+
+            # see https://docs.python.org/3/library/resource.html#resource-usage for magic numbers
+            print("real   %s" % (fmt_hms(duration)))
+            print("user   %s" % (fmt_hms(resource[0])))
+            print("system %s" % (fmt_hms(resource[1])))
+            print("maxrss %d" % (resource[2]))
+            print("minflt %d" % (resource[6]))
+            print("maxflt %d" % (resource[7]))
+
+            how = ""
+            if status == -1:
+                sys.stderr('waitpid')
+                sys.exit(1)
+            elif os.WIFEXITED(status):
+                how = 'WIFEXITED'
+            elif os.WIFSTOPPED(status):
+                how = 'WIFSTOPPED'
+            elif os.WIFCONTINUED(status):
+                how = 'WIFCONTINUED'
+
+            print("status %i, %s" % (status, how))
+        except OSError:
+            # [Errno 10] No child processes
+            break
+        except err:
+            break
+
+if __name__ == '__main__':
+    main()
