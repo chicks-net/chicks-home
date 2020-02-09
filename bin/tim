@@ -8,9 +8,35 @@
 # TODO: send to Slack
 
 import argparse
+import logging
+import logging.handlers
 import os
 import sys
 import time
+
+def configure_logging():
+    logger = logging.getLogger('tim')
+    logger.setLevel(logging.DEBUG)
+
+    # create syslog handler
+    sl = logging.handlers.SysLogHandler(address="/dev/log") # wtf does address mean?
+
+    # create console handler with a lower log level
+    ch = logging.StreamHandler()
+    ch.setLevel(logging.DEBUG)
+
+    # create formatter and add it to the handlers
+    ch_formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(module)s.%(funcName)s - %(message)s')
+    ch.setFormatter(ch_formatter)
+
+    sl_formatter = logging.Formatter('%(name)s[]: %(module)s.%(funcName)s - %(message)s')
+    sl.setFormatter(sl_formatter)
+
+    # add the handlers to the logger
+    logger.addHandler(ch)
+    logger.addHandler(sl)
+
+    return logger
 
 # thanks to https://stackoverflow.com/a/775075/2002471
 def hms(seconds):
@@ -32,11 +58,13 @@ def fmt_hms(seconds):
     return(output)
 
 def main():
+    # parse command line arguments
     parser = argparse.ArgumentParser()
     parser.add_argument('command', metavar='C',
                         nargs='+', help='command to time')
     args = parser.parse_args()
 
+    log = configure_logging()
     start  = time.time()
 
     pgid = os.getpgrp()
@@ -44,7 +72,7 @@ def main():
     if pid < 0:
         sys.exit(-1)
     elif pid == 0: # child
-        print('forked PID %d for %s' % (os.getpid(), " ".join(args.command)))
+        log.info('forked PID %d for %s' % (os.getpid(), " ".join(args.command)))
         executable = args.command[0]
         os.execvp(executable,args.command)
     else: # parent
@@ -54,17 +82,17 @@ def main():
     while True:
         try:
             pid, status, resource = os.wait3(options) # reap any child process
-            #print(pid, resource)
+            log.debug("%s %s" % (pid, resource))
             end = time.time()
             duration = end - start
 
             # see https://docs.python.org/3/library/resource.html#resource-usage for magic numbers
-            print("real   %s" % (fmt_hms(duration)))
-            print("user   %s" % (fmt_hms(resource[0])))
-            print("system %s" % (fmt_hms(resource[1])))
-            print("maxrss %d" % (resource[2]))
-            print("minflt %d" % (resource[6]))
-            print("maxflt %d" % (resource[7]))
+            log.info("real   %s" % (fmt_hms(duration)))
+            log.info("user   %s" % (fmt_hms(resource[0])))
+            log.info("system %s" % (fmt_hms(resource[1])))
+            log.info("maxrss %d" % (resource[2]))
+            log.info("minflt %d" % (resource[6]))
+            log.info("maxflt %d" % (resource[7]))
 
             how = ""
             if status == -1:
@@ -77,7 +105,7 @@ def main():
             elif os.WIFCONTINUED(status):
                 how = 'WIFCONTINUED'
 
-            print("status %i, %s" % (status, how))
+            log.info("status %i, %s" % (status, how))
         except OSError:
             # [Errno 10] No child processes
             break
