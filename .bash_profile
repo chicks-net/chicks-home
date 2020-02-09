@@ -6,7 +6,7 @@ if [ -f ~/.bashrc ]; then
 fi
 
 # User specific environment and startup programs
-export PATH=$PATH:$HOME/bin:/sbin:/usr/sbin
+export PATH=$PATH:$HOME/bin:/sbin:/usr/sbin:$HOME/.local/bin
 
 
 # cpanminus local::lib
