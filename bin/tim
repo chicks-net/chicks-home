@@ -11,6 +11,7 @@ import argparse
 import logging
 import logging.handlers
 import os
+import platform
 import sys
 import time
 
@@ -19,7 +20,10 @@ def configure_logging():
     logger.setLevel(logging.DEBUG)
 
     # create syslog handler
-    sl = logging.handlers.SysLogHandler(address="/dev/log") # wtf does address mean?
+    syslog_address = "/dev/log"
+    if platform.system() == "Darwin":
+        syslog_address="/var/run/syslog"
+    sl = logging.handlers.SysLogHandler(address=syslog_address)
 
     # create console handler with a lower log level
     ch = logging.StreamHandler()
