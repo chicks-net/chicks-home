@@ -12,12 +12,37 @@ import logging
 import logging.handlers
 import os
 import platform
+import pkg_resources
 import sys
 import time
 
 def configure_logging():
     logger = logging.getLogger('tim')
     logger.setLevel(logging.DEBUG)
+
+    # try to include Slack logging
+    installed = {pkg.key for pkg in pkg_resources.working_set}
+    slack_handler = None
+    if not "slack-log-handler" in installed:
+        print("No Slack for you")
+    else:
+        from slack_log_handler import SlackLogHandler
+
+        # Create slack handler
+        slack_token = os.getenv("SLACK_TOKEN")
+        #slack_channel = os.getenv("SLACK_CHANNEL")
+
+        if slack_token is None:
+            print("Please define SLACK_TOKEN in your environment.")
+        else:
+            slack_handler = SlackLogHandler(slack_token)
+
+            # LOG MESSAGE FORMATTER
+            slack_formatter = logging.Formatter('%(name)s - %(levelname)s - `%(message)s`')
+            slack_handler.setFormatter(slack_formatter)
+
+            # Define the minimum level of log messages you want to send to Slack
+            slack_handler.setLevel(logging.DEBUG)
 
     # create syslog handler
     syslog_address = "/dev/log"
@@ -39,6 +64,8 @@ def configure_logging():
     # add the handlers to the logger
     logger.addHandler(ch)
     logger.addHandler(sl)
+    if not slack_handler is None:
+        logger.addHandler(slack_handler)
 
     return logger
 
@@ -113,8 +140,8 @@ def main():
         except OSError:
             # [Errno 10] No child processes
             break
-        except err:
-            break
+#        except err:
+#            break
 
 if __name__ == '__main__':
     main()
