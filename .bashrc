@@ -39,7 +39,10 @@ else
 	if [[ ${EUID} == 0 ]] ; then
 		PS1='${debian_chroot:+($debian_chroot)}\[\e[01;31m\]\h\[\e[01;35m\] \t \[\e[01;36m\]\W \[\e[01;34m\]!\! \$\[\e[00m\] '
 	else
-		PS1='${debian_chroot:+($debian_chroot)}\[\e[01;32m\]\u@\h\[\e[35;1m\] \t \[\e[01;36m\]\W\[\e[01;31m\]$(__git_ps1 " (%s)") \[\e[01;34m\]!\! \$\[\e[00m\] '
+		#PS1='${debian_chroot:+($debian_chroot)}\[\e[01;32m\]\u@\h\[\e[35;1m\] \t \[\e[01;36m\]\W\[\e[01;31m\]$(__git_ps1 " (%s)") \[\e[01;34m\]!\! \$\[\e[00m\] '
+		# green prompt, bold black command
+		PS1="\[\e[32m\]\u@\h \t \W \\$\[\e[0;30;1m\] "
+		PS0="\[$(tput sgr0)\]"
 	fi
 
 	# fix xterm titles
