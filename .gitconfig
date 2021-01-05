@@ -7,6 +7,7 @@
 	excludesfile = /home/chicks/.gitignore_global
 
 [alias]
+	ack = ! git ls-files $GIT_PREFIX | ack -x
 	co = checkout
 	ci = commit
 	st = status
