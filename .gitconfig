@@ -9,7 +9,9 @@
 [alias]
 	ack = ! git ls-files $GIT_PREFIX | ack -x
 	co = checkout
+	pushup = ! git push -u origin HEAD
 	ci = commit
+	cim = commit -m
 	st = status
 	stp = status --porcelain
 	br = branch
