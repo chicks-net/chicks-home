@@ -1,0 +1,53 @@
+#!/usr/bin/env bash
+
+check_stdin_pipe() {
+	if [[ -t 0 ]]; then
+		echo "You're supposed to be piping something into this."
+		exit 1
+	fi
+}
+
+check_stdin_pipe
+
+check_macos() {                                                                   
+        if [[ $(uname) != "Darwin" ]]; then
+                echo You are on $(uname), not MacOS/Darwin, so this script will not work for you.  Exiting.
+                exit 2
+        fi         
+}
+
+check_macos
+
+tmpfile=$(mktemp /tmp/tf-gh-clip.XXXX)
+cat > "$tmpfile"
+
+summary="REPLACE SUMMARY"
+if grep Plan: "$tmpfile" > /dev/null; then
+	summary=$(grep Plan: "$tmpfile")
+	perform_line=$(( $(grep -n 'Terraform will perform' "$tmpfile" | sed -e 's/:.*$//') -1 ))
+	plan_line=$(( $(grep -n 'Plan:' "$tmpfile" | sed -e 's/:.*$//') +1 ))
+	# echo "lines: ${perform_line}-${plan_line}"
+fi
+
+(
+	echo "${1:-introduction...}"
+	echo ''
+
+	echo '<details>'
+	echo "<summary>$summary</summary>"
+	echo ''
+
+	echo '```'
+	if grep Plan: "$tmpfile" > /dev/null; then
+		# get rid of extaneous bits
+		cat "$tmpfile" | sed -e "1,${perform_line}d" -e "${plan_line},\$d"
+	else
+		cat "$tmpfile"
+	fi
+	echo '```'
+	echo ''
+
+	echo '</details>'
+) | pbcopy
+
+rm "$tmpfile"
