@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+# tf-gh-clip takes one argument which will be inserted before the details block to explain what it is for.
+
 check_stdin_pipe() {
 	if [[ -t 0 ]]; then
 		echo "You're supposed to be piping something into this."
