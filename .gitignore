@@ -48,6 +48,7 @@ pm_to_blib
 ###		vim
 #/.vim/
 /.viminfo
+*.sw[a-p]
 
 ###		games
 /.steam*
