@@ -3,6 +3,7 @@
 	email = chicks.net@gmail.com
 [core]
 	autocrlf = input
+;	autocrlf = false
 	safecrlf = true
 	excludesfile = /home/chicks/.gitignore_global
 
