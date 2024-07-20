@@ -87,6 +87,7 @@ pm_to_blib
 /.adobe/
 /.java/
 /Ubuntu One/
+.DS_Store
 
 ###		random ????
 .local/
