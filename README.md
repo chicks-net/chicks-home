@@ -73,7 +73,11 @@ Here is using the `check_ssl` script:
 INSTALL
 -------
 
-Via [ansible](https://github.com/chicks-net/fini-ansible) or shell commands:
+Typically I clone the repo and setup symlinks these days.
+I'm open to ideas for doing this better.
+I might be working ways to automate this myself.
+
+Via shell commands:
 
 	adduser chicks
 	cd /home
@@ -87,6 +91,7 @@ Via [ansible](https://github.com/chicks-net/fini-ansible) or shell commands:
 	# keygen for chicks, add to github and authorized_keys
 	# download dnetc
 
+We used to support ansible as an option, but gave up because we don't trust IBM/Red Hat anymore.
 
 TODO
 ----
@@ -110,6 +115,7 @@ SUPPORT
 Feel free to file [issues](https://github.com/chicks-net/chicks-home/issues) on
 github or send pull requests.
 
-I've started friendlier docs at http://chicks-net.github.io/chicks-home/ but
-since I have to maintain them in HTML instead of markdown they are being
-thoroughly neglected until I find a better workflow.
+I started friendlier docs at http://chicks-net.github.io/chicks-home/ but
+since I have to maintain them in HTML instead of Markdown they have been
+thoroughly neglected.  Since I got hugo working for a couple of sites I
+will eventually go in that direction for documenting this repo.
