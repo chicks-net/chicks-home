@@ -1,0 +1,18 @@
+alias:
+  - name: hello-world
+    value: echo "hello world"
+    type: function
+  #  - name: a
+  #    value: aliae
+env:
+  - name: BC_ENV_ARGS
+    value: ~/.bcrc
+path:
+  - value: |
+      /opt/homebrew/bin/
+      /opt/homebrew/sbin/
+    if: match .OS "darwin"
+  - value: |
+      {{ .Home }}/.local/bin
+      /usr/local/bin/
+      {{ .Home }}/go/bin/
