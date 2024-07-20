@@ -79,7 +79,7 @@ function check_packages {
 	#
 	# UPDATE PACKAGE LISTS HERE
 	#
-	UNIVERSAL_PKGS="mtr screen tmux perl bash curl wget ansible git git-svn"
+	UNIVERSAL_PKGS="mtr screen tmux perl bash curl wget git git-svn"
 	RPM_PKGS="vim-enhanced pcre jwhois"
 	DEB_PKGS="vim pcregrep whois libdatetime-perl"
 	# mailutils would be nice but it installs server shit
