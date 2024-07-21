@@ -1,18 +1,25 @@
 alias:
-  - name: hello-world
-    value: echo "hello world"
-    type: function
-  #  - name: a
-  #    value: aliae
+  - name: mtr
+    value: sudo mtr -w --curses
+  - name: grep
+    value: grep --colour=auto
+  - name: humanpath
+    value: echo $PATH | sed 's/:/\n/g'
+  - name: ls
+    value: ls --color=auto
 env:
   - name: BC_ENV_ARGS
     value: ~/.bcrc
 path:
   - value: |
-      /opt/homebrew/bin/
-      /opt/homebrew/sbin/
+      /opt/homebrew/bin
+      /opt/homebrew/sbin
     if: match .OS "darwin"
   - value: |
       {{ .Home }}/.local/bin
-      /usr/local/bin/
-      {{ .Home }}/go/bin/
+      /usr/local/bin
+      {{ .Home }}/go/bin
+script:
+  - value: |
+      echo "yolo"
+      w
