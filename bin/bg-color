@@ -15,4 +15,4 @@ getTermRGB() {
 	done
 }
 getTermRGB cTcolors
-declare  -p ${!cTcolors*}
+declare -p ${!cTcolors*}
