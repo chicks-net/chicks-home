@@ -15,6 +15,7 @@
 	cim = commit -m
 	st = status
 	stp = status --porcelain
+	dc = diff --cached
 	br = branch
 	hist = log --graph --pretty=format:\"%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset\" --abbrev-commit
 	hh = hist -n 15

@@ -1,0 +1,21 @@
+#!/usr/bin/env bash
+
+# from https://stackoverflow.com/a/79484191/2002471
+
+# takes argument of what to name the variables
+getTermRGB() {
+	local _array _string _fb=(F B) _i
+	for _i in 0 1; do
+		printf -v _string '\e]1%d;?\e\\' $_i
+		IFS= read -d \\ -srp "$_string" _string
+		IFS=$'\e/' read -ra _array <<<"${_string#*:}"
+		read -ra _array <<<"${_array[*]%??}"
+		printf -v _string '%d ' "${_array[@]/#/0x}"
+		read -r "${1:-TERM}_${_fb[_i]}"g_{Red,Gre,Blu} <<<"$_string"
+	done
+}
+
+getTermRGB cTcolors
+
+# shellcheck disable=SC2086 # irrelevant because it breaks with double quotes
+declare -p ${!cTcolors*}
