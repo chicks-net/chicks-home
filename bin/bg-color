@@ -15,4 +15,5 @@ getTermRGB() {
 	done
 }
 getTermRGB cTcolors
+# shellcheck disable=SC2086 # irrelevant because it breaks with double quotes
 declare -p ${!cTcolors*}
