@@ -2,7 +2,7 @@
 
 # from https://stackoverflow.com/a/79484191/2002471
 
-
+# takes argument of what to name the variables
 getTermRGB() {
 	local _array _string _fb=(F B) _i
 	for _i in 0 1; do
@@ -14,6 +14,8 @@ getTermRGB() {
 		read -r "${1:-TERM}_${_fb[_i]}"g_{Red,Gre,Blu} <<<"$_string"
 	done
 }
+
 getTermRGB cTcolors
+
 # shellcheck disable=SC2086 # irrelevant because it breaks with double quotes
 declare -p ${!cTcolors*}
