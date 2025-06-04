@@ -1,0 +1,1 @@
+just -d . -f ~/Documents/git/template-repo/justfile compliance_check
