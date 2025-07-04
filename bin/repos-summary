@@ -1,0 +1,39 @@
+#!/usr/bin/env bash
+
+# TODO: strict mode
+
+function carp {
+	echo "carp $1"
+	exit 2
+}
+
+gitdir=~/Documents/git
+cd "$gitdir" || carp "failed to chdir; $!"
+
+#ls -ltr
+#echo "code faster..."
+
+for dir in $( find . -type d -mindepth 1 -maxdepth 1 -print | sort )
+do
+	echo "dir=$dir"
+
+	if [[ -d "$dir/.git" ]]; then
+		#echo "  - looks like a git repo"
+
+		branch=$(cd "$dir" || exit; git branch --show-current)
+
+		if [[ "$branch" == "master" ]]; then
+			echo "  - on branch '$branch' (deprecated default branch name)"
+		else
+			echo "  - on branch '$branch'"
+		fi
+
+		untracked_files=$(cd "$dir" || exit; git status --porcelain | wc -l | sed -e 's/^[ ]*//')
+		if [[ "$untracked_files" -gt 0 ]]; then
+			echo "  - $untracked_files untracked or modified files"
+		fi
+	else
+		# shellcheck disable=SC2012
+		ls -l "$dir" | sed -e 's/^/	/'
+	fi
+done
