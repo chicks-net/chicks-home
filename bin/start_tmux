@@ -1,27 +1,47 @@
 #!/bin/bash
 
+function our_new_session {
+	SESSION_NAME="${1:-default}"
+	echo "generating tmux session '$SESSION_NAME' on host '`hostname`'"
+	tmux new-session -s "$SESSION_NAME" -n bc -d
+	# thanks to https://stackoverflow.com/a/64037405/2002471
+	tmux send-keys -t "$SESSION_NAME" "bc" Enter
+}
+
+function our_new_window {
+	SESSION_NAME="${1:-default}"
+	WINDOW_NAME="${2:-name}"
+
+	if [[ -n "$3" ]]; then
+		DIRECTORY="$3"
+		tmux new-window -t "$SESSION_NAME" -d -n "$WINDOW_NAME" -c "$DIRECTORY"
+	else
+		tmux new-window -t "$SESSION_NAME" -d -n "$WINDOW_NAME"
+	fi
+}
+
+function our_attach {
+	SESSION_NAME="${1:-default}"
+	tmux attach -t "$SESSION_NAME"
+}
+
 case `hostname` in
 
-	waterpark* )
-
-		# root
-		tmux new-session -s wtrprk -n root -d "sudo top"
-		tmux split-window -t wtrprk:root "sudo bash"
-
-		# Personal
-		tmux new-window -t wtrprk -d -n Personal -c /home/chicks/Documents/dnetc
-		tmux split-window -t wtrprk:Personal -c /home/chicks/Documents/personal
-
-		# git
-		tmux new-window -t wtrprk -d -n git -c /home/chicks/Documents/git
-
-		# connect to it
-		tmux attach -t wtrprk
+	freshfruit* )
+		our_new_session fruity
+		our_new_window fruity www-chicks ~/Documents/git/www-chicks-net
+		our_new_window fruity www-fini ~/Documents/git/www-fini-net
+		our_new_window fruity Downloads ~/Downloads
+		our_new_window fruity mans ~/LocalDocuments/git/my-user-manuals
+		our_new_window fruity iReserve
+		our_new_window fruity coredns ~/Documents/git/fini-coredns-example
+		our_new_window fruity other ~/Documents/git/
+		our_attach fruity
 
 	;;
 
 	hellonurse.* )
-		tmux new-session -s hellonurse -n logs -d "sudo bash"
+		tmux new-session -s hellonurse -n logs -d "bc"
 		sleep 1
 		tmux new-window -t hellonurse -d -n dnetc -c /home/chicks/Documents/dnetc -d "./dnetc"
 		tmux new-window -t hellonurse -d -n dnetc_meta -c /home/chicks/Documents/dnetc
@@ -30,20 +50,30 @@ case `hostname` in
 	;;
 
 	c64.* )
-		tmux new-session -s c64 -n root -d "sudo bash"
+		tmux new-session -s c64 -n bc -d "bc"
 		tmux new-window -t c64 -d -n dnetc_proxy #-c /home/chicks/Documents/git/fini-dnet-proxy
 		tmux new-window -t c64 -d -n dnetc #-c /home/chicks/Documents/dnetc
 		tmux attach -t c64
 	;;
 
+	efba* )
+		our_new_session podman
+		our_new_window podman foo /etc
+		our_new_window podman bar /chicksbin
+		our_new_window podman baz /root
+		our_new_window podman profit /proc
+		our_attach podman
+
+	;;
+
 	* )
-		echo there should a default here
-		tmux new-session -s defacto -n root -d "sudo bash"
-		tmux new-window -t defacto -d -n foo
-		tmux new-window -t defacto -d -n bar
-		tmux new-window -t defacto -d -n baz
-		tmux new-window -t defacto -d -n profit
-		tmux attach -t defacto
+		echo generating default tmux session...
+		our_new_session defacto
+		our_new_window defacto foo
+		our_new_window defacto bar
+		our_new_window defacto baz
+		our_new_window defacto profit
+		our_attach defacto
 
 	;;
 
