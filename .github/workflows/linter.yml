@@ -21,7 +21,7 @@ on:
   pull_request:
     branches: [master]
 
-permissions: read-all
+#permissions: read-all
 
 ###############
 # Set the Job #
@@ -32,6 +32,12 @@ jobs:
     name: Lint Code Base
     # Set the agent to run on
     runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+      packages: read
+      # To report GitHub Actions status checks
+      statuses: write
 
     ##################
     # Load all steps #
