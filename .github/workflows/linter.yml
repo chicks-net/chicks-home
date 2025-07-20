@@ -21,7 +21,7 @@ on:
   pull_request:
     branches: [master]
 
-#permissions: read-all
+permissions: read-all
 
 ###############
 # Set the Job #
