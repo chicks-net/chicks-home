@@ -2,7 +2,7 @@
 
 function our_new_session {
 	SESSION_NAME="${1:-default}"
-	echo "generating tmux session '$SESSION_NAME' on host '`hostname`'"
+	echo "generating tmux session '$SESSION_NAME' on host '$(hostname)'"
 	tmux new-session -s "$SESSION_NAME" -n bc -d
 	# thanks to https://stackoverflow.com/a/64037405/2002471
 	tmux send-keys -t "$SESSION_NAME" "bc" Enter
@@ -25,9 +25,9 @@ function our_attach {
 	tmux attach -t "$SESSION_NAME"
 }
 
-case `hostname` in
+case $(hostname) in
 
-	freshfruit* )
+	freshfruit*)
 		our_new_session fruity
 		our_new_window fruity www-chicks ~/Documents/git/www-chicks-net
 		our_new_window fruity www-fini ~/Documents/git/www-fini-net
@@ -38,25 +38,26 @@ case `hostname` in
 		our_new_window fruity other ~/Documents/git/
 		our_attach fruity
 
-	;;
+		;;
 
-	hellonurse.* )
-		tmux new-session -s hellonurse -n logs -d "bc"
+	hellonurse.*)
+		our_new_session hellonurse
 		sleep 1
-		tmux new-window -t hellonurse -d -n dnetc -c /home/chicks/Documents/dnetc -d "./dnetc"
-		tmux new-window -t hellonurse -d -n dnetc_meta -c /home/chicks/Documents/dnetc
-		#tmux new-window -t hellonurse -d -n logs -c /var/log -d "tail -f /var/log/messages"
-		tmux attach -t hellonurse
-	;;
+		our_new_window hellonurse logs /var/logs
+		our_new_window hellonurse dnetc /home/chicks/Documents/dnetc
+		our_new_window hellonurse dnetc_meta /home/chicks/Documents/dnetc
+		our_attach hellonurse
 
-	c64.* )
+		;;
+
+	c64.*)
 		tmux new-session -s c64 -n bc -d "bc"
 		tmux new-window -t c64 -d -n dnetc_proxy #-c /home/chicks/Documents/git/fini-dnet-proxy
-		tmux new-window -t c64 -d -n dnetc #-c /home/chicks/Documents/dnetc
+		tmux new-window -t c64 -d -n dnetc       #-c /home/chicks/Documents/dnetc
 		tmux attach -t c64
-	;;
+		;;
 
-	efba* )
+	efba*)
 		our_new_session podman
 		our_new_window podman foo /etc
 		our_new_window podman bar /chicksbin
@@ -64,9 +65,9 @@ case `hostname` in
 		our_new_window podman profit /proc
 		our_attach podman
 
-	;;
+		;;
 
-	* )
+	*)
 		echo generating default tmux session...
 		our_new_session defacto
 		our_new_window defacto foo
@@ -75,6 +76,6 @@ case `hostname` in
 		our_new_window defacto profit
 		our_attach defacto
 
-	;;
+		;;
 
 esac
