@@ -2,7 +2,7 @@
 
 function our_new_session {
 	SESSION_NAME="${1:-default}"
-	echo "generating tmux session '$SESSION_NAME' on host '`hostname`'"
+	echo "generating tmux session '$SESSION_NAME' on host '$(hostname)'"
 	tmux new-session -s "$SESSION_NAME" -n bc -d
 	# thanks to https://stackoverflow.com/a/64037405/2002471
 	tmux send-keys -t "$SESSION_NAME" "bc" Enter
