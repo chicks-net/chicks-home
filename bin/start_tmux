@@ -41,12 +41,13 @@ case `hostname` in
 	;;
 
 	hellonurse.* )
-		tmux new-session -s hellonurse -n logs -d "bc"
+		our_new_session hellonurse
 		sleep 1
-		tmux new-window -t hellonurse -d -n dnetc -c /home/chicks/Documents/dnetc -d "./dnetc"
-		tmux new-window -t hellonurse -d -n dnetc_meta -c /home/chicks/Documents/dnetc
-		#tmux new-window -t hellonurse -d -n logs -c /var/log -d "tail -f /var/log/messages"
-		tmux attach -t hellonurse
+		our_new_window hellonurse logs /var/logs
+		our_new_window hellonurse dnetc /home/chicks/Documents/dnetc
+		our_new_window hellonurse dnetc_meta /home/chicks/Documents/dnetc
+		our_attach hellonurse
+
 	;;
 
 	c64.* )
