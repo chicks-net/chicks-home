@@ -25,7 +25,7 @@ function our_attach {
 	tmux attach -t "$SESSION_NAME"
 }
 
-case `hostname` in
+case $(hostname) in
 
 	freshfruit* )
 		our_new_session fruity
