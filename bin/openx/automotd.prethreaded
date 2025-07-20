@@ -14,7 +14,7 @@ use File::Copy;
 use Data::Dumper;
 
 sub program_description { 
-  "Display host info and generate motd files"
+	"Display host info and generate motd files"
 }
 
 # config
