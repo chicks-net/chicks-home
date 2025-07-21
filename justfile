@@ -47,6 +47,14 @@ pr: _on_a_branch
     gh pr create --title "{{ last_commit_message }}" --body-file "$bodyfile"
     rm "$bodyfile"
 
+    just watch_checks
+
+# watch PR checks
+[group('Process')]
+watch_checks: _on_a_branch
+    #!/usr/bin/env bash
+    set -euo pipefail # strict mode
+
     if [[ ! -e ".github/workflows" ]]; then
         echo "{{BLUE}}there are no workflows in this repo so there are no PR checks to watch{{NORMAL}}"
         exit 0
@@ -105,44 +113,6 @@ _main_branch:
 [no-cd]
 @utcdate:
     TZ=UTC date +"%Y-%m-%d"
-
-# generate a clean README
-[group('Utility')]
-[no-cd]
-clean_readme:
-    #!/usr/bin/env bash
-    set -euo pipefail # strict mode without tracing
-
-    GIT_ORIGIN=$(git config --get remote.origin.url | sed -e 's/^.*://' -e 's/[.]git$//')
-    #echo "$GIT_ORIGIN"
-
-    GITHUB_ORG=$(echo "$GIT_ORIGIN" | sed -e 's/[/].*$//')
-    echo "org={{BLUE}}$GITHUB_ORG{{NORMAL}}"
-
-    GITHUB_REPO=$(echo "$GIT_ORIGIN" | sed -e 's/^.*[/]//')
-    echo "repo={{BLUE}}$GITHUB_REPO{{NORMAL}}"
-
-    cat > README.md << END_OF_HEREDOC
-    # FINI template-repo
-
-    ![GitHub Issues](https://img.shields.io/github/issues/${GITHUB_ORG}/${GITHUB_REPO})
-    ![GitHub Pull Requests](https://img.shields.io/github/issues-pr/${GITHUB_ORG}/${GITHUB_REPO})
-    ![GitHub License](https://img.shields.io/github/license/${GITHUB_ORG}/${GITHUB_REPO})
-    ![GitHub watchers](https://img.shields.io/github/watchers/${GITHUB_ORG}/${GITHUB_REPO})
-
-    A good starting place for new github repos.
-
-    ## Contibuting
-
-    - [Code of Conduct](.github/CODE_OF_CONDUCT.md)
-    - [Contributing Guide](.github/CONTRIBUTING.md) includes a step-by-step guide to our
-      [development processs](.github/CONTRIBUTING.md#development-process).
-
-    ## Support
-
-    - [Getting Support](.github/SUPPORT.md)
-    - [Security](.github/SECURITY.md)
-    END_OF_HEREDOC
 
 # our own compliance check
 [group('Compliance')]
