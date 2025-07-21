@@ -91,8 +91,8 @@ _on_a_branch:
     # thanks to https://stackoverflow.com/a/12142066/2002471
 
     if [[ $(git rev-parse --abbrev-ref HEAD) == "{{ release_branch }}" ]]; then
-      echo "{{RED}}You are on branch '{{ release_branch }}' (the release branch) so you are not ready to start a PR.{{NORMAL}}"
-      exit 100
+        echo "{{RED}}You are on branch '{{ release_branch }}' (the release branch) so you are not ready to start a PR.{{NORMAL}}"
+        exit 100
     fi
 
 # error if not on the release branch
@@ -104,8 +104,8 @@ _main_branch:
     # thanks to https://stackoverflow.com/a/12142066/2002471
 
     if [[ ! $(git rev-parse --abbrev-ref HEAD) == "{{ release_branch }}" ]]; then
-      echo "You are on a branch that is not the release branch so you are not ready to start a new branch."
-      exit 100
+        echo "You are on a branch that is not the release branch so you are not ready to start a new branch."
+        exit 100
     fi
 
 # print UTC date in ISO format
@@ -200,7 +200,7 @@ compliance_check:
 # make a release
 [group('Process')]
 release rel_version:
-   gh release create {{rel_version}} --generate-notes
+    gh release create {{rel_version}} --generate-notes
 
 # thanks to https://apple.stackexchange.com/a/230447/210526
 # merge PDFs
