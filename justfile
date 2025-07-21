@@ -10,8 +10,8 @@ last_commit_message := `git log -1 --pretty=%B | grep '.'`
 # list recipes (default works without naming it)
 [group('example')]
 list:
-	just --list
-	@echo "{{GREEN}}Your justfile is waiting for more scripts and snippets{{NORMAL}}"
+    just --list
+    @echo "{{GREEN}}Your justfile is waiting for more scripts and snippets{{NORMAL}}"
 
 # escape from branch, back to starting point
 [group('Process')]
@@ -207,5 +207,5 @@ release rel_version:
 [no-cd, macos]
 [group('Utility')]
 mergepdf dest_file *src_files:
-	"/System/Library/Automator/Combine PDF Pages.action/Contents/MacOS/join" -o {{dest_file}} {{src_files}}
+    "/System/Library/Automator/Combine PDF Pages.action/Contents/MacOS/join" -o {{dest_file}} {{src_files}}
 
