@@ -27,46 +27,50 @@ USAGE
 
 The first example shows using the function library and package installation features:
 
-	chicks@chickshp 09:32:10 chicks-home !224 $ . .functions 
-	chicks@chickshp 09:32:14 chicks-home !225 $ check_packages 
-	check_packages()...
-		git-svn is not installed
-		# sudo apt-get install  git-svn
-	check done.
-	chicks@chickshp 09:32:19 chicks-home !226 $ check_packages -i
-	check_packages(-i)...
-		git-svn is not installed
-	Reading package lists... Done
-	Building dependency tree       
-	Reading state information... Done
-	Suggested packages:
-	  subversion
-	The following NEW packages will be installed:
-	  git-svn
-	0 upgraded, 1 newly installed, 0 to remove and 137 not upgraded.
-	Need to get 0 B/42.3 kB of archives.
-	After this operation, 612 kB of additional disk space will be used.
-	Selecting previously unselected package git-svn.
-	(Reading database ... 246615 files and directories currently installed.)
-	Unpacking git-svn (from .../git-svn_1%3a1.8.1.2-1_all.deb) ...
-	Processing triggers for man-db ...
-	Setting up git-svn (1:1.8.1.2-1) ...
-	check done.
-	chicks@chickshp 09:32:33 chicks-home !227 $ 
+```ShellSession
+chicks@chickshp 09:32:10 chicks-home !224 $ . .functions 
+chicks@chickshp 09:32:14 chicks-home !225 $ check_packages 
+check_packages()...
+      git-svn is not installed
+      # sudo apt-get install  git-svn
+check done.
+chicks@chickshp 09:32:19 chicks-home !226 $ check_packages -i
+check_packages(-i)...
+      git-svn is not installed
+Reading package lists... Done
+Building dependency tree       
+Reading state information... Done
+Suggested packages:
+  subversion
+The following NEW packages will be installed:
+  git-svn
+0 upgraded, 1 newly installed, 0 to remove and 137 not upgraded.
+Need to get 0 B/42.3 kB of archives.
+After this operation, 612 kB of additional disk space will be used.
+Selecting previously unselected package git-svn.
+(Reading database ... 246615 files and directories currently installed.)
+Unpacking git-svn (from .../git-svn_1%3a1.8.1.2-1_all.deb) ...
+Processing triggers for man-db ...
+Setting up git-svn (1:1.8.1.2-1) ...
+check done.
+chicks@chickshp 09:32:33 chicks-home !227 $ 
+```
 
 Here is using the `check_ssl` script:
 
-	chicks@waterpark $ ./check_ssl www.google.com:443
-	www.google.com:443:
-	notBefore=Jul 28 11:40:00 2016 GMT
-	notAfter=Oct 20 11:40:00 2016 GMT
-	chicks@waterpark $ ./check_ssl
-	dev.sepi.fini.net:443:
-	notBefore=Jun  5 22:00:00 2016 GMT
-	notAfter=Sep  3 22:00:00 2016 GMT
-	prod.ireserve.info:443:
-	notBefore=Apr 20 22:36:42 2014 GMT
-	notAfter=Aug  5 19:17:16 2016 GMT
+```ShellSession
+chicks@waterpark $ ./check_ssl www.google.com:443
+www.google.com:443:
+notBefore=Jul 28 11:40:00 2016 GMT
+notAfter=Oct 20 11:40:00 2016 GMT
+chicks@waterpark $ ./check_ssl
+dev.sepi.fini.net:443:
+notBefore=Jun  5 22:00:00 2016 GMT
+notAfter=Sep  3 22:00:00 2016 GMT
+prod.ireserve.info:443:
+notBefore=Apr 20 22:36:42 2014 GMT
+notAfter=Aug  5 19:17:16 2016 GMT
+```
 
 
 
@@ -79,17 +83,19 @@ I might be working ways to automate this myself.
 
 Via shell commands:
 
-	adduser chicks
-	cd /home
-	mv chicks chicks.sys
-	# setup temp keys
-	git clone git@github.com:chicks-net/chicks-home.git
-	mv chicks-home chicks
-	chown -r chicks.chicks chicks
-	cd chicks
-	mkdir Documents Desktop tmp Mail Documents/git
-	# keygen for chicks, add to github and authorized_keys
-	# download dnetc
+```ShellSession
+adduser chicks
+cd /home
+mv chicks chicks.sys
+# setup temp keys
+git clone git@github.com:chicks-net/chicks-home.git
+mv chicks-home chicks
+chown -r chicks.chicks chicks
+cd chicks
+mkdir Documents Desktop tmp Mail Documents/git
+# keygen for chicks, add to github and authorized_keys
+# download dnetc
+```
 
 We used to support ansible as an option, but gave up because we don't trust IBM/Red Hat anymore.
 
