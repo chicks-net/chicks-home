@@ -1,9 +1,9 @@
 #!/bin/bash
 
-TARGET=$1
+TARGET="$1"
 
-ipmitool -I lanplus -U ADMIN -P ADMIN -H $TARGET chassis bootdev pxe
+ipmitool -I lanplus -U ADMIN -P ADMIN -H "$TARGET" chassis bootdev pxe
 sleep 1
-ipmitool -I lanplus -U ADMIN -P ADMIN -H $TARGET chassis power reset
+ipmitool -I lanplus -U ADMIN -P ADMIN -H "$TARGET" chassis power reset
 sleep 1
-ipmitool -I lanplus -U ADMIN -P ADMIN -H $TARGET chassis power status
+ipmitool -I lanplus -U ADMIN -P ADMIN -H "$TARGET" chassis power status

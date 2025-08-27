@@ -1,15 +1,15 @@
 #!/bin/bash
 
-cd /home
+cd /home || exit
 
 # move old home dir out of the way
 mv chicks chicks.sys
 ln -s chicks.sys chicks
-cd chicks.sys
+cd chicks.sys || exit
 mkdir backups.clone
 mv .aliases .bash_logout .bash_profile .bashrc .functions .git .gitconfig .gitignore .perltidyrc .ssh .tmux.conf .vimrc bin backups.clone
 
-cd /home
+cd /home || exit
 
 # setup temp keys
 git clone git@github.com:chicks-net/chicks-home.git
