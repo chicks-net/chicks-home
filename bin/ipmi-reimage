@@ -3,13 +3,13 @@
 TARGET=$1
 
 echo "starting power state"
-ipmitool -I lanplus -U ADMIN -P ADMIN -H $TARGET chassis power status
+ipmitool -I lanplus -U ADMIN -P ADMIN -H "$TARGET" chassis power status
 sleep 1
-ipmitool -I lanplus -U ADMIN -P ADMIN -H $TARGET chassis bootdev pxe
+ipmitool -I lanplus -U ADMIN -P ADMIN -H "$TARGET" chassis bootdev pxe
 sleep 1
 echo "rebooting"
-ipmitool -I lanplus -U ADMIN -P ADMIN -H $TARGET chassis power reset
+ipmitool -I lanplus -U ADMIN -P ADMIN -H "$TARGET" chassis power reset
 sleep 1
-ipmitool -I lanplus -U ADMIN -P ADMIN -H $TARGET chassis power status
+ipmitool -I lanplus -U ADMIN -P ADMIN -H "$TARGET" chassis power status
 sleep 1
-ipmitool -I lanplus -U ADMIN -P ADMIN -H $TARGET sol activate
+ipmitool -I lanplus -U ADMIN -P ADMIN -H "$TARGET" sol activate
