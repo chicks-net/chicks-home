@@ -28,6 +28,6 @@ echo "  '$NEW_URL'"
 echo ""
 
 CHANGE_CMD="git remote set-url origin $NEW_URL"
-eval $CHANGE_CMD
+eval "$CHANGE_CMD"
 
 echo "Success"
