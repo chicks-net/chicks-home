@@ -11,24 +11,24 @@ desktop_path="$HOME/Desktop"
 # Find and move screenshot files older than 30 days
 # macOS screenshots typically start with "Screenshot" or "Screen Shot"
 find "$desktop_path" -maxdepth 1 \
-    \( -name "Screenshot*.png" -o -name "Screen Shot*.png" -o -name "Screenshot*.jpg" \) \
-    -mtime +30 \
-    -print0 | while IFS= read -r -d '' file; do
+	\( -name "Screenshot*.png" -o -name "Screen Shot*.png" -o -name "Screenshot*.jpg" \) \
+	-mtime +30 \
+	-print0 | while IFS= read -r -d '' file; do
 
-    # Get just the filename without path
-    filename=$(basename "$file")
+	# Get just the filename without path
+	filename=$(basename "$file")
 
-    # Move the file and report the action
-    if mv "$file" ~/Pictures/ScreenShots/; then
-        echo "Moved: $filename"
-    else
-        echo "Failed to move: $filename"
-    fi
+	# Move the file and report the action
+	if mv "$file" ~/Pictures/ScreenShots/; then
+		echo "Moved: $filename"
+	else
+		echo "Failed to move: $filename"
+	fi
 done
 
 # Count how many screenshots remain on desktop
 remaining=$(find "$desktop_path" -maxdepth 1 \
-    \( -name "Screenshot*.png" -o -name "Screen Shot*.png" -o -name "Screenshot*.jpg" \) \
-    | wc -l)
+	\( -name "Screenshot*.png" -o -name "Screen Shot*.png" -o -name "Screenshot*.jpg" \) \
+	| wc -l)
 
 echo "Script completed. $remaining screenshot(s) remain on desktop."
