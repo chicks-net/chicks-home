@@ -1,5 +1,5 @@
-#!/bin/bash
-
+#!/usr/bin/env bash
+#
 # Script to move screenshots older than 1 month from Desktop to ~/Pictures/ScreenShots
 
 # Create the destination directory if it doesn't exist
