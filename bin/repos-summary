@@ -2,6 +2,11 @@
 
 # TODO: strict mode
 
+# Color variables
+BLUE='\033[34m'
+RED='\033[31m'
+RESET='\033[0m'
+
 function carp {
 	echo "carp $1"
 	exit 2
@@ -25,7 +30,7 @@ for dir in $(find . -type d -mindepth 1 -maxdepth 1 -print | sort); do
 		)
 
 		if [[ "$branch" == "master" ]]; then
-			echo -e "  - on branch '$branch' \033[34m(deprecated default branch name)\033[0m"
+			echo -e "  - on branch '$branch' ${BLUE}(deprecated default branch name)${RESET}"
 		else
 			echo "  - on branch '$branch'"
 		fi
@@ -35,7 +40,7 @@ for dir in $(find . -type d -mindepth 1 -maxdepth 1 -print | sort); do
 			git status --porcelain | wc -l | sed -e 's/^[ ]*//'
 		)
 		if [[ "$untracked_files" -gt 0 ]]; then
-			echo -e "  - \033[31m$untracked_files untracked or modified files\033[0m"
+			echo -e "  - ${RED}$untracked_files untracked or modified files${RESET}"
 		fi
 	else
 		echo "  - not a git repo"
