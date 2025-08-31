@@ -23,17 +23,16 @@ do
 		branch=$(cd "$dir" || exit; git branch --show-current)
 
 		if [[ "$branch" == "master" ]]; then
-			echo "  - on branch '$branch' (deprecated default branch name)"
+			echo -e "  - on branch '$branch' \033[34m(deprecated default branch name)\033[0m"
 		else
 			echo "  - on branch '$branch'"
 		fi
 
 		untracked_files=$(cd "$dir" || exit; git status --porcelain | wc -l | sed -e 's/^[ ]*//')
 		if [[ "$untracked_files" -gt 0 ]]; then
-			echo "  - $untracked_files untracked or modified files"
+			echo -e "  - \033[31m$untracked_files untracked or modified files\033[0m"
 		fi
 	else
-		# shellcheck disable=SC2012
-		ls -l "$dir" | sed -e 's/^/	/'
+		echo "  - not a git repo"
 	fi
 done
