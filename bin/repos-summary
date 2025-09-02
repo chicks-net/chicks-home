@@ -18,6 +18,9 @@ cd "$gitdir" || carp "failed to chdir; $!"
 #ls -ltr
 #echo "code faster..."
 
+# Array to store repos with modified files
+declare -a modified_repos
+
 for dir in $(find . -type d -mindepth 1 -maxdepth 1 -print | sort); do
 	echo "dir=$dir"
 
@@ -41,8 +44,19 @@ for dir in $(find . -type d -mindepth 1 -maxdepth 1 -print | sort); do
 		)
 		if [[ "$untracked_files" -gt 0 ]]; then
 			echo -e "  - ${RED}$untracked_files untracked or modified files${RESET}"
+			modified_repos+=("$untracked_files:$dir")
 		fi
 	else
 		echo "  - not a git repo"
 	fi
 done
+
+# Print summary of repos with modified files
+if [[ ${#modified_repos[@]} -gt 0 ]]; then
+	echo
+	echo "Summary of repos with modified/untracked files/directories:"
+	echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
+	printf '%s\n' "${modified_repos[@]}" | sort -nr | while IFS=':' read -r count repo; do
+		echo -e "  ${RED}$count${RESET} files in $repo"
+	done
+fi
