@@ -14,12 +14,12 @@ titles update with your home directory.
 This is also where a few of my scripts live that don't deserve their own repo:
 
 - `closefh` - when you don't want to inheret a file handle, close it
-- `roll` - a D&D-style dice roller.  This is critical infrastructure when the Magic 8-Ball (TM) is not available.
+- `roll` - a D&D-style dice roller.  This is critical infrastructure when the
+  Magic 8-Ball (TM) is not available.
 - `ruler` - counting characters by hand is silly, use a ruler on the command line
 - `comify` - turn newlines into commas
 - `watch_constate` - watch network connection states ala `vmstat` or `iostat`
 - `github_fix_https` - make a repo cloned via `https` have ssh remotes
-
 
 ## USAGE
 
@@ -92,21 +92,25 @@ mkdir Documents Desktop tmp Mail Documents/git
 # download dnetc
 ```
 
-We used to support ansible as an option, but gave up because we don't trust IBM/Red Hat anymore.
+We used to support ansible as an option, but gave up because we don't trust
+IBM/Red Hat anymore.
 
 ## TODO
 
 - finish mysql backups scripts
-- find solution to git/permissions issues generally "would you trust it with /etc?"
+- find solution to git/permissions issues generally "would you trust it with
+/etc?"
 - integrate one of the cleaner ANSI color implementations
-
 
 ## EXPERIMENTS
 
 There are a few areas where work is in progress:
 
-- `daily_mysql_backup` is 50% done but hopes to make maintaining remote SQL-level backups easy and efficient
-- *tmux* setup.  I'm reading an e-book and starting to integrate it into my workflow.  I've also started [libtmux](https://github.com/chicks-net/libtmux) for automation via tmux.
+- `daily_mysql_backup` is 50% done but hopes to make maintaining remote
+  SQL-level backups easy and efficient
+- *tmux* setup.  I'm reading an e-book and starting to integrate it into my
+  workflow.  I've also started [libtmux](https://github.com/chicks-net/libtmux)
+  for automation via `tmux`.
 
 ## SUPPORT
 
