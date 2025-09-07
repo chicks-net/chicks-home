@@ -2,7 +2,7 @@
 
 # some useful variables
 host := `uname -n`
-release_branch := "master"
+release_branch := "main"
 
 # thanks to https://stackoverflow.com/a/7293026/2002471 for the perfect git incantation
 last_commit_message := `git log -1 --pretty=%B | grep '.'`
