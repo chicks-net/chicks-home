@@ -89,25 +89,25 @@ function updateDayToTomorrow() {
     firstParagraph.setText(updatedText);
     Logger.log('Document updated. New first line: ' + updatedText);
     
-    // Show a toast notification
-    DocumentApp.getUi().showToast(
-      'Day updated to ' + tomorrowDayFull, 
-      'Document Updated', 
-      3
+    // Show an alert notification
+    DocumentApp.getUi().alert(
+      'Document Updated',
+      'Day updated to ' + tomorrowDayFull,
+      DocumentApp.getUi().ButtonSet.OK
     );
   } else if (!dayFound) {
     Logger.log('No day of the week found in the first line');
-    DocumentApp.getUi().showToast(
-      'No day of the week found in first line', 
-      'No Update Made', 
-      3
+    DocumentApp.getUi().alert(
+      'No Update Made',
+      'No day of the week found in first line',
+      DocumentApp.getUi().ButtonSet.OK
     );
   } else {
     Logger.log('No change needed - already tomorrow?');
-    DocumentApp.getUi().showToast(
-      'Day already appears to be correct', 
-      'No Update Needed', 
-      3
+    DocumentApp.getUi().alert(
+      'No Update Needed',
+      'Day already appears to be correct',
+      DocumentApp.getUi().ButtonSet.OK
     );
   }
 }
@@ -118,7 +118,7 @@ function updateDayToTomorrow() {
  */
 function onOpen() {
   DocumentApp.getUi()
-    .createMenu('Day Updater')
+    .createMenu('Regime Edicts')
     .addItem('Update Day to Tomorrow', 'updateDayToTomorrow')
     .addToUi();
 }
