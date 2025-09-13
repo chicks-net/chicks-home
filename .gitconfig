@@ -9,6 +9,7 @@
 
 [alias]
 	ack = ! git ls-files $GIT_PREFIX | ack -x
+	add = add --verbose
 	co = checkout
 	pushup = ! git push -u origin HEAD
 	ci = commit
