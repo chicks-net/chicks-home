@@ -5,11 +5,19 @@ repositories, focusing on automation and repository management.
 
 ## Contents
 
+### Scripts
+
+- `apply-ruleset` - Bash script to apply repository rulesets via GitHub API
+- `github_fix_https` - Converts HTTPS remote URLs to SSH for password-free
+  authentication
+
 ### Rulesets
 
 - `rulesets/` - GitHub repository ruleset configurations
   - `default-linear.json` - Standard ruleset enforcing linear history,
     preventing deletions and non-fast-forward pushes
+  - `require-pr.json` - Ruleset requiring pull requests with code owner
+    review and automated Copilot review
 
 ## GitHub Resources
 
@@ -62,6 +70,26 @@ For workflow automation and CI/CD integration.
    [installation guide](https://github.com/cli/cli#installation)
 2. Authenticate: `gh auth login`
 3. Explore available commands: `gh help`
+
+### Using the Scripts
+
+#### Apply Ruleset
+
+Apply a repository ruleset configuration:
+
+```bash
+./apply-ruleset rulesets/default-linear.json my-repo-name
+```
+
+Note: Only works on public repos unless you have GitHub Pro.
+
+#### Fix HTTPS Authentication
+
+Convert repository remote from HTTPS to SSH to avoid password prompts:
+
+```bash
+./github_fix_https
+```
 
 ## Common Commands
 
