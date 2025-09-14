@@ -67,7 +67,7 @@ For workflow automation and CI/CD integration.
 ## Getting Started
 
 1. Install the GitHub CLI: `brew install gh` (macOS) or check the
-   [installation guide](https://github.com/cli/cli#installation)
+  [installation guide](https://github.com/cli/cli#installation)
 2. Authenticate: `gh auth login`
 3. Explore available commands: `gh help`
 
