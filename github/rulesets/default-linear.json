@@ -1,0 +1,28 @@
+{
+  "id": 7939368,
+  "name": "default-linear",
+  "target": "branch",
+  "source_type": "Repository",
+  "source": "chicks-net/www-chicks-net",
+  "enforcement": "active",
+  "conditions": {
+    "ref_name": {
+      "exclude": [],
+      "include": [
+        "~DEFAULT_BRANCH"
+      ]
+    }
+  },
+  "rules": [
+    {
+      "type": "deletion"
+    },
+    {
+      "type": "non_fast_forward"
+    },
+    {
+      "type": "required_linear_history"
+    }
+  ],
+  "bypass_actors": []
+}
