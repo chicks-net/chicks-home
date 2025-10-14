@@ -5,6 +5,7 @@
 # Color variables
 BLUE='\033[34m'
 RED='\033[31m'
+CYAN='\033[36m'
 RESET='\033[0m'
 
 function carp {
@@ -28,6 +29,10 @@ for dir in ~/Documents/Creative_Writing/cw $(find "$gitdir" -type d -mindepth 1 
 			cd "$dir" || exit
 			git branch --show-current
 		)
+
+		if [[ ! -f "$dir/.github/workflows/claude-code-review.yml" ]]; then
+			echo -e "  - ${CYAN}No Claude code review in this repo.${RESET}"
+		fi
 
 		if [[ "$branch" == "master" ]]; then
 			echo -e "  - on branch '$branch' ${BLUE}(deprecated default branch name)${RESET}"
