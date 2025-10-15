@@ -13,7 +13,7 @@
 	co = checkout
 	pushup = ! git push -u origin HEAD
 	ci = commit
-	cim = commit -m
+	cim = ! git symbolic-ref --short HEAD | grep -vE '^(main|master)$' >/dev/null && git commit -m
 	st = status
 	stp = status --porcelain
 	dc = diff --cached
