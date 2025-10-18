@@ -1,7 +1,8 @@
 {
   "permissions": {
     "allow": [
-      "Bash(markdownlint-cli2:*)"
+      "Bash(markdownlint-cli2:*)",
+      "Bash(git config:*)"
     ],
     "deny": [],
     "ask": []
