@@ -4,120 +4,165 @@
 [![GPLv2 license](https://img.shields.io/badge/License-GPLv2-blue.svg)](https://github.com/chicks-net/chicks-home/blob/master/LICENSE)
 [![Maintenance](https://img.shields.io/badge/Maintained%3F-yes-green.svg)](https://github.com/chicks-net/chicks-home/graphs/commit-activity)
 
-This project was begun to simplify my life for maintaining my home
-directory across numerous servers running different versions of Linux.
-It checks to make sure that useful packages are installed and makes it
-easy to install the missing ones.  I am testing it on Mint and CentOS.  It works
-around the idiosyncracies of both so you get colorful prompts and `xterm`/window
-titles update with your home directory.
+A battle-tested collection of shell configurations, automation scripts, and
+command-line utilities for managing Unix/Linux development environments. Born
+from years of maintaining home directories across dozens of servers running
+different distros, this repo contains tools that solve real problems you've
+probably encountered yourself.
 
-This is also where a few of my scripts live that don't deserve their own repo:
+## What's Inside
 
-- `closefh` - when you don't want to inheret a file handle, close it
-- `roll` - a D&D-style dice roller.  This is critical infrastructure when the
-  Magic 8-Ball (TM) is not available.
-- `ruler` - counting characters by hand is silly, use a ruler on the command line
-- `comify` - turn newlines into commas
-- `watch_constate` - watch network connection states ala `vmstat` or `iostat`
-- `github_fix_https` - make a repo cloned via `https` have ssh remotes
+### Modern Development Workflow
 
-## USAGE
+- **[justfile](justfile)** - Streamlined PR workflow with `just branch`,
+  `just pr`, `just merge` automation.  This workflow is also available
+  through our [template-repo](https://github.com/fini-net/template-repo).
+- **Custom git aliases** - `git pushup`, `git stp`, `git hh` and more
+  time-savers in [.gitconfig](.gitconfig)
+- **GitHub Actions** - Automated markdownlint, security scanning, and
+  [Claude Code PR reviews](.github/workflows/claude-code-review.yml)
+- **GitHub CLI tools** - Scripts for applying rulesets and managing repos via
+  API
 
-The first example shows using the function library and package installation features:
+### Command-Line Utilities You'll Actually Use
 
-```ShellSession
-chicks@chickshp 09:32:10 chicks-home !224 $ . .functions 
-chicks@chickshp 09:32:14 chicks-home !225 $ check_packages 
-check_packages()...
-      git-svn is not installed
-      # sudo apt-get install  git-svn
-check done.
-chicks@chickshp 09:32:19 chicks-home !226 $ check_packages -i
-check_packages(-i)...
-      git-svn is not installed
-Reading package lists... Done
-Building dependency tree       
-Reading state information... Done
-Suggested packages:
-  subversion
-The following NEW packages will be installed:
-  git-svn
-0 upgraded, 1 newly installed, 0 to remove and 137 not upgraded.
-Need to get 0 B/42.3 kB of archives.
-After this operation, 612 kB of additional disk space will be used.
-Selecting previously unselected package git-svn.
-(Reading database ... 246615 files and directories currently installed.)
-Unpacking git-svn (from .../git-svn_1%3a1.8.1.2-1_all.deb) ...
-Processing triggers for man-db ...
-Setting up git-svn (1:1.8.1.2-1) ...
-check done.
-chicks@chickshp 09:32:33 chicks-home !227 $ 
+**Text Processing:**
+
+- `ruler` - Count characters visually on the command line (beats counting by
+  hand)
+- `comify` - Convert newlines to comma-separated lists
+- `closefh` - Close inherited file handles cleanly
+
+**Network & Security:**
+
+- `check_ssl` - Quick SSL certificate expiration checker for monitoring
+  multiple endpoints
+- `watch_constate` - Monitor network connection states like `vmstat` but for
+  connections
+
+**Fun & Games:**
+
+- `roll` - D&D-style dice roller for when you need to make random decisions
+  (critical infrastructure)
+
+**GitHub Workflow:**
+
+- `github_fix_https` - Convert HTTPS clones to SSH for password-free git
+  operations
+- `apply-ruleset` - Apply repository rulesets via GitHub API
+
+### Cross-Distro Package Management
+
+The [.functions](.functions) library handles package installation across
+RPM-based (CentOS/RHEL) and DEB-based (Debian/Ubuntu/Mint) systems:
+
+```bash
+. .functions
+check_packages      # See what's missing
+check_packages -i   # Install missing packages automatically
 ```
 
-Here is using the `check_ssl` script:
+Includes automatic permission checking for SSH keys and smart timestamp-based
+caching to avoid hammering package managers.
 
-```ShellSession
-chicks@waterpark $ ./check_ssl www.google.com:443
-www.google.com:443:
-notBefore=Jul 28 11:40:00 2016 GMT
-notAfter=Oct 20 11:40:00 2016 GMT
-chicks@waterpark $ ./check_ssl
-dev.sepi.fini.net:443:
-notBefore=Jun  5 22:00:00 2016 GMT
-notAfter=Sep  3 22:00:00 2016 GMT
-prod.ireserve.info:443:
-notBefore=Apr 20 22:36:42 2014 GMT
-notAfter=Aug  5 19:17:16 2016 GMT
+### Google Workspace Automation
+
+The [google/AppScript/](google/AppScript/) directory contains Google Apps
+Script utilities for automating Google Docs, Sheets, and other Workspace tasks.
+Includes day-of-week updater scripts and comprehensive documentation links.
+
+## Quick Start Examples
+
+### Package Management Across Distros
+
+```bash
+# Check what packages are missing
+. .functions
+check_packages
+
+# Install missing packages automatically
+check_packages -i
 ```
 
-## INSTALL
+The package checker handles the differences between `apt-get` and `yum` for
+you, making it easy to maintain the same environment across different Linux
+flavors.
 
-Typically I clone the repo and setup symlinks these days.
-I'm open to ideas for doing this better.
-I might be working ways to automate this myself.
+### SSL Certificate Monitoring
 
-Via shell commands:
+```bash
+# Check a specific endpoint
+./check_ssl www.google.com:443
 
-```ShellSession
-adduser chicks
-cd /home
-mv chicks chicks.sys
-# setup temp keys
+# Check multiple endpoints from a config file
+./check_ssl
+# Outputs expiration dates for all configured endpoints
+```
+
+Perfect for keeping tabs on certificate expiration across your infrastructure.
+
+### Streamlined PR Workflow with just
+
+```bash
+# Start a new feature
+just branch fix-bug-123
+
+# Create PR and watch checks automatically
+just pr
+
+# After approval, merge and clean up
+just merge
+```
+
+The justfile automates the entire GitHub PR lifecycle with built-in safety
+checks to prevent commits on main.
+
+## Installation
+
+This is primarily a personal home directory configuration, but you're welcome
+to cherry-pick utilities and configurations that solve your problems:
+
+```bash
+# Clone and explore
 git clone git@github.com:chicks-net/chicks-home.git
-mv chicks-home chicks
-chown -r chicks.chicks chicks
-cd chicks
-mkdir Documents Desktop tmp Mail Documents/git
-# keygen for chicks, add to github and authorized_keys
-# download dnetc
+cd chicks-home
+
+# Cherry-pick individual scripts to your ~/bin
+cp bin/ruler ~/bin/
+cp bin/check_ssl ~/bin/
+
+# Or source the functions library in your .bashrc
+echo '. /path/to/chicks-home/.functions' >> ~/.bashrc
+
+# Try out the just-based workflow
+just list
 ```
 
-We used to support ansible as an option, but gave up because we don't trust
-IBM/Red Hat anymore.
+For full home directory integration, I typically clone the repo and symlink
+configurations. Open to suggestions for better installation automation.
 
-## TODO
+## What's Cooking
 
-- finish mysql backups scripts
-- find solution to git/permissions issues generally "would you trust it with
-/etc?"
-- integrate one of the cleaner ANSI color implementations
+**In Progress:**
 
-## EXPERIMENTS
+- `daily_mysql_backup` - Making remote SQL-level backups easy and efficient
+- Enhanced tmux configuration (also check out my
+  [libtmux](https://github.com/chicks-net/libtmux) project for tmux automation)
+- Cleaner ANSI color implementations
 
-There are a few areas where work is in progress:
+**Deliberately Avoiding:**
 
-- `daily_mysql_backup` is 50% done but hopes to make maintaining remote
-  SQL-level backups easy and efficient
-- *tmux* setup.  I'm reading an e-book and starting to integrate it into my
-  workflow.  I've also started [libtmux](https://github.com/chicks-net/libtmux)
-  for automation via `tmux`.
+- Ansible (personal preference after the IBM/Red Hat acquisition)
 
-## SUPPORT
+## Contributing
 
-Feel free to file [issues](https://github.com/chicks-net/chicks-home/issues) on
-github or send pull requests.
+Found a bug? Have a cool utility to add? PRs welcome!
 
-I started friendlier docs in [github pages](http://chicks-net.github.io/chicks-home/)
-but since I have to maintain them in HTML instead of Markdown they have been
-thoroughly neglected.  Since I got hugo working for a couple of sites I will
-eventually go in that direction for documenting this repo.
+- File [issues](https://github.com/chicks-net/chicks-home/issues) on GitHub
+- Send pull requests (run `markdownlint-cli2` before submitting)
+- Check out the [justfile](justfile) for the PR workflow
+
+## License & Maintenance
+
+GPLv2 licensed. Actively maintained across multiple Linux distros (CentOS,
+Debian, Ubuntu, Mint) and macOS.
