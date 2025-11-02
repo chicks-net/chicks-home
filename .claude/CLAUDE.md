@@ -1,4 +1,8 @@
-# Instructions for Claude
+# Global Instructions for Claude
+
+This file is expected to be available as `~/.claude/CLAUDE.md`
+and each project should have its own file in the repo
+as `/CLAUDE.md` and usually maintained with `/init` subcommand.
 
 ## Writing Style
 
