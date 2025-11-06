@@ -16,8 +16,21 @@ function carp {
 gitdir=~/Documents/git
 cd "$gitdir" || carp "failed to chdir; $!"
 
+# Template repo for .just file comparison
+template_repo=~/Documents/git/template-repo
+template_just_file="$template_repo/.just/gh-process.just"
+
+# Calculate checksum of template .just file if it exists
+if [[ -f "$template_just_file" ]]; then
+	template_just_checksum=$(md5 -q "$template_just_file" 2>/dev/null || echo "")
+else
+	template_just_checksum=""
+fi
+
 # Array to store repos with modified files
 declare -a modified_repos
+# Array to store repos with outdated .just files
+declare -a outdated_just_repos
 
 for dir in ~/Documents/Creative_Writing/cw $(find "$gitdir" -type d -mindepth 1 -maxdepth 1 -print | sort) $(find ~/LocalDocuments/git -type d -mindepth 1 -maxdepth 1 -print | sort); do
 	echo "dir=$dir"
@@ -32,6 +45,22 @@ for dir in ~/Documents/Creative_Writing/cw $(find "$gitdir" -type d -mindepth 1 
 
 		if [[ ! -f "$dir/.github/workflows/claude-code-review.yml" ]]; then
 			echo -e "  - ${CYAN}No Claude code review in this repo.${RESET}"
+		fi
+
+		# Check .just/gh-process.just version
+		if [[ -n "$template_just_checksum" ]]; then
+			repo_just_file="$dir/.just/gh-process.just"
+			if [[ -f "$repo_just_file" ]]; then
+				repo_just_checksum=$(md5 -q "$repo_just_file" 2>/dev/null || echo "")
+				if [[ "$repo_just_checksum" != "$template_just_checksum" ]]; then
+					echo -e "  - ${CYAN}Outdated .just/gh-process.just (differs from template-repo)${RESET}"
+					outdated_just_repos+=("$dir")
+				fi
+			elif [[ "$dir" != "$template_repo" ]]; then
+				# Only report missing if it's not the template repo itself
+				echo -e "  - ${CYAN}Missing .just/gh-process.just${RESET}"
+				outdated_just_repos+=("missing:$dir")
+			fi
 		fi
 
 		if [[ "$branch" == "master" ]]; then
@@ -60,5 +89,20 @@ if [[ ${#modified_repos[@]} -gt 0 ]]; then
 	echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
 	printf '%s\n' "${modified_repos[@]}" | sort -nr | while IFS=':' read -r count repo; do
 		echo -e "  ${RED}$count${RESET} files in $repo"
+	done
+fi
+
+# Print summary of repos with outdated .just files
+if [[ ${#outdated_just_repos[@]} -gt 0 ]]; then
+	echo
+	echo "Summary of repos with outdated or missing .just/gh-process.just:"
+	echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
+	for repo in "${outdated_just_repos[@]}"; do
+		if [[ "$repo" == missing:* ]]; then
+			repo_path="${repo#missing:}"
+			echo -e "  ${CYAN}MISSING${RESET} in $repo_path"
+		else
+			echo -e "  ${CYAN}OUTDATED${RESET} in $repo"
+		fi
 	done
 fi
