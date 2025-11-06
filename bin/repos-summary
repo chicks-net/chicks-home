@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
-# TODO: strict mode
-set -u  # Catch undefined variables
+# sorta strict mode
+set -u # Catch undefined variables
 
 # Color variables
 BLUE='\033[34m'
