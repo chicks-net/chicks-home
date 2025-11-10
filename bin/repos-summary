@@ -93,7 +93,7 @@ if [[ ${#outdated_just_repos[@]} -gt 0 ]]; then
 			repo_path="${repo#missing:}"
 			echo -e "  ${CYAN}MISSING${RESET} in $repo_path"
 		else
-			echo -e "  ${CYAN}OUTDATED${RESET} in $repo"
+			echo -e "  ${CYAN}OUTDATED or DIFFERENT${RESET} in $repo"
 		fi
 	done
 fi
