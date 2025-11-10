@@ -83,16 +83,6 @@ for dir in ~/Documents/Creative_Writing/cw $(find "$gitdir" -type d -mindepth 1 
 	fi
 done
 
-# Print summary of repos with modified files
-if [[ ${#modified_repos[@]} -gt 0 ]]; then
-	echo
-	echo "Summary of repos with modified/untracked files/directories:"
-	echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
-	printf '%s\n' "${modified_repos[@]}" | sort -nr | while IFS=':' read -r count repo; do
-		echo -e "  ${RED}$count${RESET} files in $repo"
-	done
-fi
-
 # Print summary of repos with outdated .just files
 if [[ ${#outdated_just_repos[@]} -gt 0 ]]; then
 	echo
@@ -105,5 +95,15 @@ if [[ ${#outdated_just_repos[@]} -gt 0 ]]; then
 		else
 			echo -e "  ${CYAN}OUTDATED${RESET} in $repo"
 		fi
+	done
+fi
+
+# Print summary of repos with modified files
+if [[ ${#modified_repos[@]} -gt 0 ]]; then
+	echo
+	echo "Summary of repos with modified/untracked files/directories:"
+	echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
+	printf '%s\n' "${modified_repos[@]}" | sort -nr | while IFS=':' read -r count repo; do
+		echo -e "  ${RED}$count${RESET} files in $repo"
 	done
 fi
