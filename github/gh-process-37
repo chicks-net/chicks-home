@@ -1,0 +1,5 @@
+just branch gh-process-3-7
+cp ../template-repo/.just/gh-process.just .just
+git add .just
+git cim '🟢 [just] update gh-process to v3.7'
+just pr
