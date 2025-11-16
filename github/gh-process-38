@@ -1,0 +1,5 @@
+just branch gh-process-3-8
+#cp ../template-repo/.just/gh-process.just .just
+git add .just
+git cim '🔬 [just] update gh-process to v3.8'
+just pr
