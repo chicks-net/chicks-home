@@ -62,10 +62,14 @@ function updateDayToTomorrow() {
 
 	// Try to replace full day names first
 	for (let i = 0; i < daysOfWeek.length; i++) {
-		if (currentText.includes(daysOfWeek[i])) {
-			updatedText = currentText.replace(daysOfWeek[i], tomorrowDayFull);
+		// Use word boundaries to avoid partial matches
+		const regex = new RegExp('\\b' + daysOfWeek[i] + '\\b', 'i');
+		if (regex.test(currentText)) {
+			const inner_regex = '\\b' + daysOfWeek[i] + '\\b';
+			firstParagraph.replaceText(inner_regex, tomorrowDayFull);
 			dayFound = true;
 			Logger.log('Replaced ' + daysOfWeek[i] + ' with ' + tomorrowDayFull);
+			Logger.log('Regex: ' + inner_regex);
 			break;
 		}
 	}
@@ -76,7 +80,8 @@ function updateDayToTomorrow() {
 			// Use word boundaries to avoid partial matches
 			const regex = new RegExp('\\b' + daysOfWeekShort[i] + '\\b', 'i');
 			if (regex.test(currentText)) {
-				updatedText = currentText.replace(regex, tomorrowDayShort);
+				const inner_regex = '\\b' + daysOfWeekShort[i] + '\\b';
+				firstParagraph.replaceText(inner_regex, tomorrowDayShort);
 				dayFound = true;
 				Logger.log('Replaced ' + daysOfWeekShort[i] + ' with ' + tomorrowDayShort);
 				break;
@@ -85,9 +90,8 @@ function updateDayToTomorrow() {
 	}
 
 	// Update the document if a day was found and replaced
-	if (dayFound && updatedText !== currentText) {
-		firstParagraph.setText(updatedText);
-		Logger.log('Document updated. New first line: ' + updatedText);
+	if (dayFound) {
+		Logger.log('Document updated. Day replaced in first line.');
 
 		// Show an alert notification
 		DocumentApp.getUi().alert(
