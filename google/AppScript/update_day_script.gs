@@ -1,21 +1,21 @@
 /**
  * Google Apps Script to update the day of the week in the top line of a document
- * This script finds the first line, looks for a day of the week, and updates it to tomorrow
+ * This script finds the first line, looks for a day of the week, and updates it to today or tomorrow
  *
  * Key Features:
  * - Finds the first paragraph in the document
  * - Searches for both full day names (Monday, Tuesday, etc.) and short forms (Mon, Tue, etc.)
- * - Calculates tomorrow's day and replaces the found day
+ * - Can update to either today's day or tomorrow's day
  * - Shows a toast notification when complete
- * - Adds a custom menu "Day Updater" to Google Docs for easy access
+ * - Adds a custom menu "Regime Edicts" to Google Docs for easy access
  *
  * How to use it:
  * 1. Open your Google Doc
  * 2. Go to Extensions → Apps Script
  * 3. Replace the default code with this script
  * 4. Save and authorize the script
- * 5. Refresh your document - you'll see a new "Day Updater" menu
- * 6. Click "Update Day to Tomorrow" to run it
+ * 5. Refresh your document - you'll see a new "Regime Edicts" menu
+ * 6. Click "Update Day to Today" or "Update Day to Tomorrow" to run it
  *
  * Advanced usage:
  * - You can set up a time-based trigger to run dailyDayUpdate() automatically each day
@@ -109,12 +109,100 @@ function updateDayToTomorrow() {
 }
 
 /**
+ * Updates the day of the week in the first line to TODAY
+ * Similar to updateDayToTomorrow but uses current day instead
+ */
+function updateDayToToday() {
+	// Get the active document
+	const doc = DocumentApp.getActiveDocument();
+	const body = doc.getBody();
+
+	// Get the first paragraph
+	const firstParagraph = body.getParagraphs()[0];
+	if (!firstParagraph) {
+		Logger.log('No paragraphs found in document');
+		return;
+	}
+
+	// Get current text of the first line
+	const currentText = firstParagraph.getText();
+	Logger.log('Current first line: ' + currentText);
+
+	// Days of the week arrays
+	const daysOfWeek = [
+		'Sunday', 'Monday', 'Tuesday', 'Wednesday',
+		'Thursday', 'Friday', 'Saturday'
+	];
+
+	const daysOfWeekShort = [
+		'Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'
+	];
+
+	// Get today's day
+	const today = new Date();
+	const todayDayIndex = today.getDay();
+	const todayDayFull = daysOfWeek[todayDayIndex];
+	const todayDayShort = daysOfWeekShort[todayDayIndex];
+
+	let dayFound = false;
+
+	// Try to replace full day names first
+	for (let i = 0; i < daysOfWeek.length; i++) {
+		// Use word boundaries to avoid partial matches
+		const regexPattern = '\\b' + daysOfWeek[i] + '\\b';
+		const regex = new RegExp(regexPattern, 'i');
+		if (regex.test(currentText)) {
+			firstParagraph.replaceText(regexPattern, todayDayFull);
+			dayFound = true;
+			Logger.log('Replaced ' + daysOfWeek[i] + ' with ' + todayDayFull);
+			Logger.log('Regex: ' + regex);
+			break;
+		}
+	}
+
+	// If no full day name found, try short day names
+	if (!dayFound) {
+		for (let i = 0; i < daysOfWeekShort.length; i++) {
+			// Use word boundaries to avoid partial matches
+			const regexPattern = '\\b' + daysOfWeekShort[i] + '\\b';
+			const regex = new RegExp(regexPattern, 'i');
+			if (regex.test(currentText)) {
+				firstParagraph.replaceText(regexPattern, todayDayShort);
+				dayFound = true;
+				Logger.log('Replaced ' + daysOfWeekShort[i] + ' with ' + todayDayShort);
+				break;
+			}
+		}
+	}
+
+	// Update the document if a day was found and replaced
+	if (dayFound) {
+		Logger.log('Document updated. Day replaced in first line.');
+
+		// Show an alert notification
+		DocumentApp.getUi().alert(
+			'Document Updated',
+			'Day updated to ' + todayDayFull,
+			DocumentApp.getUi().ButtonSet.OK
+		);
+	} else if (!dayFound) {
+		Logger.log('No day of the week found in the first line');
+		DocumentApp.getUi().alert(
+			'No Update Made',
+			'No day of the week found in first line',
+			DocumentApp.getUi().ButtonSet.OK
+		);
+	}
+}
+
+/**
  * Creates a menu item in Google Docs to run the script
  * This function runs automatically when the document is opened
  */
 function onOpen() {
 	DocumentApp.getUi()
 		.createMenu('Regime Edicts')
+		.addItem('Update Day to Today', 'updateDayToToday')
 		.addItem('Update Day to Tomorrow', 'updateDayToTomorrow')
 		.addToUi();
 }
