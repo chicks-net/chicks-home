@@ -1,0 +1,5 @@
+just branch gh-process-3-9
+#cp ~/Documents/git/template-repo/.just/gh-process.just .just
+git add .just/gh-process.just
+git cim '🧼 [just] gh-process v3.9 fixes shellcheck warnings'
+just pr
