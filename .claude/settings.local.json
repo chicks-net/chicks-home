@@ -3,7 +3,8 @@
     "allow": [
       "Bash(markdownlint-cli2:*)",
       "Bash(git config:*)",
-      "Bash(just list:*)"
+      "Bash(just list:*)",
+      "Bash(gh pr view:*)"
     ],
     "deny": [],
     "ask": []
