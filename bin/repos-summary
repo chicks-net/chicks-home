@@ -76,7 +76,18 @@ for dir in ~/Documents/Creative_Writing/cw $(find "$gitdir" -type d -mindepth 1 
 		)
 		if [[ "$untracked_files" -gt 0 ]]; then
 			echo -e "  - ${RED}$untracked_files untracked or modified files${RESET}"
-			modified_repos+=("$untracked_files:$dir")
+
+			# Check if repo is private
+			is_private=$(
+				cd "$dir" || exit
+				gh repo view --json isPrivate -q .isPrivate 2>/dev/null || echo "unknown"
+			)
+
+			if [[ "$is_private" == "true" ]]; then
+				modified_repos+=("$untracked_files:private:$dir")
+			else
+				modified_repos+=("$untracked_files:public:$dir")
+			fi
 		fi
 	else
 		echo "  - not a git repo"
@@ -103,7 +114,14 @@ if [[ ${#modified_repos[@]} -gt 0 ]]; then
 	echo
 	echo "Summary of repos with modified/untracked files/directories:"
 	echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
-	printf '%s\n' "${modified_repos[@]}" | sort -nr | while IFS=':' read -r count repo; do
-		echo -e "  ${RED}$count${RESET} files in $repo"
+	printf '%s\n' "${modified_repos[@]}" | sort -nr | while IFS=':' read -r count marker repo; do
+		# Consistent 3-field format: count:marker:repo
+		# marker is either "private" or "public"
+		if [[ "$marker" == "private" ]]; then
+			echo -e "  ${RED}$count${RESET} files in ${BLUE}[PRIVATE]${RESET} $repo"
+		else
+			# public repos don't need a marker
+			echo -e "  ${RED}$count${RESET} files in $repo"
+		fi
 	done
 fi
