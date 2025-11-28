@@ -218,10 +218,10 @@ pr_update: _on_a_pull_request
     if [ ! -s "$other_sections" ]; then
         # look for content after the Done section's commit list
         awk 'BEGIN {in_done=0; after_done=0; empty_count=0}
-             /^## Done/ {in_done=1; next}
-             in_done && /^$/ {empty_count++; if (empty_count >= 2) after_done=1; next}
-             in_done && /^- / {next}
-             after_done {print}' "$bodyfile" > "$other_sections"
+            /^## Done/ {in_done=1; next}
+            in_done && /^$/ {empty_count++; if (empty_count >= 2) after_done=1; next}
+            in_done && /^- / {next}
+            after_done {print}' "$bodyfile" > "$other_sections"
     fi
 
     # combine new Done section with preserved sections
