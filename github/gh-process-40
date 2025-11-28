@@ -1,0 +1,64 @@
+#!/usr/bin/env bash
+
+if [[ ! -d .git ]]; then
+	echo not in the root of a git repo
+	exit 1
+fi
+
+if [[ ! -d .just ]]; then
+	echo no .just dir, seems bad
+	exit 2
+fi
+
+echo "sanity checks look ok"
+
+SRC_DIR=~/Documents/git/template-repo
+
+sync_file () {
+	FILEPATH=".just/$1"
+	if [[ -e "$FILEPATH" ]]; then
+		if diff "$SRC_DIR/$FILEPATH" "$FILEPATH" > /dev/null; then
+			echo "$FILEPATH is current"
+		else
+			echo "$FILEPATH has diferences, copying..."
+			cp "$SRC_DIR/$FILEPATH" "$FILEPATH"
+		fi
+	else
+		echo "$FILEPATH missing, copying..."
+		cp "$SRC_DIR/$FILEPATH" "$FILEPATH"
+	fi
+
+	if grep "$FILEPATH" justfile > /dev/null; then
+		echo "$FILEPATH found in justfile"
+	else
+		echo "$FILEPATH NOT found in justfile, updating..."
+		awk '!done && /^$/ {print; print "import? '"'$FILEPATH'"'"; done=1; next} 1' justfile > justfile.tmp
+		mv justfile.tmp justfile
+	fi
+}
+
+sync_file "gh-process.just"
+sync_file "shellcheck.just"
+
+FILEPATH=".just/README.md"
+if [[ ! -e "$FILEPATH" ]]; then
+	echo "$FILEPATH does not exist, copying..."
+	cp "$SRC_DIR/$FILEPATH" "$FILEPATH"
+else
+	echo "$FILEPATH exists, nothing to do here"
+fi
+
+git stp
+
+echo SLEEPING for 3s
+sleep 3
+
+echo DEFANGED during development
+just branch gh-process-4-0
+git add .just/gh-process.just .just/shellcheck.just justfile .just/README.md
+git stp
+git cim '🐈‍⬛ [just] gh-process v4.0 adds PR description update recipes'
+sleep 1
+just pr
+
+echo "$0 completed"
