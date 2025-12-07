@@ -151,6 +151,26 @@ for dir in ~/Documents/Creative_Writing/cw $(find "$gitdir" -type d -mindepth 1 
 	fi
 done
 
+# Print summary of repos with no releases
+if [[ ${#no_release_repos[@]} -gt 0 ]]; then
+	echo
+	echo "Summary of repos with no releases:"
+	echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
+	for repo in "${no_release_repos[@]}"; do
+		echo -e "  ${YELLOW}NO RELEASES${RESET} in $repo"
+	done
+fi
+
+# Print summary of repos with stale releases
+if [[ ${#stale_release_repos[@]} -gt 0 ]]; then
+	echo
+	echo "Summary of repos with releases older than 60 days:"
+	echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
+	printf '%s\n' "${stale_release_repos[@]}" | sort -nr | while IFS=':' read -r days tag repo; do
+		echo -e "  ${YELLOW}$days days${RESET} old ($tag) in $repo"
+	done
+fi
+
 # Print summary of repos with outdated .just files
 if [[ ${#outdated_just_repos[@]} -gt 0 ]]; then
 	echo
@@ -180,25 +200,5 @@ if [[ ${#modified_repos[@]} -gt 0 ]]; then
 			# public repos don't need a marker
 			echo -e "  ${RED}$count${RESET} files in $repo"
 		fi
-	done
-fi
-
-# Print summary of repos with no releases
-if [[ ${#no_release_repos[@]} -gt 0 ]]; then
-	echo
-	echo "Summary of repos with no releases:"
-	echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
-	for repo in "${no_release_repos[@]}"; do
-		echo -e "  ${YELLOW}NO RELEASES${RESET} in $repo"
-	done
-fi
-
-# Print summary of repos with stale releases
-if [[ ${#stale_release_repos[@]} -gt 0 ]]; then
-	echo
-	echo "Summary of repos with releases older than 60 days:"
-	echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
-	printf '%s\n' "${stale_release_repos[@]}" | sort -nr | while IFS=':' read -r days tag repo; do
-		echo -e "  ${YELLOW}$days days${RESET} old ($tag) in $repo"
 	done
 fi
