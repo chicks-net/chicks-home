@@ -117,12 +117,31 @@ for dir in ~/Documents/Creative_Writing/cw $(find "$gitdir" -type d -mindepth 1 
 					current_epoch=$(date "+%s")
 					days_old=$(( (current_epoch - release_epoch) / 86400 ))
 
+					# Count commits since last release on main/master branch
+					commits_since=$(
+						cd "$dir" || exit
+						# Determine main branch (main or master)
+						if git rev-parse --verify main >/dev/null 2>&1; then
+							main_branch="main"
+						elif git rev-parse --verify master >/dev/null 2>&1; then
+							main_branch="master"
+						else
+							main_branch=""
+						fi
+
+						if [[ -n "$main_branch" && -n "$release_tag" ]]; then
+							git rev-list --count "${release_tag}..${main_branch}" 2>/dev/null || echo "0"
+						else
+							echo "0"
+						fi
+					)
+
 					# Always show the age of the latest release
 					if [[ $days_old -gt 60 ]]; then
-						echo -e "  - ${YELLOW}Latest release ($release_tag) is $days_old days old${RESET}"
+						echo -e "  - ${YELLOW}Latest release ($release_tag) is $days_old days old, $commits_since commits since${RESET}"
 						stale_release_repos+=("$days_old:$release_tag:$dir")
 					else
-						echo -e "  - Latest release ($release_tag) is $days_old days old"
+						echo -e "  - Latest release ($release_tag) is $days_old days old, $commits_since commits since"
 					fi
 				fi
 			fi
