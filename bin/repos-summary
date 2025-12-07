@@ -7,6 +7,7 @@ set -u # Catch undefined variables
 BLUE='\033[34m'
 RED='\033[31m'
 CYAN='\033[36m'
+YELLOW='\033[33m'
 RESET='\033[0m'
 
 function carp {
@@ -32,6 +33,10 @@ fi
 declare -a modified_repos
 # Array to store repos with outdated .just files
 declare -a outdated_just_repos
+# Array to store repos with no releases
+declare -a no_release_repos
+# Array to store repos with stale releases (>60 days)
+declare -a stale_release_repos
 
 for dir in ~/Documents/Creative_Writing/cw $(find "$gitdir" -type d -mindepth 1 -maxdepth 1 -print | sort) $(find ~/LocalDocuments/git -type d -mindepth 1 -maxdepth 1 -print | sort); do
 	echo "dir=$dir"
@@ -89,6 +94,39 @@ for dir in ~/Documents/Creative_Writing/cw $(find "$gitdir" -type d -mindepth 1 
 				modified_repos+=("$untracked_files:public:$dir")
 			fi
 		fi
+
+		# Check for releases
+		latest_release=$(
+			cd "$dir" || exit
+			gh release list --limit 1 2>/dev/null | head -1
+		)
+
+		if [[ -z "$latest_release" ]]; then
+			echo -e "  - ${YELLOW}No releases found${RESET}"
+			no_release_repos+=("$dir")
+		else
+			# Parse release date (format: tag	title	type	date)
+			release_date=$(echo "$latest_release" | awk '{print $4}')
+			release_tag=$(echo "$latest_release" | awk '{print $1}')
+
+			if [[ -n "$release_date" ]]; then
+				# Convert release date to epoch seconds
+				# Extract just the date portion (YYYY-MM-DD) in case there's a timestamp
+				clean_date="${release_date:0:10}"
+				if release_epoch=$(date -j -f "%Y-%m-%d" "$clean_date" "+%s" 2>/dev/null); then
+					current_epoch=$(date "+%s")
+					days_old=$(( (current_epoch - release_epoch) / 86400 ))
+
+					# Always show the age of the latest release
+					if [[ $days_old -gt 60 ]]; then
+						echo -e "  - ${YELLOW}Latest release ($release_tag) is $days_old days old${RESET}"
+						stale_release_repos+=("$days_old:$release_tag:$dir")
+					else
+						echo -e "  - Latest release ($release_tag) is $days_old days old"
+					fi
+				fi
+			fi
+		fi
 	else
 		echo "  - not a git repo"
 	fi
@@ -123,5 +161,25 @@ if [[ ${#modified_repos[@]} -gt 0 ]]; then
 			# public repos don't need a marker
 			echo -e "  ${RED}$count${RESET} files in $repo"
 		fi
+	done
+fi
+
+# Print summary of repos with no releases
+if [[ ${#no_release_repos[@]} -gt 0 ]]; then
+	echo
+	echo "Summary of repos with no releases:"
+	echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
+	for repo in "${no_release_repos[@]}"; do
+		echo -e "  ${YELLOW}NO RELEASES${RESET} in $repo"
+	done
+fi
+
+# Print summary of repos with stale releases
+if [[ ${#stale_release_repos[@]} -gt 0 ]]; then
+	echo
+	echo "Summary of repos with releases older than 60 days:"
+	echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
+	printf '%s\n' "${stale_release_repos[@]}" | sort -nr | while IFS=':' read -r days tag repo; do
+		echo -e "  ${YELLOW}$days days${RESET} old ($tag) in $repo"
 	done
 fi
