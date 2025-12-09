@@ -20,7 +20,7 @@ sync_file () {
 		if diff "$SRC_DIR/$FILEPATH" "$FILEPATH" > /dev/null; then
 			echo "$FILEPATH is current"
 		else
-			echo "$FILEPATH has diferences, copying..."
+			echo "$FILEPATH has differences, copying..."
 			cp "$SRC_DIR/$FILEPATH" "$FILEPATH"
 		fi
 	else
