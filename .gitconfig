@@ -13,7 +13,7 @@
 	co = checkout
 	pushup = ! git push -u origin HEAD
 	ci = commit
-	cim = ! git symbolic-ref --short HEAD | grep -vE '^(main|master)$' >/dev/null && git commit -m
+	cim = "!f() { branch=$(git symbolic-ref --short HEAD); if echo \"$branch\" | grep -vE '^(main|master)$' >/dev/null; then git commit -m \"$@\"; else printf \"\\033[31mError: Cannot commit directly to '%s' branch. Use 'just branch <name>' to create a feature branch.\\033[0m\\n\" \"$branch\" >&2; return 1; fi; }; f"
 	st = status
 	stp = status --porcelain
 	dc = diff --cached
