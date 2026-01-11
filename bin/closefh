@@ -6,8 +6,8 @@ closefh - Find and close inherited file handles
 
 =head1 SYNOPSIS
 
-    closefh /path/to/file
-    eval $(closefh /path/to/file)
+	closefh /path/to/file
+	eval $(closefh /path/to/file)
 
 =head1 DESCRIPTION
 
@@ -38,19 +38,19 @@ Required.
 
 Close an inherited file handle:
 
-    eval $(closefh /var/log/app.log)
+	eval $(closefh /var/log/app.log)
 
 Check if a file is open (without closing it):
 
-    closefh /tmp/lockfile
-    # Outputs: exec 3>&-
-    # Or warns: /tmp/lockfile not opened by this process
+	closefh /tmp/lockfile
+	# Outputs: exec 3>&-
+	# Or warns: /tmp/lockfile not opened by this process
 
 Use in a shell script to clean up before exec:
 
-    #!/bin/bash
-    eval $(closefh /dev/pts/1)
-    exec some-daemon
+	#!/bin/bash
+	eval $(closefh /dev/pts/1)
+	exec some-daemon
 
 =head1 DIAGNOSTICS
 
