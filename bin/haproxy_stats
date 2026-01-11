@@ -3,6 +3,215 @@
 use warnings;
 use strict;
 
+=head1 NAME
+
+haproxy_stats - Parse HAProxy logs and generate per-minute connection statistics
+
+=head1 SYNOPSIS
+
+	haproxy_stats
+
+=head1 DESCRIPTION
+
+Analyzes HAProxy log files to generate per-minute connection statistics,
+including average connection times, total response times, and distribution
+of connection termination states. Useful for understanding load balancer
+performance patterns and identifying issues like client aborts, server
+timeouts, or connection limit problems.
+
+The script processes HAProxy logs in syslog format and aggregates metrics
+by minute, making it easy to spot trends or correlate performance issues
+with specific time periods.
+
+=head1 CONFIGURATION
+
+The log file path is hardcoded in the script:
+
+	/mnt/log/haproxy.log
+
+Edit the C<$log> variable to analyze different log files.
+
+=head1 OUTPUT
+
+For each minute that contains log entries, the script outputs:
+
+=over 4
+
+=item *
+
+B<Minute identifier> - In HHMM format (e.g., "1430" for 2:30 PM)
+
+=item *
+
+B<Average connection time> - Time to establish connection to backend server (ms)
+
+=item *
+
+B<Average total time> - Total time from request to response completion (ms)
+
+=item *
+
+B<Connection count> - Number of connections processed in that minute
+
+=item *
+
+B<Termination state breakdown> - Count and percentage of each termination state
+
+=back
+
+=head1 EXAMPLE OUTPUT
+
+	1430: 23ms conn, 145ms total for 1247 conns
+		-- = 1180 (94.6%)    # normal
+		CD = 42 (3.4%)    # client abort in DATA phase
+		SC = 25 (2.0%)    # server abort while connecting
+
+	1431: 19ms conn, 132ms total for 1305 conns
+		-- = 1290 (98.9%)    # normal
+		sC = 15 (1.1%)    # server timeout while connecting
+
+=head1 TERMINATION STATES
+
+The script recognizes and categorizes these HAProxy termination states:
+
+=over 4
+
+=item B<-->
+
+Normal session completion (both directions closed properly)
+
+=item B<CD>
+
+Client aborted the connection during the DATA phase
+
+=item B<PR-->
+
+Proxy aborted, typically due to connection limit being reached
+
+=item B<SC> or B<SC-->
+
+Server aborted the connection while establishing the connection
+
+=item B<sC>
+
+Server timeout while attempting to establish the connection
+
+=back
+
+States not in the predefined list will show as "undef" in the output, allowing
+you to identify and investigate unknown termination patterns.
+
+=head1 LOG FORMAT REQUIREMENTS
+
+The script expects HAProxy logs in standard syslog format with HAProxy's
+HTTP or TCP log format. It parses both:
+
+=over 4
+
+=item *
+
+B<TCP mode logs> - With fields: client, accept_date, frontend, backend,
+times, bytes, term_state, connections, queues
+
+=item *
+
+B<HTTP mode logs> - Additional fields for status_code, cookies
+
+=back
+
+The script auto-detects which format based on the number of time fields
+(HTTP logs have 4 time values: Tq/Tw/Tc/Tr).
+
+=head1 USE CASES
+
+=over 4
+
+=item *
+
+B<Performance monitoring> - Track average response times throughout the day
+
+=item *
+
+B<Capacity planning> - Identify peak traffic periods and connection patterns
+
+=item *
+
+B<Troubleshooting> - Spot increases in client aborts or server timeouts
+
+=item *
+
+B<Service health> - Monitor backend server connection success rates
+
+=item *
+
+B<Incident analysis> - Correlate application issues with load balancer metrics
+
+=back
+
+=head1 LIMITATIONS
+
+=over 4
+
+=item *
+
+Log file path is hardcoded (requires editing script to change)
+
+=item *
+
+Processes entire log file in memory (may be slow for very large logs)
+
+=item *
+
+No command-line arguments for filtering or date ranges
+
+=item *
+
+Output goes to STDOUT only (pipe to file or grep as needed)
+
+=back
+
+=head1 NOTES
+
+HAProxy's termination state codes are four characters representing:
+
+=over 4
+
+=item 1.
+
+Session state when terminated (first character)
+
+=item 2.
+
+Proxy action (second character)
+
+=item 3.
+
+Persistence cookie info (third character)
+
+=item 4.
+
+Connection retry info (fourth character)
+
+=back
+
+The script simplifies analysis by focusing on the most common patterns that
+indicate issues requiring attention.
+
+For complete HAProxy termination state documentation, see:
+https://docs.haproxy.org/
+
+=head1 AUTHOR
+
+Christopher Hicks
+
+=head1 SEE ALSO
+
+L<haproxy(1)>
+
+HAProxy documentation: https://docs.haproxy.org/
+
+=cut
+
 my $log = "/mnt/log/haproxy.log";
 
 open(LOG,"<",$log) or die "couldn't open $log: $!";

@@ -1,12 +1,17 @@
 {
-  "permissions": {
-    "allow": [
-      "Bash(markdownlint-cli2:*)",
-      "Bash(git config:*)",
-      "Bash(just list:*)",
-      "Bash(gh pr view:*)"
-    ],
-    "deny": [],
-    "ask": []
-  }
+	"permissions": {
+		"allow": [
+			"Bash(markdownlint-cli2:*)",
+			"Bash(git config:*)",
+			"Bash(just list:*)",
+			"Bash(gh pr view:*)",
+			"Bash(podchecker:*)",
+			"Bash(perldoc:*)",
+			"Bash(gh pr checks:*)",
+			"Bash(gh run view:*)",
+			"Bash(editorconfig-checker:*)"
+		],
+		"deny": [],
+		"ask": []
+	}
 }

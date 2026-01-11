@@ -10,3 +10,63 @@ foreach my $numerator ( 1 .. 5 ) {
 	my $portion = ($numerator/5)*$total;
 	print "$total*(${numerator}/5)=$portion\n";
 }
+
+__END__
+
+=head1 NAME
+
+fifths - Split a number into five equal portions
+
+=head1 SYNOPSIS
+
+	fifths NUMBER
+
+	# Examples:
+	fifths 100
+	fifths 42.5
+	fifths 1000
+
+=head1 DESCRIPTION
+
+B<fifths> takes a number and calculates what 1/5, 2/5, 3/5, 4/5, and 5/5 of
+that number are. It's handy when you need to quickly divide something into
+five equal parts - whether you're splitting a bill, dividing up work, or
+just doing quick math.
+
+The script prints out each calculation showing the formula and result, so
+you can see exactly what portion of the total each fifth represents.
+
+=head1 OPTIONS
+
+This script doesn't take any options, just a single number argument.
+
+=head1 EXAMPLES
+
+Split 100 into fifths:
+
+	$ fifths 100
+	100*(1/5)=20
+	100*(2/5)=40
+	100*(3/5)=60
+	100*(4/5)=80
+	100*(5/5)=100
+
+Works with decimals too:
+
+	$ fifths 42.5
+	42.5*(1/5)=8.5
+	42.5*(2/5)=17
+	42.5*(3/5)=25.5
+	42.5*(4/5)=34
+	42.5*(5/5)=42.5
+
+=head1 AUTHOR
+
+Christopher Hicks
+
+=head1 SEE ALSO
+
+For other fraction calculations, check out the other utilities in the bin/
+directory.
+
+=cut
