@@ -8,10 +8,10 @@ comify - Convert newline-separated input to comma-separated output
 
 =head1 SYNOPSIS
 
-    cat files.txt | comify
-    ls *.json | comify
-    echo -e "foo\nbar\nbaz" | comify
-    comify < input.txt
+	cat files.txt | comify
+	ls *.json | comify
+	echo -e "foo\nbar\nbaz" | comify
+	comify < input.txt
 
 =head1 DESCRIPTION
 
@@ -36,36 +36,36 @@ the output includes a trailing comma after the last item.
 
 Convert a list of files to comma-separated format:
 
-    $ ls *.txt | comify
-    file1.txt,file2.txt,file3.txt,
+	$ ls *.txt | comify
+	file1.txt,file2.txt,file3.txt,
 
 Generate SQL IN clause values:
 
-    $ cat user_ids.txt | comify
-    123,456,789,
+	$ cat user_ids.txt | comify
+	123,456,789,
 
 Create comma-separated list from command output:
 
-    $ git branch | grep feature | sed 's/^[* ]*//' | comify
-    feature-login,feature-signup,feature-logout,
+	$ git branch | grep feature | sed 's/^[* ]*//' | comify
+	feature-login,feature-signup,feature-logout,
 
 Convert inline list:
 
-    $ echo -e "apple\norange\nbanana" | comify
-    apple,orange,banana,
+	$ echo -e "apple\norange\nbanana" | comify
+	apple,orange,banana,
 
 Pipe into clipboard (macOS):
 
-    $ ls *.log | comify | pbcopy
+	$ ls *.log | comify | pbcopy
 
 Use with here-doc:
 
-    $ comify <<EOF
-    production
-    staging
-    development
-    EOF
-    production,staging,development,
+	$ comify <<EOF
+	production
+	staging
+	development
+	EOF
+	production,staging,development,
 
 =head1 NOTES
 
@@ -90,15 +90,15 @@ The script preserves whitespace within each line (except the trailing newline).
 
 Remove the trailing comma:
 
-    $ cat list.txt | comify | sed 's/,$//'
+	$ cat list.txt | comify | sed 's/,$//'
 
 Create properly quoted SQL IN clause:
 
-    $ cat ids.txt | comify | sed 's/\([^,]*\)/"\1"/g; s/,$//'
+	$ cat ids.txt | comify | sed 's/\([^,]*\)/"\1"/g; s/,$//'
 
 Combine with other Unix tools for data transformation:
 
-    $ cat messy_list.txt | sort | uniq | comify
+	$ cat messy_list.txt | sort | uniq | comify
 
 =head1 AUTHOR
 

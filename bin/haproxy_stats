@@ -9,7 +9,7 @@ haproxy_stats - Parse HAProxy logs and generate per-minute connection statistics
 
 =head1 SYNOPSIS
 
-    haproxy_stats
+	haproxy_stats
 
 =head1 DESCRIPTION
 
@@ -27,7 +27,7 @@ with specific time periods.
 
 The log file path is hardcoded in the script:
 
-    /mnt/log/haproxy.log
+	/mnt/log/haproxy.log
 
 Edit the C<$log> variable to analyze different log files.
 
@@ -61,14 +61,14 @@ B<Termination state breakdown> - Count and percentage of each termination state
 
 =head1 EXAMPLE OUTPUT
 
-    1430: 23ms conn, 145ms total for 1247 conns
-        -- = 1180 (94.6%)    # normal
-        CD = 42 (3.4%)    # client abort in DATA phase
-        SC = 25 (2.0%)    # server abort while connecting
+	1430: 23ms conn, 145ms total for 1247 conns
+		-- = 1180 (94.6%)    # normal
+		CD = 42 (3.4%)    # client abort in DATA phase
+		SC = 25 (2.0%)    # server abort while connecting
 
-    1431: 19ms conn, 132ms total for 1305 conns
-        -- = 1290 (98.9%)    # normal
-        sC = 15 (1.1%)    # server timeout while connecting
+	1431: 19ms conn, 132ms total for 1305 conns
+		-- = 1290 (98.9%)    # normal
+		sC = 15 (1.1%)    # server timeout while connecting
 
 =head1 TERMINATION STATES
 

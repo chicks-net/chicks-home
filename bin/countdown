@@ -9,9 +9,9 @@ countdown - Smart countdown timer with adaptive sleep intervals
 
 =head1 SYNOPSIS
 
-    countdown 300      # 5 minute timer
-    countdown 60       # 1 minute timer
-    countdown 3600     # 1 hour timer
+	countdown 300      # 5 minute timer
+	countdown 60       # 1 minute timer
+	countdown 3600     # 1 hour timer
 
 =head1 DESCRIPTION
 
@@ -92,29 +92,29 @@ Sleep duration until next update
 
 Example output:
 
-    Sat Jan 11 14:23:45 2026: 5m0s left, sleeping 60 seconds
-    Sat Jan 11 14:24:45 2026: 4m0s left, sleeping 60 seconds
-    Sat Jan 11 14:25:45 2026: 3m0s left, sleeping 60 seconds
+	Sat Jan 11 14:23:45 2026: 5m0s left, sleeping 60 seconds
+	Sat Jan 11 14:24:45 2026: 4m0s left, sleeping 60 seconds
+	Sat Jan 11 14:25:45 2026: 3m0s left, sleeping 60 seconds
 
 =head1 EXAMPLES
 
 Quick 5 minute break timer:
 
-    $ countdown 300
-    Sat Jan 11 14:23:45 2026: 5m0s left, sleeping 60 seconds
-    ...
+	$ countdown 300
+	Sat Jan 11 14:23:45 2026: 5m0s left, sleeping 60 seconds
+	...
 
 Pomodoro session (25 minutes):
 
-    $ countdown 1500
+	$ countdown 1500
 
 Short reminder to check the laundry:
 
-    $ countdown 600
+	$ countdown 600
 
 One hour long task timer:
 
-    $ countdown 3600
+	$ countdown 3600
 
 =head1 ERROR HANDLING
 
