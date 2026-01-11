@@ -3,6 +3,153 @@
 use strict;
 use warnings;
 
+=head1 NAME
+
+countdown - Smart countdown timer with adaptive sleep intervals
+
+=head1 SYNOPSIS
+
+    countdown 300      # 5 minute timer
+    countdown 60       # 1 minute timer
+    countdown 3600     # 1 hour timer
+
+=head1 DESCRIPTION
+
+A command-line countdown timer that displays periodic updates showing how much
+time remains. Unlike simple sleep commands, this timer uses adaptive sleep
+intervals to provide frequent updates when time is running out while avoiding
+spam when there's plenty of time left.
+
+Perfect for timing pomodoro sessions, reminding yourself to check on something,
+or any situation where you need a visible countdown without constant updates.
+
+Each update shows the current system time, remaining time in minutes and seconds,
+and how long until the next update.
+
+=head1 ARGUMENTS
+
+=over 4
+
+=item B<timeout>
+
+The countdown duration in seconds (required). This is the total time to count
+down from.
+
+=back
+
+=head1 BEHAVIOR
+
+The script uses smart adaptive sleep intervals to balance visibility with
+terminal noise:
+
+=over 4
+
+=item *
+
+B<More than 1 minute remaining>: Updates every 60 seconds
+
+=item *
+
+B<Exactly 1 minute remaining>: Updates every remaining second, or every 10 seconds
+if at exactly 1 minute
+
+=item *
+
+B<11-19 seconds remaining>: Updates every few seconds (varies by second count)
+
+=item *
+
+B<10 seconds or less>: Updates every 2-3 seconds for the final countdown
+
+=item *
+
+B<20-60 seconds remaining>: Updates every 10 seconds
+
+=back
+
+This algorithm means you get frequent updates when it matters most (final
+seconds) without your terminal getting flooded during long countdowns.
+
+=head1 OUTPUT
+
+Each line shows:
+
+=over 4
+
+=item *
+
+Current system time (using localtime format)
+
+=item *
+
+Time remaining in MmSs format (minutes and seconds)
+
+=item *
+
+Sleep duration until next update
+
+=back
+
+Example output:
+
+    Sat Jan 11 14:23:45 2026: 5m0s left, sleeping 60 seconds
+    Sat Jan 11 14:24:45 2026: 4m0s left, sleeping 60 seconds
+    Sat Jan 11 14:25:45 2026: 3m0s left, sleeping 60 seconds
+
+=head1 EXAMPLES
+
+Quick 5 minute break timer:
+
+    $ countdown 300
+    Sat Jan 11 14:23:45 2026: 5m0s left, sleeping 60 seconds
+    ...
+
+Pomodoro session (25 minutes):
+
+    $ countdown 1500
+
+Short reminder to check the laundry:
+
+    $ countdown 600
+
+One hour long task timer:
+
+    $ countdown 3600
+
+=head1 ERROR HANDLING
+
+The script dies with an error message if you don't provide a timeout argument.
+Make sure to pass the duration in seconds.
+
+=head1 TIPS
+
+=over 4
+
+=item *
+
+Use basic math in your shell: C<countdown $((25 * 60))> for 25 minutes
+
+=item *
+
+Combine with a command to run when done: C<countdown 300 && say "Time's up!">
+(macOS)
+
+=item *
+
+Run in a separate terminal window or tmux pane so you can continue working
+
+=back
+
+=head1 AUTHOR
+
+Christopher Hicks
+
+=head1 SEE ALSO
+
+L<sleep(1)>, L<at(1)>
+
+=cut
+
 my ($timeout) = @ARGV;
 die "no timeout provided" unless defined $timeout;
 

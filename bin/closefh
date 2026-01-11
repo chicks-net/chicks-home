@@ -1,5 +1,95 @@
 #!/usr/bin/perl -w
 
+=head1 NAME
+
+closefh - Find and close inherited file handles
+
+=head1 SYNOPSIS
+
+    closefh /path/to/file
+    eval $(closefh /path/to/file)
+
+=head1 DESCRIPTION
+
+closefh helps you clean up inherited file handles in shell subprocesses. When you
+spawn a shell subprocess, it inherits all open file descriptors from the parent.
+Sometimes you need to close specific files in the child without affecting the parent.
+
+This script uses lsof to check if a given file is currently open by the current
+process. If it finds the file, it outputs a shell command to close that file
+descriptor. If the file isn't open, it prints a warning to STDERR.
+
+Note that this script doesn't close the file descriptor itself - it outputs a shell
+command that you need to eval. This lets you close the descriptor in the current
+shell rather than in a subprocess.
+
+=head1 ARGUMENTS
+
+=over 4
+
+=item filename
+
+Path to the file you want to close. Must be the full path as shown by lsof.
+Required.
+
+=back
+
+=head1 EXAMPLES
+
+Close an inherited file handle:
+
+    eval $(closefh /var/log/app.log)
+
+Check if a file is open (without closing it):
+
+    closefh /tmp/lockfile
+    # Outputs: exec 3>&-
+    # Or warns: /tmp/lockfile not opened by this process
+
+Use in a shell script to clean up before exec:
+
+    #!/bin/bash
+    eval $(closefh /dev/pts/1)
+    exec some-daemon
+
+=head1 DIAGNOSTICS
+
+=over 4
+
+=item "specify a file please"
+
+You didn't provide a filename argument. The script requires exactly one argument.
+
+=item "$file not opened by this process"
+
+The file you specified isn't currently open by this process. Either the path is
+wrong or the file simply isn't open.
+
+=back
+
+=head1 DEPENDENCIES
+
+Requires the lsof(8) command, which is standard on most Unix-like systems but may
+need to be installed separately on some Linux distributions.
+
+Only works on systems that support lsof - primarily Unix, Linux, and macOS. Won't
+work on Windows even with Cygwin.
+
+=head1 EXIT STATUS
+
+Always exits with status 0. Errors are reported as warnings to STDERR but don't
+affect the exit status.
+
+=head1 AUTHOR
+
+Christopher Hicks
+
+=head1 SEE ALSO
+
+lsof(8), exec(1)
+
+=cut
+
 use strict;
 
 my ($file) = @ARGV;

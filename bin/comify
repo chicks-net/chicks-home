@@ -2,6 +2,114 @@
 
 use strict;
 
+=head1 NAME
+
+comify - Convert newline-separated input to comma-separated output
+
+=head1 SYNOPSIS
+
+    cat files.txt | comify
+    ls *.json | comify
+    echo -e "foo\nbar\nbaz" | comify
+    comify < input.txt
+
+=head1 DESCRIPTION
+
+A simple but incredibly useful filter that converts line-separated input into
+comma-separated output. Perfect for when you need to turn a list of things
+into a format suitable for SQL IN clauses, configuration files, or anywhere
+else you need comma-separated values.
+
+The script reads from standard input, removes newlines from each line, and
+outputs all items separated by commas on a single line.
+
+=head1 ARGUMENTS
+
+None. The script reads from standard input (STDIN).
+
+=head1 OUTPUT
+
+All input lines joined with commas, followed by a single newline. Note that
+the output includes a trailing comma after the last item.
+
+=head1 EXAMPLES
+
+Convert a list of files to comma-separated format:
+
+    $ ls *.txt | comify
+    file1.txt,file2.txt,file3.txt,
+
+Generate SQL IN clause values:
+
+    $ cat user_ids.txt | comify
+    123,456,789,
+
+Create comma-separated list from command output:
+
+    $ git branch | grep feature | sed 's/^[* ]*//' | comify
+    feature-login,feature-signup,feature-logout,
+
+Convert inline list:
+
+    $ echo -e "apple\norange\nbanana" | comify
+    apple,orange,banana,
+
+Pipe into clipboard (macOS):
+
+    $ ls *.log | comify | pbcopy
+
+Use with here-doc:
+
+    $ comify <<EOF
+    production
+    staging
+    development
+    EOF
+    production,staging,development,
+
+=head1 NOTES
+
+=over 4
+
+=item *
+
+The output includes a trailing comma after the last item. If you need to
+remove it, pipe through C<sed 's/,$//'> or handle it in your consuming code.
+
+=item *
+
+Empty lines in the input will result in consecutive commas in the output.
+
+=item *
+
+The script preserves whitespace within each line (except the trailing newline).
+
+=back
+
+=head1 TIPS
+
+Remove the trailing comma:
+
+    $ cat list.txt | comify | sed 's/,$//'
+
+Create properly quoted SQL IN clause:
+
+    $ cat ids.txt | comify | sed 's/\([^,]*\)/"\1"/g; s/,$//'
+
+Combine with other Unix tools for data transformation:
+
+    $ cat messy_list.txt | sort | uniq | comify
+
+=head1 AUTHOR
+
+Christopher Hicks
+
+=head1 SEE ALSO
+
+L<paste(1)>, L<tr(1)>, L<join(1)>
+
+=cut
+
 while (my $line = <STDIN>) {
 	chomp($line);
 	print $line, ",";

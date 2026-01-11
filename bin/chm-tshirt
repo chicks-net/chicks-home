@@ -1,10 +1,138 @@
 #!/usr/bin/perl
-#
-# translate Computer History Museum t-shirt
-# http://i.ebayimg.com/images/g/qksAAOSwaB5XjsI1/s-l300.jpg
 
 use strict;
 use warnings;
+
+=head1 NAME
+
+chm-tshirt - Decode the Computer History Museum binary t-shirt message
+
+=head1 SYNOPSIS
+
+    chm-tshirt
+
+=head1 DESCRIPTION
+
+A fun little decoder for the Computer History Museum t-shirt that displays
+binary numbers. The shirt shows three 8-bit binary numbers, and this script
+reveals what message they encode.
+
+This script demonstrates binary-to-decimal-to-ASCII conversion, showing each
+step of the translation process. It's both a practical example of binary
+encoding and a tribute to a cool piece of nerd fashion.
+
+The original t-shirt image can be seen at:
+http://i.ebayimg.com/images/g/qksAAOSwaB5XjsI1/s-l300.jpg
+
+=head1 ARGUMENTS
+
+None. The script has the binary values hardcoded from the t-shirt design.
+
+=head1 OUTPUT
+
+For each binary number on the shirt, the script displays:
+
+=over 4
+
+=item *
+
+The 8-bit binary representation
+
+=item *
+
+The decimal (base-10) equivalent
+
+=item *
+
+The ASCII character that decimal value represents
+
+=back
+
+Output format: C<binary decimal letter>
+
+=head1 EXAMPLE
+
+    $ chm-tshirt
+    01000011 67 C
+    01001000 72 H
+    01001101 77 M
+
+The binary spells out "CHM" - the Computer History Museum's initials!
+
+=head1 HOW IT WORKS
+
+The script uses Perl's C<pack> and C<unpack> functions to convert binary
+strings to decimal values:
+
+=over 4
+
+=item 1.
+
+Takes an 8-bit binary string (like "01000011")
+
+=item 2.
+
+Pads it to 32 bits (Perl's network byte order format requirement)
+
+=item 3.
+
+Packs it as a binary string (B32 format)
+
+=item 4.
+
+Unpacks it as a 32-bit network-order integer (N format)
+
+=item 5.
+
+Converts the decimal to its ASCII character with C<chr()>
+
+=back
+
+=head1 EDUCATIONAL VALUE
+
+This script is a great teaching tool for understanding:
+
+=over 4
+
+=item *
+
+Binary number representation
+
+=item *
+
+ASCII character encoding
+
+=item *
+
+Perl's pack/unpack functions for binary data manipulation
+
+=item *
+
+How text is represented in computers at the bit level
+
+=back
+
+=head1 NOTES
+
+The Computer History Museum in Mountain View, California, is one of the world's
+leading institutions exploring the history of computing and its impact on
+society. If you haven't been, it's worth a visit - they've got everything from
+the Babbage Engine to vintage gaming consoles.
+
+This t-shirt is the kind of thing you see at tech conferences or on engineers
+who appreciate a good binary joke.
+
+=head1 AUTHOR
+
+Christopher Hicks
+
+=head1 SEE ALSO
+
+L<pack>, L<unpack>, L<chr>, L<ord>
+
+Computer History Museum: https://computerhistory.org/
+
+=cut
 
 my @binary = qw(01000011 01001000 01001101);
 

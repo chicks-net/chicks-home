@@ -2,6 +2,114 @@
 
 use strict;
 
+=head1 NAME
+
+roll - D&D-style dice roller for the command line
+
+=head1 SYNOPSIS
+
+    roll 2d6
+    roll d20 3d8 d10
+    roll 4d6
+
+=head1 DESCRIPTION
+
+A simple command-line dice roller that uses standard RPG dice notation.
+Perfect for when you're at your terminal and need to settle an argument,
+generate random numbers, or actually play a tabletop game remotely.
+
+The script accepts standard dice notation (NdM format) where N is the number
+of dice to roll and M is the number of sides on each die. If you omit the
+number of dice, it defaults to 1 (so "d20" rolls one twenty-sided die).
+
+Each die argument is processed independently, making it easy to roll different
+types of dice in a single command.
+
+=head1 ARGUMENTS
+
+One or more dice specifications in the format:
+
+=over 4
+
+=item B<NdM>
+
+Roll N dice, each with M sides. Examples: 2d6, 3d10, 4d8
+
+=item B<dM>
+
+Roll a single die with M sides. Examples: d20, d6, d100
+
+=back
+
+=head1 OUTPUT
+
+For each die specification, the script outputs:
+
+=over 4
+
+=item *
+
+The dice notation being rolled
+
+=item *
+
+Each individual roll result (labeled as "roll 1:", "roll 2:", etc.)
+
+=item *
+
+The total and maximum possible (only shown when rolling multiple dice)
+
+=back
+
+=head1 EXAMPLES
+
+Roll a single twenty-sided die (classic D&D attack roll):
+
+    $ roll d20
+    d20:
+        roll 1: 14
+
+Roll 2d6 (classic board game dice):
+
+    $ roll 2d6
+    2d6:
+        roll 1: 4
+        roll 2: 3
+        total: 7/12
+
+Roll multiple different dice in one command (D&D damage roll):
+
+    $ roll d20 2d6 d4
+    d20:
+        roll 1: 18
+    2d6:
+        roll 1: 5
+        roll 2: 2
+        total: 7/12
+    d4:
+        roll 1: 3
+
+Generate ability scores (3d6, the old-school way):
+
+    $ roll 3d6 3d6 3d6 3d6 3d6 3d6
+
+=head1 ERROR HANDLING
+
+The script dies with an error message if any argument doesn't match the
+expected dice notation format. Make sure you're using the NdM format
+(like "2d6", not "2 d 6" or "roll 2d6").
+
+=head1 AUTHOR
+
+Christopher Hicks
+
+=head1 SEE ALSO
+
+For a Python implementation with additional features, see F<roll.py> in the
+same directory.
+
+=cut
+
 foreach my $die (@ARGV) {
 	if ($die =~ /^(\d*)d(\d+)$/) {
 		my $times = $1 || 1;
