@@ -1,5 +1,8 @@
 #!/usr/bin/env bash
 
+# Search for patterns inside .lbx (label/zip) files
+# Usage: labelgrep.sh <pattern>
+
 if [ "$#" -eq 0 ]; then
 	echo "Usage: $0 <pattern>" >&2
 	exit 1
