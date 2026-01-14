@@ -119,6 +119,35 @@ checks to prevent commits on main.
 
 ## Installation
 
+### Homebrew Installation (Recommended)
+
+The easiest way to install the command-line utilities is via our
+[Homebrew tap](https://github.com/chicks-net/homebrew-chicks):
+
+```bash
+# Option 1: Add the tap first (shorter install commands)
+brew tap chicks-net/chicks
+brew install chicks-git-tools
+brew install chicks-monitoring-tools
+brew install chicks-text-tools
+
+# Option 2: Install directly without tapping (longer formula names)
+brew install chicks-net/chicks/chicks-git-tools
+brew install chicks-net/chicks/chicks-monitoring-tools
+brew install chicks-net/chicks/chicks-text-tools
+```
+
+**What's included:**
+
+- `chicks-git-tools` - Git/GitHub automation (repos-summary, github_fix_https,
+  apply-ruleset)
+- `chicks-monitoring-tools` - System and networking monitoring utilities.
+- `chicks-text-tools` - Text utilities (comify, ruler, roll, closefh)
+
+This handles installation paths and updates automatically through `brew upgrade`.
+
+### Manual Installation
+
 This is primarily a personal home directory configuration, but you're welcome
 to cherry-pick utilities and configurations that solve your problems:
 
