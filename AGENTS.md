@@ -62,6 +62,14 @@ This file provides guidance for agentic coding agents working in this repository
 - **Colors**: Use color variables: `{{GREEN}}`, `{{RED}}`, `{{BLUE}}`,
   `{{MAGENTA}}`, `{{NORMAL}}`
 
+### GitHub Actions
+
+- **Standards**: Follow requirements in `docs/github-actions.yml`
+- **Linting**: Must pass actionlint validation (runs as GitHub Action)
+- **Permissions**: Include global `permissions: {}` before jobs section
+- **Versions**: Use latest action versions when possible
+- **Formatting**: Must pass YAML syntax validation
+
 ### Markdown Files
 
 - **Linting**: Must pass `markdownlint-cli2` validation
@@ -137,6 +145,7 @@ echo "{{RED}}Error occurred{{NORMAL}}" >&2
 - `.functions` - Cross-platform package management library
 - `bin/lib.sh` - Shared shell functions (spinner, etc.)
 - `CLAUDE.md` - Repository-specific guidance for Claude Code
+- `docs/github-actions.yml` - GitHub Actions workflow requirements and standards
 
 ## Platform Compatibility
 

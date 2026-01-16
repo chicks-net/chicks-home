@@ -161,6 +161,8 @@ markdownlint-cli2 "**/*.md"
 - `.github/workflows/linter.yml` - General linting
 - `.github/workflows/auto-assign.yml` - Auto-assign PR reviewers
 
+**Standards**: See `docs/github-actions.yml` for GitHub Actions requirements and standards.
+
 ## Code Style and Quality
 
 ### Shell Scripts
