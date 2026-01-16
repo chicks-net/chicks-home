@@ -99,13 +99,13 @@ set -euo pipefail  # strict mode
 
 # Check for required commands
 if ! command -v required_cmd &> /dev/null; then
-    echo "{{RED}}Error: required_cmd not found{{NORMAL}}" >&2
+    echo -e "\033[31mError: required_cmd not found\033[0m" >&2
     exit 1
 fi
 
 # Use conditional execution
 command_that_might_fail || {
-    echo "{{RED}}Error: command failed{{NORMAL}}" >&2
+    echo -e "\033[31mError: command failed\033[0m" >&2
     exit 1
 }
 ```
