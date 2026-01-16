@@ -8,7 +8,7 @@
 
 Must include this before `jobs` section and after `on` section::
 
-```
+```yaml
 # global permissions
 permissions: {}
 ```
