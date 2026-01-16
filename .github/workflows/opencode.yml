@@ -1,3 +1,4 @@
+---
 name: opencode
 
 on:
@@ -7,7 +8,7 @@ on:
     types: [created]
 
 # global permissions
-permissions: {}
+permissions: { }
 
 jobs:
   opencode:
