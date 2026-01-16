@@ -6,6 +6,9 @@ on:
   pull_request_review_comment:
     types: [created]
 
+# global permissions
+permissions: {}
+
 jobs:
   opencode:
     if: |
