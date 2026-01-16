@@ -64,7 +64,7 @@ This file provides guidance for agentic coding agents working in this repository
 
 ### GitHub Actions
 
-- **Standards**: Follow requirements in `docs/github-actions.yml`
+- **Standards**: Follow requirements in `docs/github-actions.md`
 - **Linting**: Must pass actionlint validation (runs as GitHub Action)
 - **Permissions**: Include global `permissions: {}` before jobs section
 - **Versions**: Use latest action versions when possible
@@ -145,7 +145,7 @@ echo "{{RED}}Error occurred{{NORMAL}}" >&2
 - `.functions` - Cross-platform package management library
 - `bin/lib.sh` - Shared shell functions (spinner, etc.)
 - `CLAUDE.md` - Repository-specific guidance for Claude Code
-- `docs/github-actions.yml` - GitHub Actions workflow requirements and standards
+- `docs/github-actions.md` - GitHub Actions workflow requirements and standards
 
 ## Platform Compatibility
 
