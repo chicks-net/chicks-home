@@ -36,7 +36,7 @@ just merge            # Squash-merges PR, deletes branch, returns to main
 
 - `just sync` - Return to main branch and pull latest changes
 - `just compliance_check` - Verify repo has expected documentation and
-  configuration files
+  configuration files. See AGENTS.md for guidance for agentic coding assistants.
 - `just prweb` - View current PR in web browser
 - `just release <version>` - Create a GitHub release with auto-generated notes
 - `just mergepdf <dest> <src...>` - Merge PDF files (macOS only)
@@ -154,11 +154,14 @@ markdownlint-cli2 "**/*.md"
 
 - `.github/workflows/markdownlint.yml` - Markdown linting (using
   DavidAnson/markdownlint-cli2-action)
+- `.github/workflows/opencode.yml` - OpenCode agent integration
 - `.github/workflows/claude-code-review.yml` - Automated Claude Code PR reviews
 - `.github/workflows/actionlint.yml` - GitHub Actions workflow validation
 - `.github/workflows/checkov.yml` - Security scanning with Checkov
 - `.github/workflows/linter.yml` - General linting
 - `.github/workflows/auto-assign.yml` - Auto-assign PR reviewers
+
+**Standards**: See `docs/github-actions.md` for GitHub Actions requirements and standards.
 
 ## Code Style and Quality
 
