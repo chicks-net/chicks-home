@@ -27,5 +27,22 @@ Write in the voice of Christopher Hicks with these characteristics:
 
 ## Compliance to best practices
 
+### Markdown
+
+- Markdown files have a `.md` extension
 - Produce Markdown files that are compliant with `markdownlint`
-- Run markdownlint with the `markdownlint-cli2` command.
+- Run markdownlint with the `markdownlint-cli2` command, no `npx` needed.
+
+### Shell Scripts
+
+- Shell scripts may end with `.sh` extension, but they could also be
+  executable files without an extension.
+- Run `shellcheck` and fix most of the issues it mentions
+
+### Just files
+
+- Just provides constants for colors and other display items.
+  See https://just.systems/man/en/constants.html for the complete list.
+- Just recipes default to running in the repo root.  Just recipes
+  work the same regardless of the directory you are in when you call them.
+- Run `just shellcheck` on new recipes if it is available.
