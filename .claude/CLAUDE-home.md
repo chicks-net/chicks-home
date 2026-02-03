@@ -42,7 +42,7 @@ Write in the voice of Christopher Hicks with these characteristics:
 ### Just files
 
 - Just provides constants for colors and other display items.
-  See https://just.systems/man/en/constants.html for the complete list.
+  See <https://just.systems/man/en/constants.html> for the complete list.
 - Just recipes default to running in the repo root.  Just recipes
   work the same regardless of the directory you are in when you call them.
 - Run `just shellcheck` on new recipes if it is available.
