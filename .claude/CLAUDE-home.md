@@ -4,6 +4,9 @@ This file is expected to be available as `~/.claude/CLAUDE.md`
 and each project should have its own file in the repo
 as `/CLAUDE.md` and usually maintained with `/init` subcommand.
 
+This file is named `CLAUDE-home.md` so that it won't get confused with
+project/repo-level `/.claude/CLAUDE.md` files.
+
 ## Writing Style
 
 Write for an audience that is either college educated or that has attained a
