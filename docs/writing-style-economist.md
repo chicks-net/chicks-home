@@ -1,8 +1,6 @@
 # The Economist Writing Style
 
-Summarized from "Writing with Style: The Economist Guide" by Lane Greene
-
----
+Summarized from ["Writing with Style: The Economist Guide" by Lane Greene](https://education.economist.com/insights/what-to-read/writing-with-style)
 
 ## The Core Philosophy
 
@@ -12,8 +10,6 @@ its place. Clarity is not a nicety — it is the entire point.
 
 The Economist's style rests on three values: **clarity, brevity, and
 precision**. If a choice must be made, clarity wins every time.
-
----
 
 ## Voice and Tone
 
@@ -28,8 +24,6 @@ precision**. If a choice must be made, clarity wins every time.
 - **No throat-clearing.** Don't warm up the engine. Start with the substance.
 - **Wit is welcome; cleverness for its own sake is not.** A well-placed aside
   or turn of phrase earns its keep; puns that require effort to parse do not.
-
----
 
 ## Sentences and Structure
 
@@ -46,8 +40,6 @@ precision**. If a choice must be made, clarity wins every time.
   Use it honestly.
 - **Lead with the news.** In any piece, the most important thing comes first —
   not buried in paragraph four after extensive scene-setting.
-
----
 
 ## Words
 
@@ -69,8 +61,6 @@ precision**. If a choice must be made, clarity wins every time.
 - **Be specific with numbers.** "A majority" means nothing. "63%" means
   something. Prefer the latter.
 
----
-
 ## Economy
 
 - **If a word does no work, cut it.** Read every sentence and ask what each
@@ -82,8 +72,6 @@ precision**. If a choice must be made, clarity wins every time.
   lost confidence.
 - **Avoid throat-clearing transitions.** "Having established X, we can now turn
   to Y" — just turn to Y.
-
----
 
 ## Structure and Argument
 
@@ -99,8 +87,6 @@ precision**. If a choice must be made, clarity wins every time.
   reader into the next naturally. If you're writing "Furthermore..." or "In
   conclusion...", find a better link.
 
----
-
 ## Common Traps to Avoid
 
 | Trap | Fix |
@@ -114,8 +100,6 @@ precision**. If a choice must be made, clarity wins every time.
 | Scare quotes | Use them rarely; they suggest you don't believe |
 | Noun strings | Unpack into a real sentence |
 
----
-
 ## On Research and Honesty
 
 - **Show your sources, implicitly or explicitly.** Even without footnotes, good
@@ -126,8 +110,6 @@ precision**. If a choice must be made, clarity wins every time.
   never an ending; it's a starting point.
 - **Don't overstate your conclusion.** If the evidence is suggestive, say
   suggestive. Certainty you haven't earned will cost you credibility.
-
----
 
 ## For Technical Writing (Applied to Chicks.net)
 
