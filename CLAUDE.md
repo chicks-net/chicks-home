@@ -20,8 +20,8 @@ intentionally avoids Ansible due to maintainer preferences.
 ### Just Commands
 
 This repository uses [just](https://github.com/casey/just) as the primary task
-runner. The justfile imports modular recipes from `.just/gh-process.just` and
-`.just/compliance.just`.
+runner. The justfile imports modular recipes from `.just/gh-process.just`,
+`.just/compliance.just`, `.just/shellcheck.just`, and `.just/test.just`.
 
 **Standard PR Workflow** (use this pattern for all changes):
 
@@ -37,6 +37,8 @@ just merge            # Squash-merges PR, deletes branch, returns to main
 - `just sync` - Return to main branch and pull latest changes
 - `just compliance_check` - Verify repo has expected documentation and
   configuration files. See AGENTS.md for guidance for agentic coding assistants.
+- `just shellcheck` - Run shellcheck on shell scripts, including bash embedded
+  in just recipes (extracts via awk before linting)
 - `just prweb` - View current PR in web browser
 - `just release <version>` - Create a GitHub release with auto-generated notes
 - `just mergepdf <dest> <src...>` - Merge PDF files (macOS only)
@@ -131,6 +133,11 @@ with comprehensive documentation links.
 
 ### `.just/` - Modular Justfile Components
 
+These recipes are synced from [`fini-net/template-repo`](https://github.com/fini-net/template-repo)
+via the numbered `github/gh-process-*` automation scripts. Run
+`.just/install-prerequisites.sh` to install required tools (just, gh, shellcheck,
+markdownlint-cli2, jq) on macOS or Linux before using any just recipes.
+
 - **`gh-process.just`** - Git/GitHub PR workflow automation
   - Implements branch/pr/merge workflow
   - Auto-watches GitHub Actions checks
@@ -141,6 +148,9 @@ with comprehensive documentation links.
     SECURITY, PR templates, issue templates, CODEOWNERS
   - Checks for .gitignore, .gitattributes, .editorconfig, justfile
   - Color-coded feedback (RED/GREEN/BLUE)
+- **`shellcheck.just`** - Shellcheck validation for shell scripts and bash
+  embedded in just recipes (uses awk to extract indented shell blocks)
+- **`test.just`** - Placeholder for future test recipes
 
 ## GitHub Actions Workflows
 
@@ -161,7 +171,10 @@ markdownlint-cli2 "**/*.md"
 - `.github/workflows/linter.yml` - General linting
 - `.github/workflows/auto-assign.yml` - Auto-assign PR reviewers
 
-**Standards**: See `docs/github-actions.md` for GitHub Actions requirements and standards.
+**Standards**: See `docs/github-actions.md` for GitHub Actions requirements and
+standards. See `docs/writing-style-economist.md` for documentation style guidance
+(based on The Economist's style guide, with a "For Technical Writing" section
+applied to chicks.net content).
 
 ## Code Style and Quality
 
