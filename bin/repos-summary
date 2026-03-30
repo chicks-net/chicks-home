@@ -25,8 +25,10 @@ template_just_file="$template_repo/.just/gh-process.just"
 # Calculate checksum of template .just file if it exists
 if [[ -f "$template_just_file" ]]; then
 	template_just_checksum=$(md5 -q "$template_just_file" 2>/dev/null || echo "")
+	template_version=$(grep '# PR create' "$template_just_file" | sed -E 's/.*v([0-9.]+).*/v\1/')
 else
 	template_just_checksum=""
+	template_version=""
 fi
 
 # Array to store repos with modified files
@@ -59,8 +61,9 @@ for dir in ~/Documents/Creative_Writing/cw $(find "$gitdir" -type d -mindepth 1 
 			if [[ -f "$repo_just_file" ]]; then
 				repo_just_checksum=$(md5 -q "$repo_just_file" 2>/dev/null || echo "")
 				if [[ "$repo_just_checksum" != "$template_just_checksum" ]]; then
-					echo -e "  - ${BLUE}Outdated .just/gh-process.just (differs from template-repo)${RESET}"
-					outdated_just_repos+=("$dir")
+					repo_version=$(grep '# PR create' "$repo_just_file" | sed -E 's/.*v([0-9.]+).*/v\1/')
+					echo -e "  - ${BLUE}Outdated .just/gh-process.just ($repo_version, template: $template_version)${RESET}"
+					outdated_just_repos+=("$repo_version:$dir")
 				fi
 			elif [[ "$dir" != "$template_repo" && -d "$dir/.just" ]]; then
 				# Only report missing if it's not the template repo itself
@@ -192,7 +195,9 @@ if [[ ${#outdated_just_repos[@]} -gt 0 ]]; then
 			repo_path="${repo#missing:}"
 			echo -e "  ${CYAN}MISSING${RESET} in $repo_path"
 		else
-			echo -e "  ${CYAN}OUTDATED or DIFFERENT${RESET} in $repo"
+			repo_version="${repo%%:*}"
+			repo_path="${repo#*:}"
+			echo -e "  ${CYAN}OUTDATED${RESET} $repo_version (template: $template_version) in $repo_path"
 		fi
 	done
 fi
