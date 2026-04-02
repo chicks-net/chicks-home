@@ -2,8 +2,8 @@
   "files": {
     "includes": [
       "**",
-      "!/.claude/**",
-      "!/.just/**"
+      "!/.claude",
+      "!/.just"
     ]
   }
 }
