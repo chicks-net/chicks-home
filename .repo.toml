@@ -1,0 +1,15 @@
+# .repo.toml
+
+[about]
+description = "my home directory and scripts 🐪🐚"
+topics = ["bash-prompt", "bashrc-configs", "perl", "tmux"]
+
+[urls]
+git_ssh = "git@github.com:chicks-net/chicks-home.git"
+web_url = "https://github.com/chicks-net/chicks-home"
+
+[flags]
+claude = false
+claude-review = false
+copilot-review = false
+standard-release = true
