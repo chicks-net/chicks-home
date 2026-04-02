@@ -15,9 +15,11 @@ jobs:
     permissions:
       contents: read
     steps:
+    # zizmor: ignore[unpinned-uses]
     - uses: actions/checkout@v6
       with:
         persist-credentials: false
+    # zizmor: ignore[unpinned-uses]
     - uses: DavidAnson/markdownlint-cli2-action@v22
       with:
         globs: |

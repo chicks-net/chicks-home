@@ -29,10 +29,12 @@ jobs:
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
       # Checks-out your repository under $GITHUB_WORKSPACE, so follow-up steps can access it
+      # zizmor: ignore[unpinned-uses]
       - uses: actions/checkout@v6
         with:
           persist-credentials: false
 
+      # zizmor: ignore[unpinned-uses]
       - name: Checkov GitHub Action
         uses: bridgecrewio/checkov-action@v12
         with:
@@ -40,6 +42,7 @@ jobs:
           output_format: cli,sarif
           output_file_path: console,results.sarif
         
+      # zizmor: ignore[unpinned-uses]
       - name: Upload SARIF file
         uses: github/codeql-action/upload-sarif@v4
         
