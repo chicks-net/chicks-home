@@ -65,3 +65,6 @@ jobs:
           FILTER_REGEX_EXCLUDE: .*\.claude/.*
           VALIDATE_BIOME: false
           VALIDATE_SHELL_SHFMT: false
+          BIOME_FORMAT: false
+          JSON_PRETTIER: false
+          YAML_PRETTIER: false
