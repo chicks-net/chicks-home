@@ -1,5 +1,8 @@
 {
   "files": {
-    "ignoreSource": [".claude/**", "**/.claude/**"]
+    "includes": [
+      "**",
+      "!**/.claude/**"
+    ]
   }
 }
