@@ -47,15 +47,18 @@ jobs:
       # Checkout the code base #
       ##########################
       - name: Checkout Code
+        # zizmor: ignore[unpinned-uses]
         uses: actions/checkout@v6
         with:
           # Full git history is needed to get a proper list of changed files within `super-linter`
           fetch-depth: 0
+          persist-credentials: false
 
       ################################
       # Run Linter against code base #
       ################################
       - name: Super-linter
+        # zizmor: ignore[unpinned-uses]
         uses: super-linter/super-linter@v8.5.0
         env:
           VALIDATE_ALL_CODEBASE: false
