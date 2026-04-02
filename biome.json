@@ -1,9 +1,0 @@
-{
-  "files": {
-    "includes": [
-      "**",
-      "!/.claude",
-      "!/.just"
-    ]
-  }
-}
