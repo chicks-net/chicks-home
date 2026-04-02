@@ -1,15 +1,15 @@
 {
   "permissions": {
     "allow": [
-      "Bash(markdownlint-cli2:*)",
+      "Bash(editorconfig-checker:*)",
+      "Bash(gh pr checks:*)",
+      "Bash(gh pr view:*)",
+      "Bash(gh run view:*)",
       "Bash(git config:*)",
       "Bash(just list:*)",
-      "Bash(gh pr view:*)",
-      "Bash(podchecker:*)",
+      "Bash(markdownlint-cli2:*)",
       "Bash(perldoc:*)",
-      "Bash(gh pr checks:*)",
-      "Bash(gh run view:*)",
-      "Bash(editorconfig-checker:*)",
+      "Bash(podchecker:*)",
       "WebFetch(domain:github.com)"
     ],
     "deny": [],
