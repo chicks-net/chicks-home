@@ -1,2 +1,0 @@
-shell-init: error retrieving current directory: getcwd: cannot access parent directories: Operation not permitted
-bash: /Users/chicks/Documents/git/chicks-home/bin/daily_desktop_cleanup: Operation not permitted
