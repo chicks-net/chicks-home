@@ -10,6 +10,7 @@ import? '.just/compliance.just'
 import? '.just/gh-process.just'
 import? '.just/shellcheck.just'
 import? '.just/test.just'
+import? '.just/launchd.just'
 
 # list recipes (default works without naming it)
 [group('example')]
