@@ -2,54 +2,54 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
-    <!-- Label uniquely identifies this job -->
-    <key>Label</key>
-    <string>net.chicks.daily-desktop-cleanup</string>
+	<!-- Label uniquely identifies this job -->
+	<key>Label</key>
+	<string>net.chicks.daily-desktop-cleanup</string>
 
-    <!-- Program to run -->
-    <key>ProgramArguments</key>
-    <array>
-        <string>/Users/chicks/Documents/git/chicks-home/bin/daily_desktop_cleanup</string>
-    </array>
+	<!-- Program to run -->
+	<key>ProgramArguments</key>
+	<array>
+		<string>/Users/chicks/Documents/git/chicks-home/bin/daily_desktop_cleanup</string>
+	</array>
 
-    <!-- Working directory for the script -->
-    <key>WorkingDirectory</key>
-    <string>/Users/chicks/Documents/git/chicks-home</string>
+	<!-- Working directory for the script -->
+	<key>WorkingDirectory</key>
+	<string>/Users/chicks/Documents/git/chicks-home</string>
 
-    <!-- Run daily at 2 AM -->
-    <key>StartCalendarInterval</key>
-    <dict>
-        <key>Hour</key>
-        <integer>2</integer>
-        <key>Minute</key>
-        <integer>0</integer>
-    </dict>
+	<!-- Run daily at 2 AM -->
+	<key>StartCalendarInterval</key>
+	<dict>
+		<key>Hour</key>
+		<integer>2</integer>
+		<key>Minute</key>
+		<integer>0</integer>
+	</dict>
 
-    <!-- Run at load (immediately when loaded) -->
-    <key>RunAtLoad</key>
-    <true/>
+	<!-- Run at load (immediately when loaded) -->
+	<key>RunAtLoad</key>
+	<true/>
 
-    <!-- Standard output log file -->
-    <key>StandardOutPath</key>
-    <string>/Users/chicks/Documents/git/chicks-home/launchd/daily-desktop-cleanup.log</string>
+	<!-- Standard output log file -->
+	<key>StandardOutPath</key>
+	<string>/Users/chicks/Documents/git/chicks-home/launchd/daily-desktop-cleanup.log</string>
 
-    <!-- Standard error log file -->
-    <key>StandardErrorPath</key>
-    <string>/Users/chicks/Documents/git/chicks-home/launchd/daily-desktop-cleanup.err</string>
+	<!-- Standard error log file -->
+	<key>StandardErrorPath</key>
+	<string>/Users/chicks/Documents/git/chicks-home/launchd/daily-desktop-cleanup.err</string>
 
-    <!-- Environment variables -->
-    <key>EnvironmentVariables</key>
-    <dict>
-        <key>PATH</key>
-        <string>/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin</string>
-    </dict>
+	<!-- Environment variables -->
+	<key>EnvironmentVariables</key>
+	<dict>
+		<key>PATH</key>
+		<string>/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin</string>
+	</dict>
 
-    <!-- Keep the job alive (restart if it exits) -->
-    <key>KeepAlive</key>
-    <false/>
+	<!-- Keep the job alive (restart if it exits) -->
+	<key>KeepAlive</key>
+	<false/>
 
-    <!-- Low priority process -->
-    <key>Nice</key>
-    <integer>1</integer>
+	<!-- Low priority process -->
+	<key>Nice</key>
+	<integer>1</integer>
 </dict>
 </plist>

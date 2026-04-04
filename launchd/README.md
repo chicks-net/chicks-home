@@ -6,7 +6,7 @@ daily at 2 AM on macOS using launchd.
 ## Quick Setup
 
 **Important**: The plist file contains hardcoded paths. You must edit it first
-to match your repo location. Use `just launchd-install` which handles this
+to match your repository location. Use `just launchd-install` which handles this
 automatically, or manually update these paths in the plist:
 
 - `ProgramArguments` - path to `bin/daily_desktop_cleanup`
@@ -161,9 +161,9 @@ plutil -lint ~/Library/LaunchAgents/net.chicks.daily-desktop-cleanup.plist
 1. Check the logs for errors
 2. Verify the script is executable:
 
-   ```bash
-   chmod +x bin/daily_desktop_cleanup
-   ```
+    ```bash
+    chmod +x bin/daily_desktop_cleanup
+    ```
 
 3. Make sure the script path is correct in the plist file
 4. Check permissions on the Desktop and Pictures directories
