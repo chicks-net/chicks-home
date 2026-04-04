@@ -5,6 +5,14 @@ daily at 2 AM on macOS using launchd.
 
 ## Quick Setup
 
+**Important**: The plist file contains hardcoded paths. You must edit it first
+to match your repo location. Use `just launchd-install` which handles this
+automatically, or manually update these paths in the plist:
+
+- `ProgramArguments` - path to `bin/daily_desktop_cleanup`
+- `WorkingDirectory` - repo root directory
+- `StandardOutPath` and `StandardErrorPath` - log file paths
+
 Copy the plist file to your LaunchAgents directory and load it:
 
 ```bash
@@ -165,7 +173,8 @@ plutil -lint ~/Library/LaunchAgents/net.chicks.daily-desktop-cleanup.plist
 The script needs permission to access Desktop and Pictures folders. On macOS,
 you may need to grant Full Disk Access to the terminal or the script:
 
-1. Open System Preferences → Privacy & Security → Full Disk Access
+1. Open System Preferences → Privacy & Security →
+      Full Disk Access
 2. Add Terminal.app (or your terminal emulator)
 3. Restart the terminal and reload the launchd job
 
@@ -182,9 +191,13 @@ provides better integration with macOS including:
 
 ## Notes
 
+- Hardcoded paths in the plist are automatically substituted by
+  `just launchd-install` and `just launchd-reload`
 - The job runs with `Nice` priority 1, meaning it yields to other processes
-- `RunAtLoad` is set to true, so it runs immediately when loaded
-- The job doesn't keep alive - it runs, completes, and waits for the next scheduled time
+- `RunAtLoad` is set to true, so it runs immediately when loaded - use
+  `just launchd-run` for manual testing instead of reloading repeatedly
+- The job doesn't keep alive - it runs, completes, and waits for the next
+  scheduled time
 - Screenshots older than 30 days are moved to `~/Pictures/ScreenShots`
 - Logs are appended, not rotated - you may want to clean them periodically
 

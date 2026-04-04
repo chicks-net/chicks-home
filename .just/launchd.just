@@ -1,4 +1,7 @@
 # launchd management recipes
+#
+# Note: Uses color variables (BLUE, GREEN, RED, etc.) defined in the main justfile.
+# This module requires those constants to be available.
 
 PLIST_NAME := "net.chicks.daily-desktop-cleanup.plist"
 PLIST_SOURCE := "launchd" / PLIST_NAME
@@ -18,13 +21,18 @@ launchd-install:
 		exit 1
 	fi
 
+	# get repository root directory
+	REPO_ROOT="$(pwd)"
+
 	# create LaunchAgents directory if needed
 	mkdir -p ~/Library/LaunchAgents
 
-	# copy plist
-	cp "{{PLIST_SOURCE}}" "{{PLIST_DEST}}"
+	# copy plist and substitute hardcoded paths
+	sed -e "s|/Users/chicks/Documents/git/chicks-home|${REPO_ROOT}|g" \
+		"{{PLIST_SOURCE}}" > "{{PLIST_DEST}}"
 
 	echo "{{GREEN}}Copied {{PLIST_SOURCE}} to {{PLIST_DEST}}{{NORMAL}}"
+	echo "{{BLUE}}Updated paths for: ${REPO_ROOT}{{NORMAL}}"
 
 	# load the job
 	launchctl load "{{PLIST_DEST}}"
@@ -82,15 +90,20 @@ launchd-reload:
 
 	echo "{{BLUE}}Reloading {{SERVICE_NAME}}...{{NORMAL}}"
 
+	# get repository root directory
+	REPO_ROOT="$(pwd)"
+
 	# unload if loaded
 	if launchctl list | grep -q "{{SERVICE_NAME}}"; then
 		launchctl unload "{{PLIST_DEST}}"
 		echo "{{GREEN}}Unloaded old version{{NORMAL}}"
 	fi
 
-	# copy updated plist
-	cp "{{PLIST_SOURCE}}" "{{PLIST_DEST}}"
+	# copy updated plist and substitute hardcoded paths
+	sed -e "s|/Users/chicks/Documents/git/chicks-home|${REPO_ROOT}|g" \
+		"{{PLIST_SOURCE}}" > "{{PLIST_DEST}}"
 	echo "{{GREEN}}Copied updated plist{{NORMAL}}"
+	echo "{{BLUE}}Updated paths for: ${REPO_ROOT}{{NORMAL}}"
 
 	# load
 	launchctl load "{{PLIST_DEST}}"
@@ -121,8 +134,7 @@ launchd-logs:
 	fi
 
 	if [[ -f launchd/daily-desktop-cleanup.err ]]; then
-		ERR_SIZE=$(wc -c < launchd/daily-desktop-cleanup.err)
-		if [[ $ERR_SIZE -gt 0 ]]; then
+		if [[ -s launchd/daily-desktop-cleanup.err ]]; then
 			echo "{{RED}}=== Errors ==={{NORMAL}}"
 			tail -20 launchd/daily-desktop-cleanup.err
 			echo ""
