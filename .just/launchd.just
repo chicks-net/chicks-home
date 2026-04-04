@@ -2,11 +2,35 @@
 #
 # Note: Uses color variables (BLUE, GREEN, RED, etc.) defined in the main justfile.
 # This module requires those constants to be available.
+#
+# macOS-only: All launchd recipes require macOS. They will error on other platforms.
 
 PLIST_NAME := "net.chicks.daily-desktop-cleanup.plist"
 PLIST_SOURCE := "launchd" / PLIST_NAME
-PLIST_DEST := env_var_or_default("HOME", "") / "Library/LaunchAgents" / PLIST_NAME
+PLIST_DEST := env_var("HOME") / "Library/LaunchAgents" / PLIST_NAME
 SERVICE_NAME := "net.chicks.daily-desktop-cleanup"
+
+# internal: check if running on macos
+[group('launchd')]
+_check-macos:
+    #!/usr/bin/env bash
+    set -euo pipefail
+
+    if [[ "$(uname)" != "Darwin" ]]; then
+        echo "{{RED}}Error: launchd recipes are macOS-only{{NORMAL}}" >&2
+        exit 1
+    fi
+
+# internal: copy plist with path substitution
+[group('launchd')]
+_copy-plist:
+    #!/usr/bin/env bash
+    set -euo pipefail
+
+    REPO_ROOT="$(pwd)"
+    sed -e "s|/Users/chicks/Documents/git/chicks-home|${REPO_ROOT}|g" \
+        "{{PLIST_SOURCE}}" > "{{PLIST_DEST}}"
+    echo "{{BLUE}}Updated paths for: ${REPO_ROOT}{{NORMAL}}"
 
 # install the launchd plist file
 [group('launchd')]
@@ -14,6 +38,7 @@ launchd-install:
     #!/usr/bin/env bash
     set -euo pipefail
 
+    just _check-macos
     echo "{{BLUE}}Installing launchd plist...{{NORMAL}}"
 
     if [[ ! -f "{{PLIST_SOURCE}}" ]]; then
@@ -21,20 +46,11 @@ launchd-install:
         exit 1
     fi
 
-    # get repository root directory
-    REPO_ROOT="$(pwd)"
-
-    # create LaunchAgents directory if needed
     mkdir -p ~/Library/LaunchAgents
-
-    # copy plist and substitute hardcoded paths
-    sed -e "s|/Users/chicks/Documents/git/chicks-home|${REPO_ROOT}|g" \
-        "{{PLIST_SOURCE}}" > "{{PLIST_DEST}}"
+    just _copy-plist
 
     echo "{{GREEN}}Copied {{PLIST_SOURCE}} to {{PLIST_DEST}}{{NORMAL}}"
-    echo "{{BLUE}}Updated paths for: ${REPO_ROOT}{{NORMAL}}"
 
-    # load the job
     launchctl load "{{PLIST_DEST}}"
 
     echo "{{GREEN}}Loaded {{SERVICE_NAME}}{{NORMAL}}"
@@ -47,9 +63,9 @@ launchd-status:
     #!/usr/bin/env bash
     set -euo pipefail
 
+    just _check-macos
     echo "{{BLUE}}Checking launchd status for {{SERVICE_NAME}}...{{NORMAL}}"
 
-    # check if loaded
     if launchctl list | grep -q "{{SERVICE_NAME}}"; then
         echo "{{GREEN}}Job is loaded{{NORMAL}}"
         echo ""
@@ -73,6 +89,7 @@ launchd-unload:
     #!/usr/bin/env bash
     set -euo pipefail
 
+    just _check-macos
     echo "{{BLUE}}Unloading {{SERVICE_NAME}}...{{NORMAL}}"
 
     if launchctl list | grep -q "{{SERVICE_NAME}}"; then
@@ -88,24 +105,18 @@ launchd-reload:
     #!/usr/bin/env bash
     set -euo pipefail
 
+    just _check-macos
     echo "{{BLUE}}Reloading {{SERVICE_NAME}}...{{NORMAL}}"
 
-    # get repository root directory
-    REPO_ROOT="$(pwd)"
-
-    # unload if loaded
     if launchctl list | grep -q "{{SERVICE_NAME}}"; then
         launchctl unload "{{PLIST_DEST}}"
         echo "{{GREEN}}Unloaded old version{{NORMAL}}"
     fi
 
-    # copy updated plist and substitute hardcoded paths
-    sed -e "s|/Users/chicks/Documents/git/chicks-home|${REPO_ROOT}|g" \
-        "{{PLIST_SOURCE}}" > "{{PLIST_DEST}}"
-    echo "{{GREEN}}Copied updated plist{{NORMAL}}"
-    echo "{{BLUE}}Updated paths for: ${REPO_ROOT}{{NORMAL}}"
+    just _copy-plist
 
-    # load
+    echo "{{GREEN}}Copied updated plist{{NORMAL}}"
+
     launchctl load "{{PLIST_DEST}}"
     echo "{{GREEN}}Loaded new version{{NORMAL}}"
 
@@ -115,6 +126,7 @@ launchd-run:
     #!/usr/bin/env bash
     set -euo pipefail
 
+    just _check-macos
     echo "{{BLUE}}Running desktop cleanup manually...{{NORMAL}}"
     bin/daily_desktop_cleanup
 
@@ -124,6 +136,7 @@ launchd-logs:
     #!/usr/bin/env bash
     set -euo pipefail
 
+    just _check-macos
     echo "{{BLUE}}Recent log entries:{{NORMAL}}"
     echo ""
 
@@ -149,6 +162,7 @@ launchd-validate:
     #!/usr/bin/env bash
     set -euo pipefail
 
+    just _check-macos
     echo "{{BLUE}}Validating plist syntax...{{NORMAL}}"
 
     if plutil -lint "{{PLIST_SOURCE}}"; then

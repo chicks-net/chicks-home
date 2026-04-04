@@ -5,28 +5,31 @@ daily at 2 AM on macOS using launchd.
 
 ## Quick Setup
 
-**Important**: The plist file contains hardcoded paths. You must edit it first
-to match your repository location. Use `just launchd-install` which handles this
-automatically, or manually update these paths in the plist:
+**Important**: The plist file contains hardcoded paths. Use `just launchd-install`
+which automatically substitutes paths for your repository location. Do **not**
+manually copy the plist file without editing it first - it will have incorrect
+paths.
+
+The `just launchd-install` command:
+
+1. Finds your repository root
+2. Substitutes hardcoded paths in the plist
+3. Copies the plist to `~/Library/LaunchAgents/`
+4. Loads the job with launchctl
+
+If you must copy manually, edit these paths in the plist first:
 
 - `ProgramArguments` - path to `bin/daily_desktop_cleanup`
 - `WorkingDirectory` - repo root directory
 - `StandardOutPath` and `StandardErrorPath` - log file paths
 
-Copy the plist file to your LaunchAgents directory and load it:
+Then copy and load:
 
 ```bash
-# Copy the plist file
+# After editing paths manually
 cp launchd/net.chicks.daily-desktop-cleanup.plist ~/Library/LaunchAgents/
-
-# Load the job
 launchctl load ~/Library/LaunchAgents/net.chicks.daily-desktop-cleanup.plist
-
-# Start it immediately (optional - RunAtLoad already does this)
-launchctl start net.chicks.daily-desktop-cleanup
 ```
-
-That's it! The cleanup will now run daily at 2 AM.
 
 ## Verifying It Works
 
@@ -185,9 +188,13 @@ provides better integration with macOS including:
 
 - Automatic restart on failure
 - Better logging
-- Runs even when not logged in
+- Runs when you're logged in (LaunchAgents run in your user session)
 - More flexible scheduling options
 - Resource management
+
+Note: LaunchAgents (stored in `~/Library/LaunchAgents`) only run when you're
+logged in. For jobs that need to run before login or without a user session,
+use LaunchDaemons (stored in `/Library/LaunchDaemons`) instead.
 
 ## Notes
 
