@@ -67,10 +67,10 @@ launchctl unload ~/Library/LaunchAgents/net.chicks.daily-desktop-cleanup.plist
 ### Reload after making changes
 
 ```bash
-launchctl unload ~/Library/LaunchAgents/net.chicks.daily-desktop-cleanup.plist
-cp launchd/net.chicks.daily-desktop-cleanup.plist ~/Library/LaunchAgents/
-launchctl load ~/Library/LaunchAgents/net.chicks.daily-desktop-cleanup.plist
+just launchd-reload
 ```
+
+This unloads the old job, copies the updated plist with correct paths, and loads the new version.
 
 ## Customizing the Schedule
 
@@ -161,10 +161,10 @@ plutil -lint ~/Library/LaunchAgents/net.chicks.daily-desktop-cleanup.plist
 ### Job loads but doesn't run
 
 1. Check the logs for errors
-2. Verify the script is executable:
+2. Verify the script runs manually:
 
     ```bash
-    chmod +x bin/daily_desktop_cleanup
+    go run bin/daily_desktop_cleanup.go
     ```
 
 3. Make sure the script path is correct in the plist file

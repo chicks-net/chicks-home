@@ -95,16 +95,23 @@ func moveFile(src, dst string) error {
 	if err != nil {
 		return err
 	}
-	defer dstFile.Close()
 
 	if _, err := io.Copy(dstFile, srcFile); err != nil {
+		dstFile.Close()
 		os.Remove(dst)
 		return err
 	}
 
+	if err := dstFile.Close(); err != nil {
+		os.Remove(dst)
+		return fmt.Errorf("failed to close destination file: %w", err)
+	}
+
 	srcInfo, err := os.Stat(src)
 	if err == nil {
-		os.Chmod(dst, srcInfo.Mode())
+		if err := os.Chmod(dst, srcInfo.Mode()); err != nil {
+			fmt.Fprintf(os.Stderr, "Warning: failed to set permissions on %s: %v\n", dst, err)
+		}
 	}
 
 	return os.Remove(src)

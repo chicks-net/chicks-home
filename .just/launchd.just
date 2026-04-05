@@ -28,7 +28,7 @@ _copy-plist:
     set -euo pipefail
 
     REPO_ROOT="$(pwd)"
-    sed -e "s|/Users/chicks/Documents/git/chicks-home|${REPO_ROOT}|g" \
+    sed -e "s#/Users/chicks/Documents/git/chicks-home#${REPO_ROOT}#g" \
         "{{PLIST_SOURCE}}" > "{{PLIST_DEST}}"
     echo "{{BLUE}}Updated paths for: ${REPO_ROOT}{{NORMAL}}"
 
@@ -156,7 +156,7 @@ launchd-logs:
         fi
     fi
 
-# validate the plist file syntax
+# validate the plist file syntax (validates template, not installed copy)
 [group('launchd')]
 launchd-validate:
     #!/usr/bin/env bash
