@@ -81,6 +81,10 @@ func main() {
 }
 
 func moveFile(src, dst string) error {
+	if _, err := os.Stat(dst); err == nil {
+		return fmt.Errorf("destination file already exists: %s", dst)
+	}
+
 	srcFile, err := os.Open(src)
 	if err != nil {
 		return err
@@ -102,9 +106,6 @@ func moveFile(src, dst string) error {
 	if err == nil {
 		os.Chmod(dst, srcInfo.Mode())
 	}
-
-	dstFile.Close()
-	srcFile.Close()
 
 	return os.Remove(src)
 }

@@ -6,10 +6,11 @@
 	<key>Label</key>
 	<string>net.chicks.daily-desktop-cleanup</string>
 
-	<!-- Program to run -->
+	<!-- Program to run (uses PATH for go) -->
 	<key>ProgramArguments</key>
 	<array>
-		<string>/opt/homebrew/bin/go</string>
+		<string>/usr/bin/env</string>
+		<string>go</string>
 		<string>run</string>
 		<string>/Users/chicks/Documents/git/chicks-home/bin/daily_desktop_cleanup.go</string>
 	</array>
@@ -42,7 +43,7 @@
 		<string>/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin</string>
 	</dict>
 
-	<!-- Keep the job alive (restart if it exits) -->
+	<!-- Do not keep alive (run once and exit) -->
 	<key>KeepAlive</key>
 	<false/>
 

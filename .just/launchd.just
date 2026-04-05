@@ -51,7 +51,7 @@ launchd-install:
 
     echo "{{GREEN}}Copied {{PLIST_SOURCE}} to {{PLIST_DEST}}{{NORMAL}}"
 
-    launchctl load "{{PLIST_DEST}}"
+    launchctl bootstrap gui/"$(id -u)" "{{PLIST_DEST}}"
 
     echo "{{GREEN}}Loaded {{SERVICE_NAME}}{{NORMAL}}"
     echo ""
@@ -93,7 +93,7 @@ launchd-unload:
     echo "{{BLUE}}Unloading {{SERVICE_NAME}}...{{NORMAL}}"
 
     if launchctl list | grep -q "{{SERVICE_NAME}}"; then
-        launchctl unload "{{PLIST_DEST}}"
+        launchctl bootout gui/"$(id -u)" "{{PLIST_DEST}}"
         echo "{{GREEN}}Unloaded {{SERVICE_NAME}}{{NORMAL}}"
     else
         echo "{{YELLOW}}Job was not loaded{{NORMAL}}"
@@ -109,7 +109,7 @@ launchd-reload:
     echo "{{BLUE}}Reloading {{SERVICE_NAME}}...{{NORMAL}}"
 
     if launchctl list | grep -q "{{SERVICE_NAME}}"; then
-        launchctl unload "{{PLIST_DEST}}"
+        launchctl bootout gui/"$(id -u)" "{{PLIST_DEST}}"
         echo "{{GREEN}}Unloaded old version{{NORMAL}}"
     fi
 
@@ -117,7 +117,7 @@ launchd-reload:
 
     echo "{{GREEN}}Copied updated plist{{NORMAL}}"
 
-    launchctl load "{{PLIST_DEST}}"
+    launchctl bootstrap gui/"$(id -u)" "{{PLIST_DEST}}"
     echo "{{GREEN}}Loaded new version{{NORMAL}}"
 
 # run the cleanup script manually
@@ -128,7 +128,7 @@ launchd-run:
 
     just _check-macos
     echo "{{BLUE}}Running desktop cleanup manually...{{NORMAL}}"
-    bin/daily_desktop_cleanup
+    go run bin/daily_desktop_cleanup.go
 
 # view the launchd logs
 [group('launchd')]

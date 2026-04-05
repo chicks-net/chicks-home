@@ -19,8 +19,7 @@ The `just launchd-install` command:
 
 If you must copy manually, edit these paths in the plist first:
 
-- `ProgramArguments` - path to `bin/daily_desktop_cleanup`
-- `WorkingDirectory` - repository root directory
+- `ProgramArguments` - path to `bin/daily_desktop_cleanup.go`
 - `StandardOutPath` and `StandardErrorPath` - log file paths
 
 Then copy and load:
