@@ -25,10 +25,15 @@ If you must copy manually, edit these paths in the plist first:
 Then copy and load:
 
 ```bash
-# After editing paths manually
-cp launchd/net.chicks.daily-desktop-cleanup.plist ~/Library/LaunchAgents/
+# After editing paths manually - REQUIRES full path substitution!
+# Replace /Users/YOURNAME/Documents/git/chicks-home with your actual path
+cp /Users/YOURNAME/Documents/git/chicks-home/launchd/net.chicks.daily-desktop-cleanup.plist \
+   ~/Library/LaunchAgents/
 launchctl load ~/Library/LaunchAgents/net.chicks.daily-desktop-cleanup.plist
 ```
+
+**Warning**: Failing to substitute paths will prevent the job from running. Use
+`just launchd-install` to avoid this problem entirely.
 
 ## Verifying It Works
 
@@ -60,9 +65,18 @@ launchctl stop net.chicks.daily-desktop-cleanup
 
 ### Unload the job (disable it)
 
+For macOS 12 and earlier:
 ```bash
 launchctl unload ~/Library/LaunchAgents/net.chicks.daily-desktop-cleanup.plist
 ```
+
+For macOS 13+ (recommended approach for all versions):
+```bash
+just launchd-unload
+```
+
+Note: `launchctl unload` is deprecated on macOS 13+. The just recipe uses the
+modern `launchctl disable` approach.
 
 ### Reload after making changes
 
