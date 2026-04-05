@@ -70,7 +70,8 @@ launchctl unload ~/Library/LaunchAgents/net.chicks.daily-desktop-cleanup.plist
 just launchd-reload
 ```
 
-This unloads the old job, copies the updated plist with correct paths, and loads the new version.
+This unloads the old job, copies the updated plist with correct paths, and
+loads the new version.
 
 ## Customizing the Schedule
 
