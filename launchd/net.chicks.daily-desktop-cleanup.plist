@@ -9,9 +9,9 @@
 	<!-- Program to run -->
 	<key>ProgramArguments</key>
 	<array>
-		<string>/bin/bash</string>
-		<string>-c</string>
-		<string>mkdir -p ~/Pictures/ScreenShots &amp;&amp; find "$HOME/Desktop" -maxdepth 1 \( -name "Screenshot*.png" -o -name "Screen Shot*.png" -o -name "Screenshot*.jpg" \) -mtime +30 -print0 | while IFS= read -r -d '' file; do filename=$(basename "$file"); if mv "$file" ~/Pictures/ScreenShots/; then echo "Moved: $filename"; else echo "Failed to move: $filename"; fi; done &amp;&amp; remaining=$(find "$HOME/Desktop" -maxdepth 1 \( -name "Screenshot*.png" -o -name "Screen Shot*.png" -o -name "Screenshot*.jpg" \) | wc -l) &amp;&amp; echo "Script completed. $remaining screenshot(s) remain on desktop."</string>
+		<string>/opt/homebrew/bin/go</string>
+		<string>run</string>
+		<string>/Users/chicks/Documents/git/chicks-home/bin/daily_desktop_cleanup.go</string>
 	</array>
 
 	<!-- Run daily at 2 AM -->
