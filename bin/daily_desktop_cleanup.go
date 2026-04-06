@@ -10,16 +10,28 @@ import (
 	"time"
 )
 
+func logWithTimestamp(format string, args ...interface{}) {
+	timestamp := time.Now().Format("2006-01-02 15:04:05")
+	fmt.Printf("[%s] ", timestamp)
+	fmt.Printf(format, args...)
+}
+
+func logError(format string, args ...interface{}) {
+	timestamp := time.Now().Format("2006-01-02 15:04:05")
+	fmt.Fprintf(os.Stderr, "[%s] ", timestamp)
+	fmt.Fprintf(os.Stderr, format, args...)
+}
+
 func main() {
 	homeDir, err := os.UserHomeDir()
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "Error getting home directory: %v\n", err)
+		logError("Error getting home directory: %v\n", err)
 		os.Exit(1)
 	}
 
 	destDir := filepath.Join(homeDir, "Pictures", "ScreenShots")
 	if err := os.MkdirAll(destDir, 0755); err != nil {
-		fmt.Fprintf(os.Stderr, "Error creating destination directory: %v\n", err)
+		logError("Error creating destination directory: %v\n", err)
 		os.Exit(1)
 	}
 
@@ -39,14 +51,14 @@ func main() {
 		fullPattern := filepath.Join(desktopPath, pattern)
 		matches, err := filepath.Glob(fullPattern)
 		if err != nil {
-			fmt.Fprintf(os.Stderr, "Error matching pattern %s: %v\n", pattern, err)
+			logError("Error matching pattern %s: %v\n", pattern, err)
 			continue
 		}
 
 		for _, file := range matches {
 			info, err := os.Stat(file)
 			if err != nil {
-				fmt.Fprintf(os.Stderr, "Error reading file info %s: %v\n", filepath.Base(file), err)
+				logError("Error reading file info %s: %v\n", filepath.Base(file), err)
 				failedCount++
 				continue
 			}
@@ -56,10 +68,10 @@ func main() {
 				destPath := filepath.Join(destDir, filename)
 
 				if err := moveFile(file, destPath); err != nil {
-					fmt.Fprintf(os.Stderr, "Failed to move: %s (%v)\n", filename, err)
+					logError("Failed to move: %s (%v)\n", filename, err)
 					failedCount++
 				} else {
-					fmt.Printf("Moved: %s\n", filename)
+					logWithTimestamp("Moved: %s\n", filename)
 					movedCount++
 				}
 			}
@@ -76,7 +88,7 @@ func main() {
 		remainingCount += len(matches)
 	}
 
-	fmt.Printf("Script completed. %d file(s) moved, %d failed. %d screenshot(s) remain on desktop.\n",
+	logWithTimestamp("Script completed. %d file(s) moved, %d failed. %d screenshot(s) remain on desktop.\n",
 		movedCount, failedCount, remainingCount)
 }
 
@@ -110,7 +122,7 @@ func moveFile(src, dst string) error {
 	srcInfo, err := os.Stat(src)
 	if err == nil {
 		if err := os.Chmod(dst, srcInfo.Mode()); err != nil {
-			fmt.Fprintf(os.Stderr, "Warning: failed to set permissions on %s: %v\n", dst, err)
+			logError("Warning: failed to set permissions on %s: %v\n", dst, err)
 		}
 	}
 
