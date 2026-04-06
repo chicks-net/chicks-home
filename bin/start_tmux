@@ -31,10 +31,11 @@ case $(hostname) in
 		our_new_session fruity
 		our_new_window fruity www-chicks ~/Documents/git/www-chicks-net
 		our_new_window fruity www-fini ~/Documents/git/www-fini-net
-		our_new_window fruity Downloads ~/Downloads
+		our_new_window fruity Down ~/Downloads
+		our_new_window fruity data ~/Documents/git/data-curated
+		our_new_window fruity gh ~/Documents/git/gh-observer
+		our_new_window fruity home ~/Documents/git/chicks-home
 		our_new_window fruity mans ~/LocalDocuments/git/my-user-manuals
-		our_new_window fruity iReserve
-		our_new_window fruity coredns ~/Documents/git/fini-coredns-example
 		our_new_window fruity other ~/Documents/git/
 		our_attach fruity
 
