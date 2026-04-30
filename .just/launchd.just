@@ -10,6 +10,9 @@ PLIST_SOURCE := "launchd" / PLIST_NAME
 PLIST_DEST := env_var("HOME") / "Library/LaunchAgents" / PLIST_NAME
 SERVICE_NAME := "net.chicks.daily-desktop-cleanup"
 
+LAUNCHD_BIN := "launchd" / "daily_desktop_cleanup"
+LAUNCHD_GO_SOURCE := "bin" / "daily_desktop_cleanup.go"
+
 # internal: check if running on macos
 [group('launchd')]
 _check-macos:
@@ -51,9 +54,12 @@ launchd-install:
 
     echo "{{GREEN}}Copied {{PLIST_SOURCE}} to {{PLIST_DEST}}{{NORMAL}}"
 
-    launchctl bootstrap gui/"$(id -u)" "{{PLIST_DEST}}"
-
-    echo "{{GREEN}}Loaded {{SERVICE_NAME}}{{NORMAL}}"
+    if launchctl list | grep -q "{{SERVICE_NAME}}"; then
+        echo "{{YELLOW}}Already loaded. Use just launchd-reload to update.{{NORMAL}}"
+    else
+        launchctl bootstrap gui/"$(id -u)" "{{PLIST_DEST}}"
+        echo "{{GREEN}}Loaded {{SERVICE_NAME}}{{NORMAL}}"
+    fi
     echo ""
     echo "{{MAGENTA}}Verify with: just launchd-status{{NORMAL}}"
 
@@ -72,8 +78,9 @@ launchd-status:
         launchctl list | grep "{{SERVICE_NAME}}" || true
         echo ""
         echo "{{MAGENTA}}Last 10 lines from log:{{NORMAL}}"
-        if [[ -f launchd/daily-desktop-cleanup.log ]]; then
-            tail -10 launchd/daily-desktop-cleanup.log
+        LOG_FILE="$HOME/Library/Logs/daily-desktop-cleanup.log"
+        if [[ -f "$LOG_FILE" ]]; then
+            tail -10 "$LOG_FILE"
         else
             echo "{{YELLOW}}No log file found yet{{NORMAL}}"
         fi
@@ -120,15 +127,21 @@ launchd-reload:
     launchctl bootstrap gui/"$(id -u)" "{{PLIST_DEST}}"
     echo "{{GREEN}}Loaded new version{{NORMAL}}"
 
-# run the cleanup script manually
+# build the launchd binary from Go source
 [group('launchd')]
-launchd-run:
+launchd-build:
     #!/usr/bin/env bash
     set -euo pipefail
 
     just _check-macos
-    echo "{{BLUE}}Running desktop cleanup manually...{{NORMAL}}"
-    go run bin/daily_desktop_cleanup.go
+    echo "{{BLUE}}Building {{LAUNCHD_BIN}}...{{NORMAL}}"
+    go build -o "{{LAUNCHD_BIN}}" "{{LAUNCHD_GO_SOURCE}}"
+    echo "{{GREEN}}Built {{LAUNCHD_BIN}}{{NORMAL}}"
+
+# run the cleanup script manually
+[group('launchd')]
+launchd-run: launchd-build
+    {{LAUNCHD_BIN}}
 
 # view the launchd logs
 [group('launchd')]
@@ -140,16 +153,19 @@ launchd-logs:
     echo "{{BLUE}}Recent log entries:{{NORMAL}}"
     echo ""
 
-    if [[ -f launchd/daily-desktop-cleanup.log ]]; then
+    LOG_FILE="$HOME/Library/Logs/daily-desktop-cleanup.log"
+    ERR_FILE="$HOME/Library/Logs/daily-desktop-cleanup.err"
+
+    if [[ -f "$LOG_FILE" ]]; then
         echo "{{MAGENTA}}=== Standard Output ==={{NORMAL}}"
-        tail -20 launchd/daily-desktop-cleanup.log
+        tail -20 "$LOG_FILE"
         echo ""
     fi
 
-    if [[ -f launchd/daily-desktop-cleanup.err ]]; then
-        if [[ -s launchd/daily-desktop-cleanup.err ]]; then
+    if [[ -f "$ERR_FILE" ]]; then
+        if [[ -s "$ERR_FILE" ]]; then
             echo "{{RED}}=== Errors ==={{NORMAL}}"
-            tail -20 launchd/daily-desktop-cleanup.err
+            tail -20 "$ERR_FILE"
             echo ""
         else
             echo "{{GREEN}}No errors logged{{NORMAL}}"
