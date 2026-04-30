@@ -105,3 +105,5 @@ pm_to_blib
 ###		launchd logs
 launchd/*.log
 launchd/*.err
+# and binary
+launchd/daily_desktop_cleanup

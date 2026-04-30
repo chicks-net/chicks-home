@@ -6,13 +6,10 @@
 	<key>Label</key>
 	<string>net.chicks.daily-desktop-cleanup</string>
 
-	<!-- Program to run (uses PATH for go) -->
+	<!-- Program to run (compiled binary in launchd/ directory) -->
 	<key>ProgramArguments</key>
 	<array>
-		<string>/usr/bin/env</string>
-		<string>go</string>
-		<string>run</string>
-		<string>/Users/chicks/Documents/git/chicks-home/bin/daily_desktop_cleanup.go</string>
+		<string>/Users/chicks/Documents/git/chicks-home/launchd/daily_desktop_cleanup</string>
 	</array>
 
 	<!-- Run daily at 2 AM -->
@@ -30,18 +27,12 @@
 
 	<!-- Standard output log file -->
 	<key>StandardOutPath</key>
-	<string>/Users/chicks/Documents/git/chicks-home/launchd/daily-desktop-cleanup.log</string>
+	<string>/Users/chicks/Library/Logs/daily-desktop-cleanup.log</string>
 
 	<!-- Standard error log file -->
 	<key>StandardErrorPath</key>
-	<string>/Users/chicks/Documents/git/chicks-home/launchd/daily-desktop-cleanup.err</string>
+	<string>/Users/chicks/Library/Logs/daily-desktop-cleanup.err</string>
 
-	<!-- Environment variables -->
-	<key>EnvironmentVariables</key>
-	<dict>
-		<key>PATH</key>
-		<string>/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin</string>
-	</dict>
 
 	<!-- Do not keep alive (run once and exit) -->
 	<key>KeepAlive</key>

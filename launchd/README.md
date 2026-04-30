@@ -19,8 +19,9 @@ The `just launchd-install` command:
 
 If you must copy manually, edit these paths in the plist first:
 
-- `ProgramArguments` - path to `bin/daily_desktop_cleanup.go`
-- `StandardOutPath` and `StandardErrorPath` - log file paths
+- `ProgramArguments` - path to `launchd/daily_desktop_cleanup` (compiled binary)
+- `StandardOutPath` and `StandardErrorPath` - log file paths (must be
+  outside `~/Documents` to avoid macOS sandboxing)
 
 Then copy and load:
 
@@ -52,7 +53,7 @@ You should see output like:
 Check the logs:
 
 ```bash
-tail -f launchd/daily-desktop-cleanup.log
+just launchd-logs
 ```
 
 ## Managing the Job
@@ -148,21 +149,28 @@ Common intervals:
 
 ## Log Files
 
-The plist configuration creates two log files in the launchd directory:
+The plist configuration writes logs to `~/Library/Logs/` (not the repo
+directory, which macOS sandboxing blocks for launchd jobs):
 
-- `daily-desktop-cleanup.log` - Standard output (files moved)
-- `daily-desktop-cleanup.err` - Error output (failures)
+- `~/Library/Logs/daily-desktop-cleanup.log` - Standard output (files moved)
+- `~/Library/Logs/daily-desktop-cleanup.err` - Error output (failures)
 
 View recent activity:
 
 ```bash
-tail -20 launchd/daily-desktop-cleanup.log
+just launchd-logs
+```
+
+Or directly:
+
+```bash
+tail -20 ~/Library/Logs/daily-desktop-cleanup.log
 ```
 
 Check for errors:
 
 ```bash
-tail -20 launchd/daily-desktop-cleanup.err
+tail -20 ~/Library/Logs/daily-desktop-cleanup.err
 ```
 
 ## Troubleshooting
@@ -181,11 +189,14 @@ plutil -lint ~/Library/LaunchAgents/net.chicks.daily-desktop-cleanup.plist
 2. Verify the script runs manually:
 
     ```bash
-    go run bin/daily_desktop_cleanup.go
+    just launchd-run
     ```
 
 3. Make sure the script path is correct in the plist file
 4. Check permissions on the Desktop and Pictures directories
+5. If logs show `EX_CONFIG` (exit code 78), the macOS sandbox may be blocking
+   file access - log paths must be outside `~/Documents` (e.g.
+   `~/Library/Logs/`)
 
 ### Script fails to move files
 
@@ -226,15 +237,19 @@ use LaunchDaemons (stored in `/Library/LaunchDaemons`) instead.
 
 ## What the Script Does
 
-The `daily_desktop_cleanup` script:
+The `launchd/daily_desktop_cleanup` binary (compiled from `bin/daily_desktop_cleanup.go`):
 
 1. Creates `~/Pictures/ScreenShots` if it doesn't exist
 2. Finds screenshots on the Desktop older than 30 days
 3. Moves them to `~/Pictures/ScreenShots`
 4. Reports which files were moved and how many remain
 
+```bash
+just launchd-build
+```
+
 Run it manually to test:
 
 ```bash
-bin/daily_desktop_cleanup
+just launchd-run
 ```
