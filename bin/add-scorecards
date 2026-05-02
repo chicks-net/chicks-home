@@ -1,0 +1,231 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+SCORECARDS_WORKFLOW_DIR=".github/workflows"
+SCORECARDS_WORKFLOW_FILE="scorecards.yml"
+SCRIPT_NAME=$(basename "$0")
+
+RED='\033[31m'
+GREEN='\033[32m'
+BLUE='\033[34m'
+YELLOW='\033[33m'
+NORMAL='\033[0m'
+
+function usage() {
+	echo "Usage: $SCRIPT_NAME <repo-path>"
+	echo ""
+	echo "Add OpenSSF Scorecard workflow and README badge to a git repository."
+	echo ""
+	echo "Options:"
+	echo "  -n, --dry-run    Show what would be done without making changes"
+	echo "  -h, --help       Show this help message"
+	exit 0
+}
+
+function error() {
+	echo -e "${RED}ERROR:${NORMAL} $*" >&2
+	exit 1
+}
+
+function info() {
+	echo -e "${BLUE}$*${NORMAL}"
+}
+
+function success() {
+	echo -e "${GREEN}$*${NORMAL}"
+}
+
+function warn() {
+	echo -e "${YELLOW}$*${NORMAL}"
+}
+
+function create_scorecards_workflow() {
+	local target_dir="$1"
+	local target_file="$target_dir/$SCORECARDS_WORKFLOW_DIR/$SCORECARDS_WORKFLOW_FILE"
+	mkdir -p "$target_dir/$SCORECARDS_WORKFLOW_DIR"
+	cat >"$target_file" <<'SCORECARDS_EOF'
+# This workflow uses actions that are not certified by GitHub. They are provided
+# by a third-party and are governed by separate terms of service, privacy
+# policy, and support documentation.
+
+name: Scorecard supply-chain security
+on:
+  # For Branch-Protection check. Only the default branch is supported. See
+  # https://github.com/ossf/scorecard/blob/main/docs/checks.md#branch-protection
+  branch_protection_rule:
+  # To guarantee Maintained check is occasionally updated. See
+  # https://github.com/ossf/scorecard/blob/main/docs/checks.md#maintained
+  schedule:
+    - cron: '20 7 * * 2'
+  push:
+    branches: ["main"]
+
+# Declare default permissions as read only.
+permissions: read-all
+
+jobs:
+  analysis:
+    name: Scorecard analysis
+    runs-on: ubuntu-latest
+    permissions:
+      # Needed to upload the results to code-scanning dashboard.
+      security-events: write
+      # Needed to publish results and get a badge (see publish_results below).
+      id-token: write
+      contents: read
+      actions: read
+      # To allow GraphQL ListCommits to work
+      issues: read
+      pull-requests: read
+      # To detect SAST tools
+      checks: read
+
+    steps:
+      - name: Harden the runner (Audit all outbound calls)
+        uses: step-security/harden-runner@6c3c2f2c1c457b00c10c4848d6f5491db3b629df # v2.18.0
+        with:
+          egress-policy: audit
+
+      - name: "Checkout code"
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
+        with:
+          persist-credentials: false
+
+      - name: "Run analysis"
+        uses: ossf/scorecard-action@62b2cac7ed8198b15735ed49ab1e5cf35480ba46 # v2.4.0
+        with:
+          results_file: results.sarif
+          results_format: sarif
+          # (Optional) "write" PAT token. Uncomment the `repo_token` line below if:
+          # - you want to enable the Branch-Protection check on a *public* repository, or
+          # - you are installing Scorecards on a *private* repository
+          # To create the PAT, follow the steps in https://github.com/ossf/scorecard-action#authentication-with-pat.
+          # repo_token: ${{ secrets.SCORECARD_TOKEN }}
+
+          # Public repositories:
+          #   - Publish results to OpenSSF REST API for easy access by consumers
+          #   - Allows the repository to include the Scorecard badge.
+          #   - See https://github.com/ossf/scorecard-action#publishing-results.
+          # For private repositories:
+          #   - `publish_results` will always be set to `false`, regardless
+          #     of the value entered here.
+          publish_results: true
+
+      # Upload the results as artifacts (optional). Commenting out will disable uploads of run results in SARIF
+      # format to the repository Actions tab.
+      - name: "Upload artifact"
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: SARIF file
+          path: results.sarif
+          retention-days: 5
+
+      # Upload the results to GitHub's code scanning dashboard.
+      - name: "Upload to code-scanning"
+        uses: github/codeql-action/upload-sarif@ce64ddcb0d8d890d2df4a9d1c04ff297367dea2a # v3.35.2
+        with:
+          sarif_file: results.sarif
+SCORECARDS_EOF
+	success "Created $SCORECARDS_WORKFLOW_DIR/$SCORECARDS_WORKFLOW_FILE"
+}
+
+DRY_RUN=false
+
+while [[ $# -gt 0 ]]; do
+	case "$1" in
+	-n | --dry-run)
+		DRY_RUN=true
+		shift
+		;;
+	-h | --help)
+		usage
+		;;
+	-*)
+		error "Unknown option: $1"
+		;;
+	*)
+		break
+		;;
+	esac
+done
+
+REPO_PATH="${1:-}"
+
+if [[ -z "$REPO_PATH" ]]; then
+	error "Repository path required. Use -h for help."
+fi
+
+if [[ ! -d "$REPO_PATH/.git" ]]; then
+	error "$REPO_PATH does not appear to be a git repository"
+fi
+
+REPO_PATH=$(cd "$REPO_PATH" && pwd)
+WORKFLOW_PATH="$REPO_PATH/$SCORECARDS_WORKFLOW_DIR/$SCORECARDS_WORKFLOW_FILE"
+README_PATH="$REPO_PATH/README.md"
+
+# Get the GitHub repo slug (owner/repo)
+REPO_SLUG=$(cd "$REPO_PATH" && gh repo view --json nameWithOwner -q '.nameWithOwner' 2>/dev/null) || {
+	error "Could not determine GitHub repo slug. Is this a GitHub repo with gh CLI configured?"
+}
+
+info "Target repo: $REPO_SLUG"
+
+# Check if scorecards workflow already exists
+if [[ -f "$WORKFLOW_PATH" ]]; then
+	warn "Scorecards workflow already exists at $SCORECARDS_WORKFLOW_DIR/$SCORECARDS_WORKFLOW_FILE"
+else
+	info "Creating $SCORECARDS_WORKFLOW_DIR/$SCORECARDS_WORKFLOW_FILE..."
+	if $DRY_RUN; then
+		echo "  [DRY RUN] Would create $WORKFLOW_PATH"
+	else
+		create_scorecards_workflow "$REPO_PATH"
+	fi
+fi
+
+# Build the badge line
+BADGE_LINE="[![OpenSSF Scorecard](https://api.scorecard.dev/projects/github.com/${REPO_SLUG}/badge)](https://scorecard.dev/viewer/?uri=github.com/${REPO_SLUG})"
+
+if [[ ! -f "$README_PATH" ]]; then
+	warn "No README.md found - cannot add badge"
+else
+	# Check if badge already exists
+	if grep -q "api.scorecard.dev/projects/github.com/${REPO_SLUG}" "$README_PATH" 2>/dev/null; then
+		warn "Scorecard badge already exists in README.md"
+	else
+		info "Adding Scorecard badge to README.md..."
+		if $DRY_RUN; then
+			echo "  [DRY RUN] Would add badge line: $BADGE_LINE"
+		else
+			# Find the first badge line (starts with [![ or ![) - insert our badge before it
+			BADGE_LINE_NUM=$(grep -nE '^\[!\[|^\!\[' "$README_PATH" | head -1 | cut -d: -f1)
+
+			if [[ -n "$BADGE_LINE_NUM" ]]; then
+				# Insert before the first existing badge
+				sed -i '' "${BADGE_LINE_NUM}i\\
+${BADGE_LINE}" "$README_PATH"
+			else
+				# No badges yet - insert after the heading + blank line
+				HEADER_LINE=$(grep -n '^#' "$README_PATH" | head -1 | cut -d: -f1)
+				if [[ -n "$HEADER_LINE" ]]; then
+					sed -i '' "$((HEADER_LINE + 1))a\\
+${BADGE_LINE}" "$README_PATH"
+				else
+					sed -i '' "1i\\
+${BADGE_LINE}" "$README_PATH"
+				fi
+			fi
+			success "Added Scorecard badge to README.md"
+		fi
+	fi
+fi
+
+if $DRY_RUN; then
+	echo ""
+	info "Dry run complete. No changes were made."
+else
+	echo ""
+	success "Done! Next steps:"
+	echo "  1. Review the changes with: git diff"
+	echo "  2. Commit with: git add -A && git commit -m 'Add OpenSSF Scorecard workflow and badge'"
+	echo "  3. Push and create a PR, or push directly to main"
+fi
