@@ -23,7 +23,7 @@ unless a screen shot is the only way to convey your problem.
 
 - Major changes should probably be discussed in an [issue](../../../issues) first.
 - Fork the repo on github.
-- Make a branch in your branch on your repo.
+- Make a branch in your fork of the repo.
 - Add commits with good commit messages.
 - Open a pull request on github.
 - Check the github actions on your PR to see if there's anything to fix.
