@@ -19,7 +19,7 @@
 <!--
     How did you verify that your action worked?
     Did you include positive and negative example test cases or links to something like that?
-    Are there any brief samples of what you are seeing in the termainal?
+    Are there any brief samples of what you are seeing in the terminal?
 
     Please use code blocks for text of error messages or terminal output.
     An image may convey the same information, but it is much more difficult to work with.
