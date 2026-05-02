@@ -226,6 +226,6 @@ else
 	echo ""
 	success "Done! Next steps:"
 	echo "  1. Review the changes with: git diff"
-	echo "  2. Commit with: git add -A && git commit -m 'Add OpenSSF Scorecard workflow and badge'"
+	echo "  2. Commit with: git add .github/workflows/scorecards.yml README.md && git commit -m 'Add OpenSSF Scorecard workflow and badge'"
 	echo "  3. Push and create a PR, or push directly to main"
 fi
