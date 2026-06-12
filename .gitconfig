@@ -18,7 +18,7 @@
 	stp = status --porcelain
 	dc = diff --cached
 	br = branch
-	hist = log --graph --pretty=format:\"%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset\" --abbrev-commit
+	hist = log --graph --pretty=format:\"%Cred%h%Creset %s%C(bold yellow)%d%Creset %Cblue(%cr) %C(bold green)<%an>%Creset\" --abbrev-commit
 	hh = hist -n 15
 	type = cat-file -t
 	dump = cat-file -p
