@@ -1,0 +1,8 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+just branch claude-init
+echo "Claude will take a few minutes..."
+claude --permission-mode acceptEdits -p "/init"
+git add CLAUDE.md
+git stp

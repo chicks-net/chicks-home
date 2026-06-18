@@ -20,8 +20,7 @@ intentionally avoids Ansible due to maintainer preferences.
 ### Just Commands
 
 This repository uses [just](https://github.com/casey/just) as the primary task
-runner. The justfile imports modular recipes from `.just/gh-process.just`,
-`.just/compliance.just`, `.just/shellcheck.just`, and `.just/test.just`.
+runner. The justfile imports 13 modular recipe files from `.just/`.
 
 **Standard PR Workflow** (use this pattern for all changes):
 
@@ -42,6 +41,15 @@ just merge            # Squash-merges PR, deletes branch, returns to main
 - `just prweb` - View current PR in web browser
 - `just release <version>` - Create a GitHub release with auto-generated notes
 - `just mergepdf <dest> <src...>` - Merge PDF files (macOS only)
+
+**Claude Code Commands**:
+
+- `just claude_permissions_sort` - Sorts `.claude/settings.local.json`
+  permissions into canonical order (Bash → WebFetch → WebSearch → Other),
+  creates a backup first. Runs automatically as part of `_pr-hook` before
+  every PR.
+- `just claude_permissions_check` - Validates the permissions structure and
+  shows counts by type (Bash/WebFetch/WebSearch/Other)
 
 ### Git Configuration
 
@@ -125,6 +133,12 @@ Contains reusable shell functions:
 - `start_tmux` - tmux initialization automation (also see
   [libtmux](https://github.com/chicks-net/libtmux) project)
 
+**Documentation Maintenance**:
+
+- `bin/claude-init` - Runs `claude --permission-mode acceptEdits -p "/init"`
+  to regenerate/update CLAUDE.md, then stages the result. Run when the repo
+  structure changes significantly.
+
 ### `google/` - Google Workspace Automation
 
 `google/AppScript/` contains Google Apps Script code for automating Google
@@ -135,21 +149,29 @@ with comprehensive documentation links.
 
 These recipes are synced from [`fini-net/template-repo`](https://github.com/fini-net/template-repo)
 via the numbered `github/gh-process-*` automation scripts. Run
-`.just/install-prerequisites.sh` to install required tools (just, gh, shellcheck,
-markdownlint-cli2, jq) on macOS or Linux before using any just recipes.
+`.just/lib/install-prerequisites.sh` to install required tools (just, gh,
+shellcheck, markdownlint-cli2, jq) on macOS or Linux before using any just
+recipes.
 
-- **`gh-process.just`** - Git/GitHub PR workflow automation
-  - Implements branch/pr/merge workflow
-  - Auto-watches GitHub Actions checks
-  - Queries Copilot and Claude PR review comments
-  - Uses heredoc for PR body formatting
-- **`compliance.just`** - Repository compliance checker
-  - Validates presence of README, LICENSE, CODE_OF_CONDUCT, CONTRIBUTING,
-    SECURITY, PR templates, issue templates, CODEOWNERS
-  - Checks for .gitignore, .gitattributes, .editorconfig, justfile
-  - Color-coded feedback (RED/GREEN/BLUE)
-- **`shellcheck.just`** - Shellcheck validation for shell scripts and bash
-  embedded in just recipes (uses awk to extract indented shell blocks)
+- **`gh-process.just`** - Git/GitHub PR workflow (branch/pr/merge/sync)
+- **`compliance.just`** - Checks for README, LICENSE, templates, CODEOWNERS,
+  config files with color-coded feedback
+- **`shellcheck.just`** - Validates shell scripts and bash embedded in just
+  recipes (uses awk to extract indented shell blocks)
+- **`claude.just`** - Claude Code permission management
+  (`claude_permissions_sort`, `claude_permissions_check`)
+- **`copilot.just`** - Interactive Copilot suggestion picker (`copilot_pick`),
+  requires `gum`
+- **`pr-hook.just`** - Pre-PR gate (`_pr-hook`): runs shellcheck then
+  `claude_permissions_sort` before every PR; add more checks here
+- **`launchd.just`** - macOS launchd service management for the
+  `daily_desktop_cleanup` Go binary (`launchd-install`, `launchd-status`,
+  `launchd-reload`, `launchd-logs`, `launchd-validate`)
+- **`template-sync.just`** - Keep `.just/` modules in sync with template-repo
+  (`checksums_generate`, `checksums_verify`, `update_from_template`)
+- **`repo-toml.just`** - Generate `.repo.toml` metadata from repo state
+- **`cue-verify.just`** - Validate `.repo.toml` against its CUE schema
+  (`docs/repo-toml.cue`)
 - **`test.just`** - Placeholder for future test recipes
 
 ## GitHub Actions Workflows
@@ -162,14 +184,15 @@ markdownlint-cli2 "**/*.md"
 
 **Active Workflows**:
 
-- `.github/workflows/markdownlint.yml` - Markdown linting (using
-  DavidAnson/markdownlint-cli2-action)
-- `.github/workflows/opencode.yml` - OpenCode agent integration
-- `.github/workflows/claude-code-review.yml` - Automated Claude Code PR reviews
-- `.github/workflows/actionlint.yml` - GitHub Actions workflow validation
-- `.github/workflows/checkov.yml` - Security scanning with Checkov
-- `.github/workflows/linter.yml` - General linting
-- `.github/workflows/auto-assign.yml` - Auto-assign PR reviewers
+- `markdownlint.yml` - Markdown linting (DavidAnson/markdownlint-cli2-action)
+- `claude-code-review.yml` - Automated Claude Code PR reviews
+- `opencode.yml` - OpenCode agent integration
+- `actionlint.yml` - GitHub Actions workflow validation
+- `checkov.yml` - Security scanning with Checkov
+- `linter.yml` - General linting
+- `auto-assign.yml` - Auto-assign PR reviewers
+- `gitleaks.yml` - Secret scanning
+- `scorecards.yml` - OpenSSF Scorecard (added by `bin/add-scorecards`)
 
 **Standards**: See `docs/github-actions.md` for GitHub Actions requirements and
 standards. See `docs/writing-style-economist.md` for documentation style guidance
@@ -221,7 +244,7 @@ variable for platform-specific logic.
 The `just pr` command performs these steps:
 
 1. Runs `_has_commits` check to ensure branch has commits
-2. Runs `pr_checks` (watches GitHub Actions)
+2. Runs `_pr-hook` (shellcheck + claude_permissions_sort)
 3. Pushes branch with `git pushup`
 4. Creates PR body using heredoc with last commit message
 5. Sleeps 10s for GitHub API lag
@@ -234,6 +257,28 @@ The `just merge` command:
 1. Verifies you're on a branch (not main)
 2. Merges PR with squash (`-s`) and deletes branch (`-d`)
 3. Returns to main and pulls latest via `sync`
+
+## macOS Automation
+
+### launchd Service (`launchd/`)
+
+A daily desktop cleanup Go binary (`launchd/daily_desktop_cleanup`) is
+managed as a launchd service via
+`launchd/net.chicks.daily-desktop-cleanup.plist`. Use the `just launchd-*`
+recipes to install, reload, and inspect it.
+
+### Cron Jobs (`cron.d/`)
+
+`cron.d/daily/` and `cron.d/hourly/` hold scripts run by `bin/do_home_cron`,
+a Perl dispatcher that executes all scripts in the appropriate subdirectory.
+`cron.d/daily/home-git-pull` pulls this repo automatically each day.
+
+## Repository Metadata
+
+`.repo.toml` stores structured metadata (description, topics, feature flags
+like `claude`, `claude-review`, `copilot-review`, `standard-release`).
+Validate it with `just cue-verify` against the CUE schema in
+`docs/repo-toml.cue`. Regenerate it with `just repo_toml_generate`.
 
 ## Configuration Files
 
