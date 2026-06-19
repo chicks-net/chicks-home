@@ -3,7 +3,7 @@
   "extends": [
     "config:recommended"
   ],
-  "schedule": ["on weekdays"]
+  "schedule": ["on weekdays"],
   "packageRules": [
     {
       "matchManagers": ["github-actions"],
