@@ -1,0 +1,23 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": [
+    "config:recommended"
+  ],
+  "schedule": ["on weekdays"]
+  "packageRules": [
+    {
+      "matchManagers": ["github-actions"],
+      "matchUpdateTypes": ["major", "minor", "patch"],
+      "automerge": false,
+      "minimumReleaseAge": "5 days"
+    },
+    {
+      "matchDepNames": ["bridgecrewio/checkov-action"],
+      "overrideDatasource": "git-refs",
+      "overridePackageName": "https://github.com/bridgecrewio/checkov-action"
+    }
+  ],
+  "prConcurrentLimit": 3,
+  "prHourlyLimit": 2,
+  "labels": ["dependencies"]
+}
