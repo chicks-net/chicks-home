@@ -1,5 +1,5 @@
-# our own compliance check
-[group('Compliance')]
+# our own repo compliance check
+[group('Testing/Compliance')]
 compliance_check:
     #!/usr/bin/env bash
     set -euo pipefail # strict mode without tracing
@@ -85,4 +85,11 @@ compliance_check:
         echo "{{GREEN}}You have an {{BLUE}}.editorconfig{{GREEN}}, keeping tabs and spaces segregated.{{NORMAL}}"
     else
         echo "{{RED}}You do NOT have an .editorconfig.  Will your world explode when the tabs and spaces get together?{{NORMAL}}"
+    fi
+
+    # Check for branch protection on main branch (repo-level or org-level rulesets)
+    if gh api 'repos/{owner}/{repo}/rulesets' --jq '.[] | select(.enforcement == "active" and .target == "branch")' | grep -q .; then
+        echo "{{GREEN}}[gh] You have branch protection enabled, keeping the main branch safe from accidents.{{NORMAL}}"
+    else
+        echo "{{RED}}[gh] You do NOT have branch protection enabled.  Living dangerously, are we?{{NORMAL}}"
     fi
