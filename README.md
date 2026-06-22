@@ -171,6 +171,57 @@ just list
 For full home directory integration, I typically clone the repo and symlink
 configurations. Open to suggestions for better installation automation.
 
+## Verifying releases
+
+Each tagged release (e.g. `v0.1`) ships an asset bundle
+(`chicks-home-<tag>.tar.gz` containing the dotfiles, `bin/` utilities,
+`.functions`, `justfile`, and `.just/` modules - the things you'd actually
+cherry-pick), a `checksums.txt` file, a cosign keyless signature
+(`.bundle`), an SBOM (`.sbom.json`), and an SLSA provenance attestation
+(`multiple.intoto.jsonl`).
+
+### Quick verify with just
+
+```bash
+# Defaults to the latest release; pass a tag to verify a specific one.
+just verify-release
+just verify-release v0.1
+```
+
+### Verify the asset signature with cosign
+
+```bash
+# Replace v0.1 with the tag you want to verify.
+TAG="v0.1"
+curl -L -O "https://github.com/chicks-net/chicks-home/releases/download/${TAG}/chicks-home-${TAG}.tar.gz"
+curl -L -O "https://github.com/chicks-net/chicks-home/releases/download/${TAG}/chicks-home-${TAG}.tar.gz.bundle"
+
+cosign verify-blob \
+  --bundle chicks-home-${TAG}.tar.gz.bundle \
+  --certificate-identity-regexp "https://github.com/chicks-net/chicks-home/.github/workflows/release.yml@refs/tags/${TAG}" \
+  --certificate-oidc-issuer "https://token.actions.githubusercontent.com" \
+  chicks-home-${TAG}.tar.gz
+```
+
+### Verify SLSA build provenance
+
+```bash
+TAG="v0.1"
+curl -L -O "https://github.com/chicks-net/chicks-home/releases/download/${TAG}/chicks-home-${TAG}.tar.gz"
+curl -L -O "https://github.com/chicks-net/chicks-home/releases/download/${TAG}/multiple.intoto.jsonl"
+
+slsa-verifier verify-artifact \
+  --provenance-path multiple.intoto.jsonl \
+  --source-uri github.com/chicks-net/chicks-home \
+  --source-tag "${TAG}" \
+  chicks-home-${TAG}.tar.gz
+```
+
+The signature is produced via keyless signing using GitHub Actions OIDC
+identities, so there are no long-lived signing keys to trust or rotate - you
+only trust the Sigstore Fulcio certificate chain and the workflow identity
+printed above.
+
 ## What's Cooking
 
 **In Progress:**
