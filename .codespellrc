@@ -1,0 +1,5 @@
+[codespell]
+# Ignore the in-toto SLSA provenance filename (multiple.intoto.jsonl).
+# "intoto" refers to the in-toto specification (https://in-toto.io), not a
+# misspelling of "into".
+ignore-words-list = intoto

@@ -69,4 +69,3 @@ jobs:
           VALIDATE_JSON_PRETTIER: false
           VALIDATE_YAML_PRETTIER: false
           VALIDATE_MARKDOWN_PRETTIER: false
-          IGNORE_WORDS_FILE: .codespell-ignore.txt

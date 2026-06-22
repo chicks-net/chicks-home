@@ -15,7 +15,10 @@ on:
     branches: ["main"]
   # Run after the Release workflow completes successfully, so newly-cut tags
   # trigger a fresh supply-chain analysis alongside the release cadence.
-  workflow_run:
+  # The workflow_run trigger is safe here: Release only fires on tag pushes
+  # (v*, maintainer-only), permissions are read-all globally with explicit
+  # per-job elevation, and the if-guard below restricts to successful runs.
+  workflow_run:  # zizmor: ignore[dangerous-triggers]
     workflows: ["Release"]
     types:
       - completed
