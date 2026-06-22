@@ -13,12 +13,19 @@ on:
     - cron: '20 7 * * 2'
   push:
     branches: ["main"]
+  # Run after the Release workflow completes successfully, so newly-cut tags
+  # trigger a fresh supply-chain analysis alongside the release cadence.
+  workflow_run:
+    workflows: ["Release"]
+    types:
+      - completed
 
 # Declare default permissions as read only.
 permissions: read-all
 
 jobs:
   analysis:
+    if: ${{ github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success' }}
     name: Scorecard analysis
     runs-on: ubuntu-latest
     permissions:
