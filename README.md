@@ -8,7 +8,7 @@
 A battle-tested collection of shell configurations, automation scripts, and
 command-line utilities for managing Unix/Linux development environments. Born
 from years of maintaining home directories across dozens of servers running
-different distros, this repo contains tools that solve real problems you've
+different distros, this repository contains tools that solve real problems you've
 probably encountered yourself.
 
 ## What's Inside
@@ -18,11 +18,11 @@ probably encountered yourself.
 - **[justfile](justfile)** - Streamlined PR workflow with `just branch`,
   `just pr`, `just merge` automation.  This workflow is also available
   through our [template-repo](https://github.com/fini-net/template-repo).
-- **Custom git aliases** - `git pushup`, `git stp`, `git hh` and more
+- **Custom Git aliases** - `git pushup`, `git stp`, `git hh` and more
   time-savers in [.gitconfig](.gitconfig)
 - **GitHub Actions** - Automated markdownlint, security scanning, and
   [Claude Code PR reviews](.github/workflows/claude-code-review.yml)
-- **GitHub CLI tools** - Scripts for applying rulesets and managing repos via
+- **GitHub command-line tools** - Scripts for applying rulesets and managing repos via
   API
 
 ### Command-Line Utilities You'll Actually Use
@@ -48,7 +48,7 @@ probably encountered yourself.
 
 **GitHub Workflow:**
 
-- `github_fix_https` - Convert HTTPS clones to SSH for password-free git
+- `github_fix_https` - Convert HTTPS clones to SSH for password-free Git
   operations
 - `apply-ruleset` - Apply repository rulesets via GitHub API
 
@@ -168,7 +168,7 @@ echo '. /path/to/chicks-home/.functions' >> ~/.bashrc
 just list
 ```
 
-For full home directory integration, I typically clone the repo and symlink
+For full home directory integration, I typically clone the repository and symlink
 configurations. Open to suggestions for better installation automation.
 
 ## Verifying releases
