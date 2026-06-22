@@ -13,12 +13,22 @@ on:
     - cron: '20 7 * * 2'
   push:
     branches: ["main"]
+  # Run after the Release workflow completes successfully, so newly-cut tags
+  # trigger a fresh supply-chain analysis alongside the release cadence.
+  # The workflow_run trigger is safe here: Release only fires on tag pushes
+  # (v*, maintainer-only), permissions are read-all globally with explicit
+  # per-job elevation, and the if-guard below restricts to successful runs.
+  workflow_run:  # zizmor: ignore[dangerous-triggers]
+    workflows: ["Release"]
+    types:
+      - completed
 
 # Declare default permissions as read only.
 permissions: read-all
 
 jobs:
   analysis:
+    if: ${{ github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success' }}
     name: Scorecard analysis
     runs-on: ubuntu-latest
     permissions:

@@ -2,8 +2,9 @@
 	"$schema": "https://docs.renovatebot.com/renovate-schema.json",
 	"extends": [
 		"config:recommended",
-		"schedule:weekdays"
+		"helpers:pinGitHubActionDigests"
 	],
+	"schedule": ["after 5am on Monday", "after 5am on Tuesday", "after 5am on Wednesday", "after 5am on Thursday", "after 5am on Friday"],
 	"packageRules": [
 		{
 			"matchManagers": ["github-actions"],
@@ -15,6 +16,11 @@
 			"matchDepNames": ["bridgecrewio/checkov-action"],
 			"overrideDatasource": "git-refs",
 			"overridePackageName": "https://github.com/bridgecrewio/checkov-action"
+		},
+		{
+			"matchDepNames": ["slsa-framework/slsa-github-generator"],
+			"enabled": false,
+			"description": "SLSA generator reusable workflow must be pinned by tag (e.g. @v2.1.0), not SHA. SHA-pinning causes 'Invalid ref' errors in the generator's internal builder checkout. See .github/workflows/release.yml."
 		}
 	],
 	"prConcurrentLimit": 3,

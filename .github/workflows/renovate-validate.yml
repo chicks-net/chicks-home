@@ -1,24 +1,26 @@
-name: Lint GitHub Actions workflows
+---
+name: Validate Renovate config
 
 on:
-  # Triggers the workflow on push or pull request events but only for the "main" branch
   push:
     branches: [ "main" ]
     paths:
-      - ".github/**"
+      - '.github/renovate.json'
+      - '.github/renovate/**'
+      - '.github/workflows/renovate-validate.yml'
   pull_request:
     branches: [ "main" ]
     paths:
-      - ".github/**"
-
-  # Allows you to run this workflow manually from the Actions tab
+      - '.github/renovate.json'
+      - '.github/renovate/**'
+      - '.github/workflows/renovate-validate.yml'
   workflow_dispatch:
 
 # global permissions
 permissions: {}
 
 jobs:
-  actionlint:
+  validate:
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -31,7 +33,8 @@ jobs:
       - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
         with:
           persist-credentials: false
-      - name: Check workflow files
-        uses: docker://rhysd/actionlint@sha256:b1934ee5f1c509618f2508e6eb47ee0d3520686341fec936f3b79331f9315667 # 1.7.12
+
+      - name: Validate renovate.json
+        uses: docker://ghcr.io/renovatebot/renovate@sha256:bd6dc280e3834278d2a22ec87b9de241d5c4b0b602f09a7618aee76b0392c9e8 # 43.233.1
         with:
-          args: -color
+          args: renovate-config-validator .github/renovate.json
