@@ -1,0 +1,74 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+# split_chunks - split an MP4 (or any ffmpeg-readable video) into 28s chunks
+# starting every 10s within the original video. Uses stream copy for speed,
+# so chunk boundaries snap to keyframes and may be slightly off from exactly
+# 28s. Chunks that would start within the last 28s of the video are skipped
+# (i.e. only full 28s chunks are emitted).
+#
+# Usage:
+#   split_chunks <input-video> [output-dir]
+#
+# Output files are named <basename>_start-<Ns>.mp4 in the output directory
+# (default: current directory).
+
+usage() {
+	echo "Usage: $(basename "$0") <input-video> [output-dir]" >&2
+	exit 1
+}
+
+[[ $# -ge 1 ]] || usage
+input="$1"
+output_dir="${2:-.}"
+
+[[ -f "$input" ]] || { echo "Error: input file '$input' not found" >&2; exit 1; }
+[[ -d "$output_dir" ]] || { echo "Error: output dir '$output_dir' not found" >&2; exit 1; }
+
+if ! command -v ffmpeg &> /dev/null; then
+	echo "Error: ffmpeg not found in PATH" >&2
+	exit 1
+fi
+if ! command -v ffprobe &> /dev/null; then
+	echo "Error: ffprobe not found in PATH" >&2
+	exit 1
+fi
+
+duration=$(ffprobe -v error -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 "$input")
+if ! [[ "$duration" =~ ^[0-9]+\.?[0-9]*$ ]]; then
+	echo "Error: could not determine duration of '$input'" >&2
+	exit 1
+fi
+
+chunk_len=28
+step=10
+basename=$(basename "$input")
+stem="${basename%.*}"
+
+echo "Input:      $input"
+echo "Duration:   ${duration}s"
+echo "Chunk len:  ${chunk_len}s"
+echo "Step:       ${step}s"
+echo "Output dir: $output_dir"
+echo
+
+last_start=$(awk -v d="$duration" -v c="$chunk_len" -v s="$step" 'BEGIN { n = int((d - c) / s); print (n < 0) ? -1 : n * s }')
+
+if [[ "$last_start" -lt 0 ]]; then
+	echo "Video is shorter than ${chunk_len}s; no full chunks to emit." >&2
+	exit 0
+fi
+
+count=0
+for ((start = 0; start <= last_start; start += step)); do
+	out="${output_dir}/${stem}_start-${start}s.mp4"
+	echo "Writing chunk start=${start}s -> $(basename "$out")"
+	ffmpeg -nostdin -hide_banner -loglevel error -y \
+		-ss "$start" -i "$input" \
+		-t "$chunk_len" -c copy -avoid_negative_ts make_zero \
+		"$out"
+	count=$((count + 1))
+done
+
+echo
+echo "Done: ${count} chunk(s) written to ${output_dir}"
