@@ -47,9 +47,9 @@ Options:
                            (default: $REPORT_PATH)
   --keep-report            Don't delete the report file when done
   --include-forks          Also scan forked repos (skipped by default)
-  --include-archived      Also scan archived repos (skipped by default)
-  --verbose               Pass LOG_LEVEL=debug to renovate (shows progress)
-  -h, --help              Show this help
+  --include-archived       Also scan archived repos (skipped by default)
+  --verbose                Pass LOG_LEVEL=debug to renovate (shows progress)
+  -h, --help               Show this help
 
 Requires: gh (authenticated), renovate, jq
 EOF
@@ -113,8 +113,7 @@ for owner in "${OWNER_LIST[@]}"; do
 	owner_repos=()
 	while IFS= read -r line; do
 		[[ -n "$line" ]] && owner_repos+=("$line")
-	done < <(jq -r --arg sel "$select_expr" \
-		".[] | $select_expr | .nameWithOwner" <<<"$repos_json")
+	done < <(jq -r ".[] | $select_expr | .nameWithOwner" <<<"$repos_json")
 	ALL_REPOS+=("${owner_repos[@]}")
 done
 
@@ -140,15 +139,14 @@ fi
 echo -e "${BLUE}Running Renovate in dry-run=lookup mode ...${RESET}" >&2
 echo -e "${CYAN}(this may take a while for many repos)${RESET}" >&2
 
-# shellcheck disable=SC2086 # intentional word splitting for positional repos
 if ! LOG_LEVEL="$LOG_LEVEL" \
 	RENOVATE_REPORT_PATH="$REPORT_PATH" \
 	RENOVATE_REPORT_TYPE=file \
+	RENOVATE_TOKEN="$GH_TOKEN" \
 	renovate \
 		"${ALL_REPOS[@]}" \
 		--platform=github \
 		--endpoint=https://api.github.com/ \
-		--token="$GH_TOKEN" \
 		--dry-run=lookup \
 		--require-config=optional \
 		--onboarding=false \
@@ -183,27 +181,24 @@ fi
 # Per-repo summary: deps, updates (deps with at least one available update),
 # total pending update entries, libYears, and a status flag.
 summarize_report() {
-	jq -c '
+	jq -r '
 		.repositories | to_entries | map(
 			.key as $repo |
-			{
-				repo: $repo,
-				depCount:
-					([.value.packageFiles | to_entries[] | .value[] | .deps[]?] | length),
-				updateableDeps:
-					([.value.packageFiles | to_entries[] | .value[] | .deps[]?
-						| select(.updates | length > 0)] | length),
-				totalUpdates:
-					([.value.packageFiles | to_entries[] | .value[] | .deps[]?
-						| .updates[]?] | length),
-				branches: (.value.branches | length),
-				libYears: (.value.libYearsWithStatus.libYears.total // 0
+			[
+				$repo,
+				([.value.packageFiles | to_entries[] | .value[] | .deps[]?] | length),
+				([.value.packageFiles | to_entries[] | .value[] | .deps[]?
+					| select(.updates | length > 0)] | length),
+				([.value.packageFiles | to_entries[] | .value[] | .deps[]?
+					| .updates[]?] | length),
+				(.value.libYearsWithStatus.libYears.total // 0
 					| if type == "number" then . else 0 end),
-				problems: (.value.problems | length)
-			}
+				(.value.problems | length)
+			]
 		)
-		| sort_by(-.totalUpdates, .repo)
+		| sort_by(-.[3], .[0])
 		| .[]
+		| @tsv
 	' "$REPORT_PATH"
 }
 
@@ -225,16 +220,11 @@ repo_with_updates=0
 no_update_repos=()
 problem_repos=()
 
-# Stream the jq output line-by-line as JSON objects so we can total while
-# we print, keeping memory low and the code straightforward.
-while IFS= read -r row; do
-	[[ -z "$row" ]] && continue
-	repo=$(jq -r '.repo' <<<"$row")
-	dep_count=$(jq -r '.depCount' <<<"$row")
-	upd_deps=$(jq -r '.updateableDeps' <<<"$row")
-	tot_upd=$(jq -r '.totalUpdates' <<<"$row")
-	libyears=$(jq -r '.libYears' <<<"$row")
-	probs=$(jq -r '.problems' <<<"$row")
+# Stream the jq output as tab-separated rows so we can total while we print,
+# keeping memory low and the code straightforward. One jq process does all the
+# extraction; the rest is bash arithmetic and printf.
+while IFS=$'\t' read -r repo dep_count upd_deps tot_upd libyears probs; do
+	[[ -z "$repo" ]] && continue
 
 	total_deps=$((total_deps + dep_count))
 	total_updates=$((total_updates + tot_upd))
@@ -248,8 +238,8 @@ while IFS= read -r row; do
 		problem_repos+=("$repo ($probs)")
 	fi
 
-	# Round libYears to 1 decimal for display
-	libyears_disp=$(jq -r '.libYears * 10 | floor / 10' <<<"$row" 2>/dev/null || echo "$libyears")
+	# Round libYears to 1 decimal for display (pure bash; libyears is a number)
+	libyears_disp=$(printf "%.1f" "$libyears" 2>/dev/null || echo "$libyears")
 
 	# Color the update count: red if any, green if zero
 	if [[ "$tot_upd" -gt 0 ]]; then
@@ -268,7 +258,7 @@ echo
 printf '%-40s %8s %10s %10s\n' \
 	"TOTAL" "$total_deps" "$total_updateable" "$total_updates"
 echo
-echo -e "${GREEN}$((repo_count - ${#no_update_repos[@]}))${RESET} repos with pending updates, ${GREEN}${#no_update_repos[@]}${RESET} up to date, $repo_count total."
+echo -e "${GREEN}$repo_with_updates${RESET} repos with pending updates, ${GREEN}${#no_update_repos[@]}${RESET} up to date, $repo_count total."
 
 # --- clean repos -------------------------------------------------------------
 if [[ ${#no_update_repos[@]} -gt 0 ]]; then
