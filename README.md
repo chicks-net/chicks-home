@@ -152,7 +152,7 @@ renovate-summary --verbose               # show renovate progress (debug logs)
 | `UPDATABLE` | Dependencies with at least one available update                                              |
 | `UPDATES`   | Total pending update entries (a dep can have more than one, e.g. minor + major)              |
 | `LIBYEARS`  | Aggregate "libyears" behind newest versions; `0.0` means everything is current               |
-| `PROBS`     | Count of Renovate "problems" for that repo; non-zero means inspect the report                |
+| `PROBS`     | Count of Renovate "problems" for that repository; non-zero means inspect the report          |
 
 The `UPDATES` column is color-coded when run interactively: red for repos
 with pending updates, green for up-to-date repos.
@@ -202,7 +202,7 @@ See /tmp/renovate-summary-report.json for details, or rerun with --verbose.
 ```
 
 A full scan of 84 repos takes about 7 minutes; most of that is GitHub API
-calls and git clones Renovate performs for dependency extraction. Use
+calls and Git clones Renovate performs for dependency extraction. Use
 `--keep-report` to retain the JSON report for drilling into a specific
 repo's updates or problems.
 
