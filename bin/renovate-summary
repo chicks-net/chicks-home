@@ -1,0 +1,294 @@
+#!/usr/bin/env bash
+
+# renovate-summary - report available dependency updates across all your GitHub
+# repos using the Renovate CLI in read-only --dry-run=lookup mode.  Works on repos
+# that have no Renovate config of their own (require-config=optional).
+#
+# Requires: gh (authenticated), renovate, jq
+#
+# Usage:
+#   renovate-summary                       # scan fini-net + chicks-net
+#   renovate-summary --org fini-net        # scan one owner
+#   renovate-summary --org fini-net,chicks-net
+#   renovate-summary --limit 50           # cap repos per owner
+#   renovate-summary --report-path /tmp/r.json
+#   renovate-summary --keep-report         # don't delete the report file
+#   renovate-summary --include-forks       # also scan forked repos
+#   renovate-summary --include-archived    # also scan archived repos
+#   renovate-summary --verbose            # show renovate progress (debug logs)
+
+set -euo pipefail
+
+# Color variables (mirroring bin/repos-summary)
+BLUE='\033[34m'
+RED='\033[31m'
+CYAN='\033[36m'
+YELLOW='\033[33m'
+GREEN='\033[32m'
+RESET='\033[0m'
+
+# Defaults
+ORGS="fini-net,chicks-net"
+LIMIT=200
+REPORT_PATH="/tmp/renovate-summary-report.json"
+KEEP_REPORT=false
+INCLUDE_FORKS=false
+INCLUDE_ARCHIVED=false
+VERBOSE=false
+
+usage() {
+	cat <<EOF
+Usage: $(basename "$0") [options]
+
+Options:
+	--org OWNER[,OWNER...]	GitHub owners to scan (default: $ORGS)
+	--limit N	Max repos per owner (default: $LIMIT)
+	--report-path PATH	Where to write the Renovate JSON report
+				(default: $REPORT_PATH)
+	--keep-report	Don't delete the report file when done
+	--include-forks	Also scan forked repos (skipped by default)
+	--include-archived	Also scan archived repos (skipped by default)
+	--verbose	Pass LOG_LEVEL=debug to renovate (shows progress)
+	-h, --help	Show this help
+
+Requires: gh (authenticated), renovate, jq
+EOF
+}
+
+while [[ $# -gt 0 ]]; do
+	case "$1" in
+		--org) ORGS="$2"; shift 2 ;;
+		--limit) LIMIT="$2"; shift 2 ;;
+		--report-path) REPORT_PATH="$2"; shift 2 ;;
+		--keep-report) KEEP_REPORT=true; shift ;;
+		--include-forks) INCLUDE_FORKS=true; shift ;;
+		--include-archived) INCLUDE_ARCHIVED=true; shift ;;
+		--verbose) VERBOSE=true; shift ;;
+		-h|--help) usage; exit 0 ;;
+		*) echo -e "${RED}Unknown option: $1${RESET}" >&2; usage >&2; exit 2 ;;
+	esac
+done
+
+# --- prerequisite checks -----------------------------------------------------
+for cmd in gh renovate jq; do
+	if ! command -v "$cmd" >/dev/null 2>&1; then
+		echo -e "${RED}Error: $cmd not found in PATH${RESET}" >&2
+		exit 1
+	fi
+done
+
+if ! gh auth status >/dev/null 2>&1; then
+	echo -e "${RED}Error: gh is not authenticated. Run 'gh auth login'.${RESET}" >&2
+	exit 1
+fi
+
+GH_TOKEN="$(gh auth token)"
+if [[ -z "$GH_TOKEN" ]]; then
+	echo -e "${RED}Error: could not retrieve GitHub token via 'gh auth token'${RESET}" >&2
+	exit 1
+fi
+
+# --- enumerate repos ---------------------------------------------------------
+# Build a gh repo list filter expression that excludes archived/forks unless
+# the user opted in.  We ask gh for JSON and use jq to select + extract
+# nameWithOwner, so the filtering logic lives in one place.
+select_expr='true'
+if [[ "$INCLUDE_ARCHIVED" == false ]]; then
+	select_expr+=' and .isArchived==false'
+fi
+if [[ "$INCLUDE_FORKS" == false ]]; then
+	select_expr+=' and .isFork==false'
+fi
+select_expr="select($select_expr)"
+
+declare -a ALL_REPOS=()
+IFS=',' read -ra OWNER_LIST <<<"$ORGS"
+for owner in "${OWNER_LIST[@]}"; do
+	echo -e "${BLUE}Listing repos for $owner ...${RESET}" >&2
+	if ! repos_json=$(gh repo list "$owner" --limit "$LIMIT" \
+		--json nameWithOwner,isArchived,isFork 2>&1); then
+		echo -e "${YELLOW}Warning: failed to list repos for $owner: ${repos_json}${RESET}" >&2
+		continue
+	fi
+	owner_repos=()
+	while IFS= read -r line; do
+		[[ -n "$line" ]] && owner_repos+=("$line")
+	done < <(jq -r ".[] | $select_expr | .nameWithOwner" <<<"$repos_json")
+	ALL_REPOS+=("${owner_repos[@]}")
+done
+
+repo_count=${#ALL_REPOS[@]}
+if [[ $repo_count -eq 0 ]]; then
+	echo -e "${RED}No repos found for owners: $ORGS${RESET}" >&2
+	exit 1
+fi
+echo -e "${BLUE}Found $repo_count repos to scan.${RESET}" >&2
+
+# --- run renovate ------------------------------------------------------------
+# Pass repos as positional args (the --repositories flag is not a CLI option).
+# reportType=file writes a JSON file at $REPORT_PATH with per-repo update data.
+# require-config=optional lets us scan repos with no renovate.json.
+# onboarding=false prevents any onboarding PR from being created.
+# optimize-for-disabled=false processes repos even if they disable Renovate
+#   in their config (none of ours have one, but it removes a failure mode).
+LOG_LEVEL=error
+if [[ "$VERBOSE" == true ]]; then
+	LOG_LEVEL=debug
+fi
+
+echo -e "${BLUE}Running Renovate in dry-run=lookup mode ...${RESET}" >&2
+echo -e "${CYAN}(this may take a while for many repos)${RESET}" >&2
+
+if ! LOG_LEVEL="$LOG_LEVEL" \
+	RENOVATE_REPORT_PATH="$REPORT_PATH" \
+	RENOVATE_REPORT_TYPE=file \
+	RENOVATE_TOKEN="$GH_TOKEN" \
+	renovate \
+		"${ALL_REPOS[@]}" \
+		--platform=github \
+		--endpoint=https://api.github.com/ \
+		--dry-run=lookup \
+		--require-config=optional \
+		--onboarding=false \
+		--optimize-for-disabled=false \
+		>/tmp/renovate-summary-stdout.log 2>&1; then
+	echo -e "${RED}Renovate failed. See /tmp/renovate-summary-stdout.log${RESET}" >&2
+	tail -20 /tmp/renovate-summary-stdout.log >&2
+	exit 1
+fi
+
+if [[ ! -f "$REPORT_PATH" ]]; then
+	echo -e "${RED}Renovate did not write a report to $REPORT_PATH${RESET}" >&2
+	echo -e "${CYAN}Last lines of renovate log:${RESET}" >&2
+	tail -20 /tmp/renovate-summary-stdout.log >&2
+	exit 1
+fi
+
+# --- parse & display ---------------------------------------------------------
+# Report shape:
+#   { "problems": [...],
+#     "repositories": {
+#       "<owner/repo>": {
+#         "branches": [...],      # proposed update branches (count = updates)
+#         "packageFiles": {       # keyed by manager name -> array of files
+#           "github-actions": [ { "deps": [ { "depName":..., "updates": [...] } ] } ]
+#         },
+#         "libYearsWithStatus": { "libYears": {...}, "dependencyStatus": {...} },
+#         "problems": [...]
+#       }
+#     } }
+
+# Per-repo summary: deps, updates (deps with at least one available update),
+# total pending update entries, libYears, and a status flag.
+summarize_report() {
+	jq -r '
+		.repositories | to_entries | map(
+			.key as $repo |
+			[
+				$repo,
+				([.value.packageFiles | to_entries[] | .value[] | .deps[]?] | length),
+				([.value.packageFiles | to_entries[] | .value[] | .deps[]?
+					| select(.updates | length > 0)] | length),
+				([.value.packageFiles | to_entries[] | .value[] | .deps[]?
+					| .updates[]?] | length),
+				(.value.libYearsWithStatus.libYears.total // 0
+					| if type == "number" then . else 0 end),
+				(.value.problems | length)
+			]
+		)
+		| sort_by(-.[3], .[0])
+		| .[]
+		| @tsv
+	' "$REPORT_PATH"
+}
+
+echo
+echo -e "${BLUE}Renovate update summary${RESET}"
+echo -e "${BLUE}~~~~~~~~~~~~~~~~~~~~~~~${RESET}"
+echo
+printf '%-40s %8s %10s %8s %8s %8s\n' \
+	"REPO" "DEPS" "UPDATABLE" "UPDATES" "LIBYEARS" "PROBS"
+printf '%-40s %8s %10s %8s %8s %8s\n' \
+	"----------------------------------------" \
+	"--------" "----------" "--------" \
+	"--------" "--------"
+
+total_deps=0
+total_updates=0
+total_updateable=0
+repo_with_updates=0
+no_update_repos=()
+problem_repos=()
+
+# Stream the jq output as tab-separated rows so we can total while we print,
+# keeping memory low and the code straightforward. One jq process does all the
+# extraction; the rest is bash arithmetic and printf.
+while IFS=$'\t' read -r repo dep_count upd_deps tot_upd libyears probs; do
+	[[ -z "$repo" ]] && continue
+
+	total_deps=$((total_deps + dep_count))
+	total_updates=$((total_updates + tot_upd))
+	total_updateable=$((total_updateable + upd_deps))
+	if [[ "$tot_upd" -gt 0 ]]; then
+		repo_with_updates=$((repo_with_updates + 1))
+	else
+		no_update_repos+=("$repo")
+	fi
+	if [[ "$probs" -gt 0 ]]; then
+		problem_repos+=("$repo ($probs)")
+	fi
+
+	# Round libYears to 1 decimal for display (pure bash; libyears is a number)
+	libyears_disp=$(printf "%.1f" "$libyears" 2>/dev/null || echo "$libyears")
+
+	# Color the update count: red if any, green if zero
+	if [[ "$tot_upd" -gt 0 ]]; then
+		upd_color="$RED"
+	else
+		upd_color="$GREEN"
+	fi
+	# Use %b so escape sequences render; pad the visible digits to width 10.
+	printf '%-40s %8s %10s %b%8s%b %8s %8s\n' \
+		"$repo" "$dep_count" "$upd_deps" \
+		"$upd_color" "$tot_upd" "$RESET" \
+		"$libyears_disp" "$probs"
+done < <(summarize_report)
+
+echo
+printf '%-40s %8s %10s %8s\n' \
+	"TOTAL" "$total_deps" "$total_updateable" "$total_updates"
+echo
+echo -e "${RED}$repo_with_updates${RESET} repos with pending updates, ${GREEN}${#no_update_repos[@]}${RESET} up to date, $repo_count total."
+
+# --- clean repos -------------------------------------------------------------
+if [[ ${#no_update_repos[@]} -gt 0 ]]; then
+	echo
+	echo -e "${GREEN}Repos with no pending updates:${RESET}"
+	echo -e "${GREEN}~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~${RESET}"
+	for r in "${no_update_repos[@]}"; do
+		echo -e "  ${GREEN}CLEAN${RESET} $r"
+	done
+fi
+
+# --- problem repos -----------------------------------------------------------
+if [[ ${#problem_repos[@]} -gt 0 ]]; then
+	echo
+	echo -e "${YELLOW}Repos Renovate had problems with:${RESET}"
+	echo -e "${YELLOW}~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~${RESET}"
+	for r in "${problem_repos[@]}"; do
+		echo -e "  ${YELLOW}PROBLEM${RESET} $r"
+	done
+	echo -e "${CYAN}See $REPORT_PATH for details, or rerun with --verbose.${RESET}"
+fi
+
+# --- report cleanup ----------------------------------------------------------
+if [[ "$KEEP_REPORT" == true ]]; then
+	echo
+	echo -e "${CYAN}Report kept at: $REPORT_PATH${RESET}"
+else
+	rm -f "$REPORT_PATH"
+fi
+
+# Problems are surfaced in the report but don't fail the run — a successful
+# scan that finds problems is still a successful scan.
+exit 0

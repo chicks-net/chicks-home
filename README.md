@@ -51,6 +51,8 @@ probably encountered yourself.
 - `github_fix_https` - Convert HTTPS clones to SSH for password-free Git
   operations
 - `apply-ruleset` - Apply repository rulesets via GitHub API
+- `renovate-summary` - Report available dependency updates across all your
+  GitHub repos (even unconfigured ones) using Renovate in read-only mode
 
 ### Cross-Distro Package Management
 
@@ -117,6 +119,92 @@ just merge
 
 The justfile automates the entire GitHub PR lifecycle with built-in safety
 checks to prevent commits on main.
+
+### Renovate Update Summary
+
+`renovate-summary` scans all non-archived, non-fork repos for an owner (or
+owners) and reports available dependency updates using the Renovate CLI in
+read-only `--dry-run=lookup` mode. No in-repo Renovate config is required —
+`--require-config=optional` means it works on repos that have never opted
+into Renovate. It pulls a GitHub token via `gh auth token`, enumerates repos
+with `gh repo list`, runs one batched Renovate lookup, and prints a
+per-repo table. No PRs or branches are created.
+
+Requires `gh` (authenticated), `renovate`, and `jq`.
+
+```bash
+renovate-summary                          # scan fini-net + chicks-net
+renovate-summary --org fini-net           # scan one owner
+renovate-summary --org fini-net,chicks-net
+renovate-summary --limit 50              # cap repos per owner
+renovate-summary --keep-report           # keep the JSON report for digging
+renovate-summary --include-forks         # also scan forked repos
+renovate-summary --include-archived      # also scan archived repos
+renovate-summary --verbose               # show renovate progress (debug logs)
+```
+
+#### Column meanings
+
+| Column      | Meaning                                                                                      |
+| ----------- | -------------------------------------------------------------------------------------------- |
+| `REPO`      | `owner/repo` name                                                                            |
+| `DEPS`      | Total dependencies detected across all package managers                                      |
+| `UPDATABLE` | Dependencies with at least one available update                                              |
+| `UPDATES`   | Total pending update entries (a dep can have more than one, e.g. minor + major)              |
+| `LIBYEARS`  | Aggregate "libyears" behind newest versions; `0.0` means everything is current               |
+| `PROBS`     | Count of Renovate "problems" for that repository; non-zero means inspect the report          |
+
+The `UPDATES` column is color-coded when run interactively: red for repos
+with pending updates, green for up-to-date repos.
+
+#### Example output
+
+```text
+$ renovate-summary
+Listing repos for fini-net ...
+Listing repos for chicks-net ...
+Found 84 repos to scan.
+Running Renovate in dry-run=lookup mode ...
+(this may take a while for many repos)
+
+Renovate update summary
+~~~~~~~~~~~~~~~~~~~~~~~
+
+REPO                                         DEPS  UPDATABLE  UPDATES LIBYEARS    PROBS
+---------------------------------------- -------- ---------- -------- -------- --------
+chicks-net/data-curated                        95         41       52      7.1        0
+chicks-net/chicks-home                         50         32       45      4.5        0
+chicks-net/homebrew-chicks                     49         34       45        4        0
+fini-net/fini-infra                           107         33       37      5.5        0
+fini-net/macaw                                 51         27       31     13.4        0
+fini-net/gh-amp                                43         26       29      4.8        0
+chicks-net/www-chicks-net                      43         15       15      2.2      132
+fini-net/fini-coredns-example                  60          4        4      0.8        0
+chicks-net/my-user-manuals                     11          0        0        0        0
+chicks-net/check-domain                         0          0        0        0        0
+... (74 more rows)
+
+TOTAL                                        1135        410      476
+
+33 repos with pending updates, 51 up to date, 84 total.
+
+Repos with no pending updates:
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  CLEAN chicks-net/my-user-manuals
+  CLEAN chicks-net/check-domain
+  ... (49 more)
+
+Repos Renovate had problems with:
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  PROBLEM chicks-net/www-chicks-net (132)
+  PROBLEM fini-net/www-fini-net (2)
+See /tmp/renovate-summary-report.json for details, or rerun with --verbose.
+```
+
+A full scan of 84 repos takes about 7 minutes; most of that is GitHub API
+calls and Git clones Renovate performs for dependency extraction. Use
+`--keep-report` to retain the JSON report for drilling into a specific
+repo's updates or problems.
 
 ## Installation
 
