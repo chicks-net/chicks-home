@@ -255,10 +255,10 @@ while IFS=$'\t' read -r repo dep_count upd_deps tot_upd libyears probs; do
 done < <(summarize_report)
 
 echo
-printf '%-40s %8s %10s %10s\n' \
+printf '%-40s %8s %10s %8s\n' \
 	"TOTAL" "$total_deps" "$total_updateable" "$total_updates"
 echo
-echo -e "${GREEN}$repo_with_updates${RESET} repos with pending updates, ${GREEN}${#no_update_repos[@]}${RESET} up to date, $repo_count total."
+echo -e "${RED}$repo_with_updates${RESET} repos with pending updates, ${GREEN}${#no_update_repos[@]}${RESET} up to date, $repo_count total."
 
 # --- clean repos -------------------------------------------------------------
 if [[ ${#no_update_repos[@]} -gt 0 ]]; then
