@@ -260,16 +260,6 @@ printf '%-40s %8s %10s %8s\n' \
 echo
 echo -e "${RED}$repo_with_updates${RESET} repos with pending updates, ${GREEN}${#no_update_repos[@]}${RESET} up to date, $repo_count total."
 
-# --- clean repos -------------------------------------------------------------
-if [[ ${#no_update_repos[@]} -gt 0 ]]; then
-	echo
-	echo -e "${GREEN}Repos with no pending updates:${RESET}"
-	echo -e "${GREEN}~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~${RESET}"
-	for r in "${no_update_repos[@]}"; do
-		echo -e "  ${GREEN}CLEAN${RESET} $r"
-	done
-fi
-
 # --- problem repos -----------------------------------------------------------
 if [[ ${#problem_repos[@]} -gt 0 ]]; then
 	echo
