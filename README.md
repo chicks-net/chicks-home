@@ -22,8 +22,10 @@ probably encountered yourself.
   time-savers in [.gitconfig](.gitconfig)
 - **GitHub Actions** - Automated markdownlint, security scanning, and
   [Claude Code PR reviews](.github/workflows/claude-code-review.yml)
-- **GitHub command-line tools** - Scripts for applying rulesets and managing repos via
-  API
+- **GitHub command-line tools** - Scripts for applying rulesets and managing
+  repos via API. See [github/README.md](github/README.md) for details on the
+  `apply-ruleset` and `github_fix_https` utilities and bundled ruleset
+  configurations.
 
 ### Command-Line Utilities You'll Actually Use
 
@@ -132,6 +134,7 @@ The easiest way to install the command-line utilities is via our
 ```bash
 # Option 1: Add the tap first (shorter install commands)
 brew tap chicks-net/chicks
+brew trust chicks-net/chicks
 brew install chicks-git-tools
 brew install chicks-monitoring-tools
 brew install chicks-text-tools
