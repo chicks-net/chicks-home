@@ -21,7 +21,7 @@ It takes no arguments and has no flags - it's intentionally a four-liner.
 
 ## Examples
 
-```ScreenOutput
+```text
 $ ruler
          1         2         3         4         5         6         7         8         9         0         1         2
 123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890
