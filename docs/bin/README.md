@@ -11,6 +11,7 @@ nor are the `Pipfile` / `Pipfile.lock` dependency manifests.
 | [add-scorecards](add-scorecards.md) | Add the OpenSSF Scorecard workflow + README badge to a repo. |
 | [claude-init](claude-init.md) | Bootstrap a `CLAUDE.md` via the `claude` CLI's `/init`. |
 | [compliance-check](compliance-check.md) | Run the `template-repo` compliance check against the current dir. |
+| [github_fix_https](github_fix_https.md) | Switch the current repo's `origin` remote from HTTPS to SSH (lives in `github/`). |
 | [gpsu](gpsu.md) | Push the current branch to `origin` with `--set-upstream` (refuses `master`). |
 | [renovate-summary](renovate-summary.md) | Report dependency updates across GitHub repos via Renovate (read-only). |
 | [repos-summary](repos-summary.md) | Audit local git repos for hygiene issues (releases, branches, `.just` files). |
