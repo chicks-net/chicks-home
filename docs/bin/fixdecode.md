@@ -14,7 +14,7 @@ some-command | fixdecode [grep-args]
 `fixdecode` is a three-line Bash script that pipes `grep $*` output through a
 `sed` filter which:
 
-- Trims a leading `A`.
+- Replaces a leading `A` with three spaces.
 - Rewrites the FIX tag-35 marker (`35=`) to `type=`.
 - Rewrites the FIX tag-44 marker (`44=`) to `price=`.
 

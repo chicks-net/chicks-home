@@ -34,7 +34,7 @@ github_fix_https
 
 ## See Also
 
-- [../../github/`README.md`](../../github/`README.md`) - overview of the
+- [github/README.md](../../github/README.md) - overview of the
   `github/` scripts and rulesets.
 - [repos-summary.md](repos-summary.md) - audit local repos for hygiene
   issues.
