@@ -31,12 +31,12 @@ or with different options.
 | Argument | Description |
 | --- | --- |
 | `url` | YouTube video URL to download. Required. |
-| `output-name` | Base name for the output MP3 (extension added by script). Required. |
+| `output-name` | Base name for the output file. No extension is appended by the script, so include the `.mp3` yourself if you want one. Required. |
 
 ## Examples
 
 ```bash
-youtube2mp3 'https://www.youtube.com/watch?v=dQw4w9WgXcQ' rick
+youtube2mp3 'https://www.youtube.com/watch?v=dQw4w9WgXcQ' rick.mp3
 # Produces ~/Music/from_youtube/rick.mp3
 ```
 

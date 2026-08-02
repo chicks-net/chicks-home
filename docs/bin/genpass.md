@@ -5,7 +5,7 @@ Generate passwords that avoid ambiguous look-alike characters.
 ## Synopsis
 
 ```bash
-genpass [apg-args]
+genpass
 ```
 
 ## Description
@@ -15,8 +15,10 @@ Generator) that filters out characters that are easy to confuse visually -
 `i`, `o`, `1`, `0` (case-insensitive) - so the generated passwords can be read
 aloud or transcribed without the usual "is that an I or a 1?" problem.
 
-Because it just pipes `apg` through a filter, any flags `apg` itself accepts
-are passed through implicitly via the pipe.
+It takes no arguments. Because `apg` is invoked as the left side of a pipe,
+flags cannot be forwarded to it - running `genpass -m 20 -x 20 -n 5` will
+silently ignore every flag. If you need `apg`'s options, call `apg` directly
+and pipe through `grep -vi '[io10]'` yourself.
 
 ## Requirements
 
@@ -28,8 +30,8 @@ are passed through implicitly via the pipe.
 # Generate one look-alike-safe password
 genpass
 
-# Hand off any apg flags (length, count, etc.)
-genpass -m 20 -x 20 -n 5
+# Equivalent with explicit apg flags
+apg -m 20 -x 20 -n 5 | grep -vi '[io10]'
 ```
 
 ## See Also
