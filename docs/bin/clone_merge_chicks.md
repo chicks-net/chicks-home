@@ -26,6 +26,13 @@ indiscriminately.
 
 No flags, no arguments.
 
+## Examples
+
+```bash
+# On a fresh machine, migrate onto the chicks-home layout
+clone_merge_chicks
+```
+
 ## See Also
 
 - [infect.md](infect.md) - provision SSH keys into a host via tmux

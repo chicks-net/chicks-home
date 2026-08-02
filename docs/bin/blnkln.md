@@ -11,7 +11,7 @@ blnkln
 ## Description
 
 `blnkln` is a three-line Bash script that runs `echo ''`. That's it. It exists
-so you have a named, self-documenting way to add a empty line in a pipeline
+so you have a named, self-documenting way to add an empty line in a pipeline
 or shell script instead of reaching for `echo` with an empty string every
 time. Useful in `find ... -exec` chains, build logs, or anywhere a one-shot
 spacing helper reads better than the equivalent `echo`.

@@ -25,6 +25,13 @@ The name is a nod to the script's "infect" building block: it spreads the
 
 No arguments, no flags.
 
+## Examples
+
+```bash
+# After filling in @dcs in the script, provision keys across the fleet
+plague
+```
+
 ## See Also
 
 - [infect.md](infect.md) - the per-host provisioning script `plague` drives

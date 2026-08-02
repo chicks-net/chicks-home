@@ -24,7 +24,7 @@ a stub waiting to be finished. Listed in the `README` as "in progress".
 
 ## Arguments
 
-| Flag | Description |
+| Argument | Description |
 | --- | --- |
 | `-s server` | MySQL server to back up from. |
 | `-d localdir` | Local directory to write the backup into. |
