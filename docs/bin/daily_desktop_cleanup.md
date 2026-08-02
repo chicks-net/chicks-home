@@ -10,7 +10,7 @@ daily_desktop_cleanup
 
 ## Description
 
-`daily_desktop_cleanup` is a bash script that sweeps macOS screenshots older
+`daily_desktop_cleanup` is a Bash script that sweeps macOS screenshots older
 than 30 days from `~/Desktop` into `~/Pictures/ScreenShots`. It uses `find
 -maxdepth 1` with the name patterns `Screenshot*.png`, `Screen Shot*.png`,
 and `Screenshot*.jpg` combined with `-mtime +30`, moves each matching file

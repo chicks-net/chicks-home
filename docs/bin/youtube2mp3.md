@@ -10,7 +10,7 @@ youtube2mp3 <url> <output-name>
 
 ## Description
 
-`youtube2mp3` is a bash script that downloads a YouTube video and converts
+`youtube2mp3` is a Bash script that downloads a YouTube video and converts
 it to MP3. It:
 
 1. Creates `~/tmp` and `~/Music/from_youtube` if they don't exist.

@@ -10,7 +10,7 @@ genpass [apg-args]
 
 ## Description
 
-`genpass` is a three-line bash wrapper around `apg` (Automated Password
+`genpass` is a three-line Bash wrapper around `apg` (Automated Password
 Generator) that filters out characters that are easy to confuse visually -
 `i`, `o`, `1`, `0` (case-insensitive) - so the generated passwords can be read
 aloud or transcribed without the usual "is that an I or a 1?" problem.

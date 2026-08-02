@@ -1,6 +1,6 @@
 # lib.sh
 
-Shared bash library providing a `spinner` helper.
+Shared Bash library providing a `spinner` helper.
 
 ## Synopsis
 
@@ -11,7 +11,7 @@ spinner <pid>
 
 ## Description
 
-`lib.sh` is a small bash library meant to be **sourced**, not executed. It
+`lib.sh` is a small Bash library meant to be **sourced**, not executed. It
 provides a single `spinner` function that displays a rotating `|/-\`
 animation while a background process (identified by its PID) is alive,
 refreshing every 0.75 seconds. When the background process exits, the spinner

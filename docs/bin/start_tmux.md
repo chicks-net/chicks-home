@@ -10,7 +10,7 @@ start_tmux
 
 ## Description
 
-`start_tmux` is a bash script that creates and attaches a tmux session layout
+`start_tmux` is a Bash script that creates and attaches a tmux session layout
 that's customized per hostname. It dispatches on the machine's hostname with
 cases for:
 
@@ -21,7 +21,7 @@ cases for:
 - a default fallback.
 
 Each case creates a named session and several windows with predefined
-working directories (typically git repos the user expects to work on that
+working directories (typically `git` repos the user expects to work on that
 box), then attaches to the session. Helpers `our_new_session`,
 `our_new_window`, and `our_attach` accept session/window names plus an
 optional directory.

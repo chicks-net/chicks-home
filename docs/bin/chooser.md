@@ -18,7 +18,7 @@ weighted by those sums, and prints the chosen item prefixed with
 splitting, A/B test bucket assignment, "which lunch spot today" - anywhere a
 flat `RANDOM` isn't enough.
 
-It dies on unparseable input, which keeps scripts that pipe into it honest.
+It dies on unparsable input, which keeps scripts that pipe into it honest.
 
 No flags.
 

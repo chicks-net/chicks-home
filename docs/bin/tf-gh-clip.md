@@ -11,7 +11,7 @@ terraform show -no-color plan | tf-gh-clip [introduction-text]
 
 ## Description
 
-`tf-gh-clip` is a bash script that wraps Terraform plan output so it can be
+`tf-gh-clip` is a Bash script that wraps Terraform plan output so it can be
 pasted into a GitHub comment / PR as a collapsible `<details>` block, then
 copies the result to the macOS clipboard via `pbcopy`.
 

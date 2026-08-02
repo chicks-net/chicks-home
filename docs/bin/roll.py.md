@@ -14,7 +14,7 @@ roll.py <spec> [spec ...]
 [roll](roll.md) script. It parses the same `NdM` tabletop notation with a
 regular expression, prints each individual die result, and prints a
 `total/possible` line for multi-dice rolls. Unlike the Perl version it prints
-a friendly error message for unparseable specs instead of dying, which makes
+a friendly error message for unparsable specs instead of dying, which makes
 it slightly nicer as an interactive tool. It raises `ValueError` if invoked
 with no arguments at all.
 

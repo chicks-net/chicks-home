@@ -11,7 +11,7 @@ some-command | fixdecode [grep-args]
 
 ## Description
 
-`fixdecode` is a three-line bash script that pipes `grep $*` output through a
+`fixdecode` is a three-line Bash script that pipes `grep $*` output through a
 `sed` filter which:
 
 - Trims a leading `A`.

@@ -29,7 +29,7 @@ Authored by Kamil Páral, AGPL-3 licensed, version 0.3.99.
 | --- | --- |
 | `-t`, `--type` | Item type: `generic` (default), `network`, or `note`. |
 | `-k`, `--keyring` | Keyring to operate on. Defaults to the default keyring. |
-| `--id` | Filter by item id. |
+| `--id` | Filter by item ID. |
 | `-n`, `--name` | Filter by item name. |
 | `-p` | Add a string parameter filter (repeatable). |
 | `-i` | Add an integer parameter filter (repeatable). |

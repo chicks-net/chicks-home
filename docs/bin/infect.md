@@ -10,12 +10,12 @@ infect <tmux-target>
 
 ## Description
 
-`infect` is a short bash script that, given a tmux target, sends keystrokes
+`infect` is a short Bash script that, given a tmux target, sends keystrokes
 to:
 
 1. Create `~/.ssh` on the remote host.
 2. Set its permissions to `700`.
-3. Download the repo's `authorized_keys` from GitHub raw.
+3. Download the repository's `authorized_keys` from GitHub raw.
 
 The name is cheeky - it's "infecting" the target with your SSH keys, which is
 a quick way to bootstrap access on a fresh machine you've already got a

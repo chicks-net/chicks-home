@@ -10,7 +10,7 @@ ipmi-reimage <target-host>
 
 ## Description
 
-`ipmi-reimage` is a bash wrapper around `ipmitool` (lanplus, `ADMIN`/`ADMIN`
+`ipmi-reimage` is a Bash wrapper around `ipmitool` (lanplus, `ADMIN`/`ADMIN`
 credentials) that's a more thorough sibling of [ipmi-reboot](ipmi-reboot.md).
 It:
 
@@ -19,7 +19,7 @@ It:
 3. Performs a chassis power reset.
 4. Checks the power status again.
 5. Activates Serial-over-LAN (SOL) so you can watch the reimage stream
-   through the BMC console.
+    through the BMC console.
 
 Use this when you want to actually see the install happen; use
 [ipmi-reboot](ipmi-reboot.md) when you just want the box to PXE and reboot.

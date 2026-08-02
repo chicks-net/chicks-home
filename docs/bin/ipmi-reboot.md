@@ -10,7 +10,7 @@ ipmi-reboot <target-host>
 
 ## Description
 
-`ipmi-reboot` is a bash wrapper around `ipmitool` (lanplus, `ADMIN`/`ADMIN`
+`ipmi-reboot` is a Bash wrapper around `ipmitool` (lanplus, `ADMIN`/`ADMIN`
 credentials) that:
 
 1. Sets the next boot device to PXE.

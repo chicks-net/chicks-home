@@ -1,6 +1,6 @@
 # repos-summary
 
-Audit local git repos for common hygiene issues.
+Audit local `git` repos for common hygiene issues.
 
 ## Synopsis
 
@@ -10,12 +10,12 @@ repos-summary
 
 ## Description
 
-`repos-summary` is a bash script that walks the local git repos under
+`repos-summary` is a Bash script that walks the local `git` repos under
 `~/Documents/git`, `~/LocalDocuments/git`, and a creative-writing directory
-and reports, for each repo:
+and reports, for each repository:
 
 - Whether the Claude code review workflow is present.
-- Whether the `.just/gh-process.just` version matches a template repo's
+- Whether the `.just/gh-process.just` version matches a template repository's
   checksum.
 - The current branch (flagging `master` as deprecated).
 - Untracked / modified file counts, with a private/public marker derived
@@ -48,4 +48,4 @@ SUMMARY: stale releases
 - [renovate-summary.md](renovate-summary.md) - report dependency updates
   across remote GitHub repos
 - [add-scorecards.md](add-scorecards.md) - add OpenSSF Scorecard workflow + badge
-- [github_fix_https.md](github_fix_https.md) - switch a repo from HTTPS to SSH
+- [github_fix_https.md](github_fix_https.md) - switch a repository from HTTPS to SSH

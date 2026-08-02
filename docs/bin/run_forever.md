@@ -10,7 +10,7 @@ run_forever
 
 ## Description
 
-`run_forever` is a trivial bash script that loops forever, printing its PID
+`run_forever` is a trivial Bash script that loops forever, printing its PID
 and `still running` every 10 seconds. It's the long-running counterpart to
 [run_10s](run_10s.md) - a job that never exits on its own, intended for
 testing wrappers that need to track a process that's expected to keep

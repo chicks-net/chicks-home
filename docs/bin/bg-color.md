@@ -10,9 +10,9 @@ bg-color [variable-prefix]
 
 ## Description
 
-`bg-color` is a tiny bash utility adapted from a Stack Overflow answer that
+`bg-color` is a tiny Bash utility adapted from a Stack Overflow answer that
 sends terminal escape sequences to query the current foreground and
-background RGB colors and captures the responses into bash variables. It
+background RGB colors and captures the responses into Bash variables. It
 defines a `getTermRGB` helper, calls it with the variable prefix, and then
 `declare -p`s the resulting `cTcolorsFg_*` / `cTcolorsBg_*` variables so you
 can see (and reuse) the colors the terminal reported.

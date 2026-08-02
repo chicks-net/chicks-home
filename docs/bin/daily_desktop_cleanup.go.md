@@ -10,12 +10,12 @@ go run daily_desktop_cleanup.go
 
 ## Description
 
-`daily_desktop_cleanup.go` is a Go reimplementation of the bash
+`daily_desktop_cleanup.go` is a Go reimplementation of the Bash
 [daily_desktop_cleanup](daily_desktop_cleanup.md) script. It:
 
 1. Creates `~/Pictures/ScreenShots` if it doesn't exist.
 2. Globs the same screenshot patterns (`Screenshot*.png`, `Screen Shot*.png`,
-   `Screenshot*.jpg`) on `~/Desktop`.
+    `Screenshot*.jpg`) on `~/Desktop`.
 3. Moves files older than 30 days to the archive directory.
 
 It improves on the original with timestamped logging, real error handling,
@@ -33,5 +33,5 @@ go run daily_desktop_cleanup.go
 
 ## See Also
 
-- [daily_desktop_cleanup.md](daily_desktop_cleanup.md) - the original bash script
+- [daily_desktop_cleanup.md](daily_desktop_cleanup.md) - the original Bash script
 - [hello.go.md](hello.go.md) - another Go file in `bin/`

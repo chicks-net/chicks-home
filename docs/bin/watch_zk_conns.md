@@ -10,7 +10,7 @@ watch_zk_conns
 
 ## Description
 
-`watch_zk_conns` is a minimal nine-line bash loop for watching TCP
+`watch_zk_conns` is a minimal nine-line Bash loop for watching TCP
 connections to ZooKeeper. Every 10 seconds it prints the current date and
 runs `netstat -nap | grep ^tcp | egrep ':(2181|3888|53494)'` to show
 connections on the:

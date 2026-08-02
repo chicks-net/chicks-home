@@ -20,7 +20,7 @@ credentials before running.
 You can back up all databases with `-a` or pass explicit database names.
 The rsync / diff stages that would push the backup remotely are currently
 `die "unimplemented"` - the local backup half works, the remote-sync half is
-a stub waiting to be finished. Listed in the README as "in progress".
+a stub waiting to be finished. Listed in the `README` as "in progress".
 
 ## Arguments
 

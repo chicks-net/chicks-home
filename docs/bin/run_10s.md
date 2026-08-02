@@ -10,7 +10,7 @@ run_10s
 
 ## Description
 
-`run_10s` is a trivial bash script that sleeps for 10 seconds and exits.
+`run_10s` is a trivial Bash script that sleeps for 10 seconds and exits.
 It exists to be a predictable short-running job for process / spinner /
 wrapper test harnesses - notably [lib.sh](lib.sh.md)'s `spinner` function
 and the [test_lib](test_lib.md) harness that exercises it.

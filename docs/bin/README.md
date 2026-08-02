@@ -8,19 +8,19 @@ nor are the `Pipfile` / `Pipfile.lock` dependency manifests.
 
 | Script | Summary |
 | --- | --- |
-| [add-scorecards](add-scorecards.md) | Add the OpenSSF Scorecard workflow + README badge to a repo. |
+| [add-scorecards](add-scorecards.md) | Add the OpenSSF Scorecard workflow + `README` badge to a repository. |
 | [claude-init](claude-init.md) | Bootstrap a `CLAUDE.md` via the `claude` CLI's `/init`. |
 | [compliance-check](compliance-check.md) | Run the `template-repo` compliance check against the current dir. |
-| [github_fix_https](github_fix_https.md) | Switch the current repo's `origin` remote from HTTPS to SSH (lives in `github/`). |
+| [github_fix_https](github_fix_https.md) | Switch the current repository's `origin` remote from HTTPS to SSH (lives in `github/`). |
 | [gpsu](gpsu.md) | Push the current branch to `origin` with `--set-upstream` (refuses `master`). |
 | [renovate-summary](renovate-summary.md) | Report dependency updates across GitHub repos via Renovate (read-only). |
-| [repos-summary](repos-summary.md) | Audit local git repos for hygiene issues (releases, branches, `.just` files). |
+| [repos-summary](repos-summary.md) | Audit local `git` repos for hygiene issues (releases, branches, `.just` files). |
 
 ## Text utilities
 
 | Script | Summary |
 | --- | --- |
-| [blnkln](blnkln.md) | Print a single blank line. |
+| [blnkln](blnkln.md) | Print a single empty line. |
 | [closefh](closefh.md) | Close inherited file handles cleanly. |
 | [comify](comify.md) | Convert newline-separated input into a comma-separated line. |
 | [fifths](fifths.md) | Split a number into fifths. |
@@ -63,7 +63,7 @@ nor are the `Pipfile` / `Pipfile.lock` dependency manifests.
 | [start_tmux](start_tmux.md) | Create and attach a host-specific tmux session layout. |
 | [run_10s](run_10s.md) | Sleep for 10 seconds - a test fixture. |
 | [run_forever](run_forever.md) | Loop forever printing a heartbeat - a long-running test fixture. |
-| [lib.sh](lib.sh.md) | Shared bash library providing a `spinner` function. |
+| [lib.sh](lib.sh.md) | Shared Bash library providing a `spinner` function. |
 | [test_lib](test_lib.md) | Tiny test harness for `lib.sh`'s `spinner`. |
 
 ## Random & dice
@@ -110,7 +110,7 @@ nor are the `Pipfile` / `Pipfile.lock` dependency manifests.
 | --- | --- |
 | [tf-gh-clip](tf-gh-clip.md) | Wrap a Terraform plan for pasting into a GitHub comment (collapsible `<details>`). |
 | [tidyrt](tidyrt.md) | Convenience wrapper around `perltidy` for the `rt` script. |
-| [labelgrep.sh](labelgrep.sh.md) | Search inside `.lbx` (label / zip) files for a pattern. |
+| [labelgrep.sh](labelgrep.sh.md) | Search inside `.lbx` (label / ZIP) files for a pattern. |
 
 ## Novelty & smoke tests
 

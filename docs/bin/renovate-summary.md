@@ -15,7 +15,7 @@ renovate-summary [--org OWNER[,OWNER...]] [--limit N] [--keep-report]
 
 `renovate-summary` scans all non-archived, non-fork repos for one or more
 GitHub owners and reports available dependency updates using the Renovate CLI
-in read-only `--dry-run=lookup` mode. No in-repo Renovate config is required -
+in read-only `--dry-run=lookup` mode. No in-repository Renovate config is required -
 `--require-config=optional` means it works on repos that have never opted into
 Renovate.
 
@@ -25,8 +25,8 @@ The script:
 2. Enumerates repos with `gh repo list`.
 3. Runs one batched Renovate lookup.
 4. Parses the JSON report with `jq`.
-5. Prints a per-repo summary table (see [Column meanings](#column-meanings))
-   plus totals and a list of repos Renovate had problems with.
+5. Prints a per-repository summary table (see [Column meanings](#column-meanings))
+    plus totals and a list of repos Renovate had problems with.
 
 No PRs or branches are created - it's purely a reporting tool.
 
@@ -43,7 +43,7 @@ No PRs or branches are created - it's purely a reporting tool.
 | `--org OWNER[,OWNER...]` | Comma-separated list of GitHub owners. Default: `fini-net,chicks-net`. |
 | `--limit N` | Cap the number of repos enumerated per owner. |
 | `--report-path PATH` | Custom path for the JSON report Renovate writes. |
-| `--keep-report` | Don't delete the JSON report on exit - useful for digging into a repo. |
+| `--keep-report` | Don't delete the JSON report on exit - useful for digging into a repository. |
 | `--include-forks` | Also scan forked repos (excluded by default). |
 | `--include-archived` | Also scan archived repos (excluded by default). |
 | `--verbose` | Show Renovate progress / debug logs. |
@@ -118,10 +118,10 @@ See /tmp/renovate-summary-report.json for details, or rerun with --verbose.
 
 A full scan of 84 repos takes about 7 minutes; most of that is GitHub API
 calls and Git clones Renovate performs for dependency extraction. Use
-`--keep-report` to retain the JSON report for drilling into a specific repo's
+`--keep-report` to retain the JSON report for drilling into a specific repository's
 updates or problems.
 
 ## See Also
 
-- [repos-summary.md](repos-summary.md) - audit local git repos
+- [repos-summary.md](repos-summary.md) - audit local `git` repos
 - [add-scorecards.md](add-scorecards.md) - add OpenSSF Scorecard workflow + badge

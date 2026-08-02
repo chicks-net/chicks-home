@@ -10,7 +10,7 @@ test_lib
 
 ## Description
 
-`test_lib` is a tiny bash test harness for the [lib.sh](lib.sh.md) shared
+`test_lib` is a tiny Bash test harness for the [lib.sh](lib.sh.md) shared
 library. It sources the library, kicks off a background [run_10s](run_10s.md)
 job, and uses the `spinner` function (passing the background PID `$!`) to
 display a spinner while waiting. It prints `wait` during execution and

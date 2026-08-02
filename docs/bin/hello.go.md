@@ -12,7 +12,7 @@ go run hello.go
 
 `hello.go` is a tiny `package main` Go program that prints `hello world`. It
 exists as a build/toolchain smoke test - the kind of thing you run after
-installing or upgrading Go to confirm the toolchain works end to end.
+installing or upgrading Go to confirm the toolchain works end-to-end.
 
 No flags, no arguments.
 

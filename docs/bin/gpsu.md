@@ -1,6 +1,6 @@
 # gpsu
 
-Push the current git branch to `origin` with `--set-upstream`.
+Push the current `git` branch to `origin` with `--set-upstream`.
 
 ## Synopsis
 
@@ -10,7 +10,7 @@ gpsu
 
 ## Description
 
-`gpsu` is a tiny bash wrapper for `git push --set-upstream origin <branch>`.
+`gpsu` is a tiny Bash wrapper for `git push --set-upstream origin <branch>`.
 It determines the current branch via `git describe --contains --all HEAD` and
 pushes it upstream so future `git push` and `git pull` calls don't need the
 remote/branch arguments. It deliberately refuses to push `master`, exiting
@@ -27,5 +27,5 @@ gpsu
 
 ## See Also
 
-- [github_fix_https.md](github_fix_https.md) - switch a repo's remote from HTTPS to SSH
-- [repos-summary.md](repos-summary.md) - audit local git repos
+- [github_fix_https.md](github_fix_https.md) - switch a repository's remote from HTTPS to SSH
+- [repos-summary.md](repos-summary.md) - audit local `git` repos

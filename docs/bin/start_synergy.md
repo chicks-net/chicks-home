@@ -10,7 +10,7 @@ start_synergy
 
 ## Description
 
-`start_synergy` is a bash script that acts as a poor-man's supervisor for the
+`start_synergy` is a Bash script that acts as a poor-man's supervisor for the
 Synergy server (`synergys`). Every 3 seconds it checks (via `lsof` on
 listening TCP sockets) whether `synergys` is running; if not, it logs the
 restart via `logger` and starts it again after a 10-second back-off.

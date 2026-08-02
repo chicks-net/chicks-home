@@ -10,7 +10,7 @@ split_chunks <input-video> [output-dir]
 
 ## Description
 
-`split_chunks` is a bash script (strict mode) that uses `ffmpeg -c copy`
+`split_chunks` is a Bash script (strict mode) that uses `ffmpeg -c copy`
 (stream copy, fast, keyframe-snapped) to split an MP4 (or any
 ffmpeg-readable video) into 28-second chunks, with a new chunk starting
 every 10 seconds. This produces overlapping segments that are useful for

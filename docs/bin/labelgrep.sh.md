@@ -1,6 +1,6 @@
 # labelgrep.sh
 
-Search inside `.lbx` (label / zip) files for a pattern.
+Search inside `.lbx` (label / ZIP) files for a pattern.
 
 ## Synopsis
 
@@ -10,7 +10,7 @@ labelgrep.sh <pattern>
 
 ## Description
 
-`labelgrep.sh` is a bash script that searches inside `.lbx` files (which are
+`labelgrep.sh` is a Bash script that searches inside `.lbx` files (which are
 ZIP archives) in the current directory tree for a given pattern using
 `zipgrep`, printing the filenames that match. It's the grep-and-find you'd
 otherwise hand-roll every time you need to dig into a pile of label-format

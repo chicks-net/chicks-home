@@ -10,12 +10,12 @@ claude-init
 
 ## Description
 
-`claude-init` is a short bash wrapper that automates bootstrapping a
-`CLAUDE.md` file for a repo:
+`claude-init` is a short Bash wrapper that automates bootstrapping a
+`CLAUDE.md` file for a repository:
 
 1. Creates a feature branch via `just branch claude-init`.
 2. Runs `claude --permission-mode acceptEdits -p "/init"` to let Claude
-   generate the initial `CLAUDE.md`.
+    generate the initial `CLAUDE.md`.
 3. Stages the new file with `git add CLAUDE.md`.
 4. Stashes the working tree with `git stp` (a custom alias) for review.
 
