@@ -14,7 +14,7 @@ on:
 permissions: {}
 
 jobs:
-  claude-review:
+  claude-review: # zizmor: ignore[secrets-outside-env] action requires the token via `with:`, not `env:`
     # Optional: Filter by PR author
     # if: |
     #   github.event.pull_request.user.login == 'external-contributor' ||

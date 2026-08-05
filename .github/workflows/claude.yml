@@ -14,7 +14,7 @@ on:
 permissions: {}
 
 jobs:
-  claude:
+  claude: # zizmor: ignore[secrets-outside-env] action requires the token via `with:`, not `env:`
     if: |
       (github.event_name == 'issue_comment' && contains(github.event.comment.body, '@claude')) ||
       (github.event_name == 'pull_request_review_comment' && contains(github.event.comment.body, '@claude')) ||
