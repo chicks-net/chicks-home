@@ -5,7 +5,7 @@
 		"**/threads_play",
 		"**/threads_example"
 	],
-	"ignore-patterns": [
+	"ignorePattern": [
 		"Harden the runner",
 		"step-security/harden-runner",
 		"actions/checkout",
