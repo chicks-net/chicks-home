@@ -1,0 +1,16 @@
+{
+	"threshold": 10,
+	"ignore": [
+		"**/*.prethreaded",
+		"**/threads_play",
+		"**/threads_example"
+	],
+	"ignorePattern": [
+		"Harden the runner",
+		"step-security/harden-runner",
+		"actions/checkout",
+		"persist-credentials",
+		"egress-policy",
+		"runs-on: ubuntu-latest"
+	]
+}
