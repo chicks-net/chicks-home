@@ -20,7 +20,7 @@ on:
 permissions: {}
 
 jobs:
-  validate:
+  renovate-validate:
     runs-on: ubuntu-latest
     permissions:
       contents: read
