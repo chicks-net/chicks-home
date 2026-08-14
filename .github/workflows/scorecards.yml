@@ -27,7 +27,7 @@ on:
 permissions: read-all
 
 jobs:
-  analysis:
+  scorecards-analysis:
     if: ${{ github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success' }}
     name: Scorecard analysis
     runs-on: ubuntu-latest
