@@ -15,7 +15,7 @@
 #   renovate-summary --keep-report         # don't delete the report file
 #   renovate-summary --include-forks       # also scan forked repos
 #   renovate-summary --include-archived    # also scan archived repos
-#   renovate-summary --verbose            # show renovate progress (debug logs)
+#   renovate-summary --verbose            # raw debug logs (hides friendly progress)
 
 set -euo pipefail
 
@@ -48,7 +48,8 @@ Options:
 	--keep-report	Don't delete the report file when done
 	--include-forks	Also scan forked repos (skipped by default)
 	--include-archived	Also scan archived repos (skipped by default)
-	--verbose	Pass LOG_LEVEL=debug to renovate (shows progress)
+	--verbose	Pass LOG_LEVEL=debug to renovate (raw debug logs;
+			hides the friendly per-repo progress lines)
 	-h, --help	Show this help
 
 Requires: gh (authenticated), renovate, jq
@@ -131,7 +132,7 @@ echo -e "${BLUE}Found $repo_count repos to scan.${RESET}" >&2
 # onboarding=false prevents any onboarding PR from being created.
 # optimize-for-disabled=false processes repos even if they disable Renovate
 #   in their config (none of ours have one, but it removes a failure mode).
-LOG_LEVEL=error
+LOG_LEVEL=info
 if [[ "$VERBOSE" == true ]]; then
 	LOG_LEVEL=debug
 fi
@@ -139,28 +140,79 @@ fi
 echo -e "${BLUE}Running Renovate in dry-run=lookup mode ...${RESET}" >&2
 echo -e "${CYAN}(this may take a while for many repos)${RESET}" >&2
 
-if ! LOG_LEVEL="$LOG_LEVEL" \
-	RENOVATE_REPORT_PATH="$REPORT_PATH" \
-	RENOVATE_REPORT_TYPE=file \
-	RENOVATE_TOKEN="$GH_TOKEN" \
-	renovate \
-		"${ALL_REPOS[@]}" \
-		--platform=github \
-		--endpoint=https://api.github.com/ \
-		--dry-run=lookup \
-		--require-config=optional \
-		--onboarding=false \
-		--optimize-for-disabled=false \
-		>/tmp/renovate-summary-stdout.log 2>&1; then
-	echo -e "${RED}Renovate failed. See /tmp/renovate-summary-stdout.log${RESET}" >&2
-	tail -20 /tmp/renovate-summary-stdout.log >&2
+# Run renovate in the background and watch its log so we can print a
+# timestamped line as each repo is processed.  We tail the log file in a
+# background process and match repo names against the pending set, then
+# stop the tailer once renovate exits.
+LOG_FILE=/tmp/renovate-summary-stdout.log
+: > "$LOG_FILE"
+
+LOG_LEVEL="$LOG_LEVEL" \
+RENOVATE_REPORT_PATH="$REPORT_PATH" \
+RENOVATE_REPORT_TYPE=file \
+RENOVATE_TOKEN="$GH_TOKEN" \
+renovate \
+	"${ALL_REPOS[@]}" \
+	--platform=github \
+	--endpoint=https://api.github.com/ \
+	--dry-run=lookup \
+	--require-config=optional \
+	--onboarding=false \
+	--optimize-for-disabled=false \
+	>"$LOG_FILE" 2>&1 &
+renovate_pid=$!
+
+# Background watcher: tail the log, strip ANSI, and print a timestamped
+# line the first time each known repo appears.  Exit when renovate does.
+# We avoid associative arrays (bash 3.2 on macOS) and instead build a
+# newline-separated "seen" list, checking membership with a case statement.
+watch_progress() {
+	local seen=""
+	local r clean logline
+	while IFS= read -r logline; do
+		clean=$(printf '%s' "$logline" | sed 's/\x1b\[[0-9;]*m//g')
+		for r in "${ALL_REPOS[@]}"; do
+			case "$seen" in
+				*$'\n'"$r"$'\n'*) continue ;;
+			esac
+			# Anchor the repo name so that owner/foo doesn't match the
+			# log line for owner/foo-bar.  Renovate logs the form
+			# "Repository started (repository=owner/foo)" so anchoring
+			# on "=<repo>)" is unambiguous (= appears only once).
+			if [[ "$clean" == *"Repository started"*"=$r)"* ]]; then
+				echo -e "${CYAN}[$(date '+%H:%M:%S')] processing $r${RESET}" >&2
+				seen="$seen"$'\n'"$r"$'\n'
+			fi
+		done
+	done < <(tail -n +1 -f "$LOG_FILE" 2>/dev/null)
+}
+if [[ "$VERBOSE" == false ]]; then
+	watch_progress &
+	watcher_pid=$!
+else
+	watcher_pid=
+fi
+
+# Wait for renovate to finish, then stop the watcher.
+wait "$renovate_pid" && renovate_status=0 || renovate_status=$?
+if [[ -n "$watcher_pid" ]]; then
+	kill "$watcher_pid" 2>/dev/null || true
+	# Also reap the tail -f child spawned by the process substitution;
+	# kill alone only signals the while-read subshell and would orphan it.
+	pkill -P "$watcher_pid" 2>/dev/null || true
+	wait "$watcher_pid" 2>/dev/null || true
+fi
+
+if [[ $renovate_status -ne 0 ]]; then
+	echo -e "${RED}Renovate failed. See $LOG_FILE${RESET}" >&2
+	tail -20 "$LOG_FILE" >&2
 	exit 1
 fi
 
 if [[ ! -f "$REPORT_PATH" ]]; then
 	echo -e "${RED}Renovate did not write a report to $REPORT_PATH${RESET}" >&2
 	echo -e "${CYAN}Last lines of renovate log:${RESET}" >&2
-	tail -20 /tmp/renovate-summary-stdout.log >&2
+	tail -20 "$LOG_FILE" >&2
 	exit 1
 fi
 

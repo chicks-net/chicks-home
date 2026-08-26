@@ -46,7 +46,7 @@ No PRs or branches are created - it's purely a reporting tool.
 | `--keep-report` | Don't delete the JSON report on exit - useful for digging into a repository. |
 | `--include-forks` | Also scan forked repos (excluded by default). |
 | `--include-archived` | Also scan archived repos (excluded by default). |
-| `--verbose` | Show Renovate progress / debug logs. |
+| `--verbose` | Show raw Renovate debug logs (hides the friendly per-repo progress lines). |
 | `-h`, `--help` | Print usage and exit. |
 
 ## Column meanings
@@ -73,8 +73,17 @@ renovate-summary --limit 50              # cap repos per owner
 renovate-summary --keep-report           # keep the JSON report for digging
 renovate-summary --include-forks         # also scan forked repos
 renovate-summary --include-archived      # also scan archived repos
-renovate-summary --verbose               # show renovate progress (debug logs)
+renovate-summary --verbose               # raw debug logs (hides friendly progress)
 ```
+
+## Example execution
+
+It takes a while for the command to run across my repos.
+Even though it's sped up 10x here, the slowest repository really did take
+2 full minutes to process; most finish faster than that, but the
+worst case is pretty bad.
+
+![animation of running the renovate-summary command with no arguments](renovate-summary.gif)
 
 ## Example output
 
