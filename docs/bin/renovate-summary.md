@@ -73,7 +73,7 @@ renovate-summary --limit 50              # cap repos per owner
 renovate-summary --keep-report           # keep the JSON report for digging
 renovate-summary --include-forks         # also scan forked repos
 renovate-summary --include-archived      # also scan archived repos
-renovate-summary --verbose               # show renovate progress (debug logs)
+renovate-summary --verbose               # raw debug logs (hides friendly progress)
 ```
 
 ## Example execution

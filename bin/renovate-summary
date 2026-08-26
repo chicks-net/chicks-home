@@ -15,7 +15,7 @@
 #   renovate-summary --keep-report         # don't delete the report file
 #   renovate-summary --include-forks       # also scan forked repos
 #   renovate-summary --include-archived    # also scan archived repos
-#   renovate-summary --verbose            # show renovate progress (debug logs)
+#   renovate-summary --verbose            # raw debug logs (hides friendly progress)
 
 set -euo pipefail
 
