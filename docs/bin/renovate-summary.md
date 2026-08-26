@@ -46,7 +46,7 @@ No PRs or branches are created - it's purely a reporting tool.
 | `--keep-report` | Don't delete the JSON report on exit - useful for digging into a repository. |
 | `--include-forks` | Also scan forked repos (excluded by default). |
 | `--include-archived` | Also scan archived repos (excluded by default). |
-| `--verbose` | Show Renovate progress / debug logs. |
+| `--verbose` | Show raw Renovate debug logs (hides the friendly per-repo progress lines). |
 | `-h`, `--help` | Print usage and exit. |
 
 ## Column meanings

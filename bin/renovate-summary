@@ -48,7 +48,8 @@ Options:
 	--keep-report	Don't delete the report file when done
 	--include-forks	Also scan forked repos (skipped by default)
 	--include-archived	Also scan archived repos (skipped by default)
-	--verbose	Pass LOG_LEVEL=debug to renovate (shows progress)
+	--verbose	Pass LOG_LEVEL=debug to renovate (raw debug logs;
+			 hides the friendly per-repo progress lines)
 	-h, --help	Show this help
 
 Requires: gh (authenticated), renovate, jq
