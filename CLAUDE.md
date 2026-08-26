@@ -20,7 +20,7 @@ intentionally avoids Ansible due to maintainer preferences.
 ### Just Commands
 
 This repository uses [just](https://github.com/casey/just) as the primary task
-runner. The justfile imports 13 modular recipe files from `.just/`.
+runner. The justfile imports 11 modular recipe files from `.just/`.
 
 **Standard PR Workflow** (use this pattern for all changes):
 
@@ -39,7 +39,15 @@ just merge            # Squash-merges PR, deletes branch, returns to main
 - `just shellcheck` - Run shellcheck on shell scripts, including bash embedded
   in just recipes (extracts via awk before linting)
 - `just prweb` - View current PR in web browser
+- `just pr_update` - Update the Done section of the PR description with
+  current commits
+- `just pr_verify` - Append to the PR's Verify section from stdin
+- `just again` - Push changes, update the PR description, and watch GHA
+  checks (shortcut for iterating after `just pr`)
 - `just release <version>` - Create a GitHub release with auto-generated notes
+- `just release_age` - Check how long ago the last release was
+- `just verify-release [tag]` - Verify a release's cosign signature and SLSA
+  provenance (defaults to latest tag)
 - `just mergepdf <dest> <src...>` - Merge PDF files (macOS only)
 
 **Claude Code Commands**:
