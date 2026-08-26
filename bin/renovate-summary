@@ -49,7 +49,7 @@ Options:
 	--include-forks	Also scan forked repos (skipped by default)
 	--include-archived	Also scan archived repos (skipped by default)
 	--verbose	Pass LOG_LEVEL=debug to renovate (raw debug logs;
-			 hides the friendly per-repo progress lines)
+			hides the friendly per-repo progress lines)
 	-h, --help	Show this help
 
 Requires: gh (authenticated), renovate, jq
