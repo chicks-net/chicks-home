@@ -79,9 +79,9 @@ renovate-summary --verbose               # show renovate progress (debug logs)
 ## Example execution
 
 It takes a while for the command to run across my repos.
-This animation is sped up 10x so it really is taking 2 entire
-minutes for this script to process a single repository.  Most finish
-faster than that, but the worst case is pretty bad.
+Even though it's sped up 10x here, the slowest repo really did take
+2 full minutes to process; most finish faster than that, but the
+worst case is pretty bad.
 
 ![animation of running the renovate-summary command with no arguments](renovate-summary.gif)
 
