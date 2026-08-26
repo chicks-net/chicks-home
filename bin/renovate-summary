@@ -175,9 +175,11 @@ watch_progress() {
 			case "$seen" in
 				*$'\n'"$r"$'\n'*) continue ;;
 			esac
-			# Anchor the repo name with a trailing quote so that
-			# owner/foo doesn't match "Repository started ... owner/foo-bar".
-			if [[ "$clean" == *"Repository started"*"$r\""* ]]; then
+			# Anchor the repo name so that owner/foo doesn't match the
+			# log line for owner/foo-bar.  Renovate logs the form
+			# "Repository started (repository=owner/foo)" so anchoring
+			# on "=<repo>)" is unambiguous (= appears only once).
+			if [[ "$clean" == *"Repository started"*"=$r)"* ]]; then
 				echo -e "${CYAN}[$(date '+%H:%M:%S')] processing $r${RESET}" >&2
 				seen="$seen"$'\n'"$r"$'\n'
 			fi
