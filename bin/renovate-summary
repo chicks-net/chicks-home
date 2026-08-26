@@ -174,7 +174,9 @@ watch_progress() {
 			case "$seen" in
 				*$'\n'"$r"$'\n'*) continue ;;
 			esac
-			if [[ "$clean" == *"Repository started"*"$r"* ]]; then
+			# Anchor the repo name with a trailing quote so that
+			# owner/foo doesn't match "Repository started ... owner/foo-bar".
+			if [[ "$clean" == *"Repository started"*"$r\""* ]]; then
 				echo -e "${CYAN}[$(date '+%H:%M:%S')] processing $r${RESET}" >&2
 				seen="$seen"$'\n'"$r"$'\n'
 			fi
@@ -192,6 +194,9 @@ fi
 wait "$renovate_pid" && renovate_status=0 || renovate_status=$?
 if [[ -n "$watcher_pid" ]]; then
 	kill "$watcher_pid" 2>/dev/null || true
+	# Also reap the tail -f child spawned by the process substitution;
+	# kill alone only signals the while-read subshell and would orphan it.
+	pkill -P "$watcher_pid" 2>/dev/null || true
 	wait "$watcher_pid" 2>/dev/null || true
 fi
 
