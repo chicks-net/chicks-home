@@ -209,7 +209,7 @@ fi
 if [[ ! -f "$REPORT_PATH" ]]; then
 	echo -e "${RED}Renovate did not write a report to $REPORT_PATH${RESET}" >&2
 	echo -e "${CYAN}Last lines of renovate log:${RESET}" >&2
-	tail -20 /tmp/renovate-summary-stdout.log >&2
+	tail -20 "$LOG_FILE" >&2
 	exit 1
 fi
 
