@@ -1,0 +1,24 @@
+#!/usr/bin/env bash
+
+if [[ ! -d .git ]]; then
+	echo not in the root of a git repo
+	exit 1
+fi
+
+if [[ ! -d .just ]]; then
+	echo no .just dir, seems bad
+	exit 2
+fi
+
+echo "sanity checks look ok"
+
+just branch gh-process-8-7
+just update_from_template
+git add .just/gh-process.just .just/copilot.just .just/compliance.just .just/lib/wait_for_copilot.sh
+git stp
+
+gum spin --title "Double checking..." sleep 3
+git cim '👓 [just] gh-process v8.7 improves compliance report and copilot active review detection'
+just pr
+
+echo "$0 completed"
