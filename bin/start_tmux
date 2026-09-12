@@ -36,6 +36,7 @@ case $(hostname) in
 		our_new_window fruity gh ~/Documents/git/gh-observer
 		our_new_window fruity home ~/Documents/git/chicks-home
 		our_new_window fruity mans ~/LocalDocuments/git/my-user-manuals
+		our_new_window fruity infra ~/Documents/git/fini-infra
 		our_new_window fruity other ~/Documents/git/
 		our_attach fruity
 
@@ -56,16 +57,6 @@ case $(hostname) in
 		tmux new-window -t c64 -d -n dnetc_proxy #-c /home/chicks/Documents/git/fini-dnet-proxy
 		tmux new-window -t c64 -d -n dnetc       #-c /home/chicks/Documents/dnetc
 		tmux attach -t c64
-		;;
-
-	efba*)
-		our_new_session podman
-		our_new_window podman foo /etc
-		our_new_window podman bar /chicksbin
-		our_new_window podman baz /root
-		our_new_window podman profit /proc
-		our_attach podman
-
 		;;
 
 	*)
