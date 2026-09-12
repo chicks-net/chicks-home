@@ -66,36 +66,13 @@ Includes day-of-week updater scripts and comprehensive documentation links.
 
 ## Quick Start Examples
 
-### Package Management Across Distros
-
-```bash
-# Check what packages are missing
-. .functions
-check_packages
-
-# Install missing packages automatically
-check_packages -i
-```
-
-The package checker handles the differences between `apt-get` and `yum` for
-you, making it easy to maintain the same environment across different Linux
-flavors.
-
-### SSL Certificate Monitoring
-
-`check_ssl` checks SSL certificate dates for one or more `host:port` pairs
-and prints the `notBefore` / `notAfter` dates. See
-[docs/bin/check_ssl.md](docs/bin/check_ssl.md) for the full reference.
-
-```bash
-./check_ssl www.google.com:443
-```
-
 ### Streamlined PR Workflow with just
 
 ```bash
 # Start a new feature
 just branch fix-bug-123
+
+# Add commits to the branch with descriptive commit messages
 
 # Create PR and watch checks automatically
 just pr
@@ -106,23 +83,6 @@ just merge
 
 The justfile automates the entire GitHub PR lifecycle with built-in safety
 checks to prevent commits on main.
-
-### Renovate Update Summary
-
-`renovate-summary` scans all non-archived, non-fork repos for an owner (or
-owners) and reports available dependency updates using the Renovate CLI in
-read-only `--dry-run=lookup` mode. No in-repo Renovate config is required and
-no PRs or branches are created. Requires `gh` (authenticated), `renovate`,
-and `jq`.
-
-```bash
-renovate-summary                  # scan fini-net + chicks-net
-renovate-summary --org fini-net   # scan one owner
-renovate-summary --keep-report    # keep the JSON report for digging
-```
-
-See [docs/bin/renovate-summary.md](docs/bin/renovate-summary.md) for the full
-flag list, column-meanings table, and example output.
 
 ## Installation
 
@@ -178,56 +138,9 @@ just list
 For full home directory integration, I typically clone the repository and symlink
 configurations. Open to suggestions for better installation automation.
 
-## Verifying releases
-
-Each tagged release (e.g. `v0.1`) ships an asset bundle
-(`chicks-home-<tag>.tar.gz` containing the dotfiles, `bin/` utilities,
-`.functions`, `justfile`, and `.just/` modules - the things you'd actually
-cherry-pick), a `checksums.txt` file, a cosign keyless signature
-(`.bundle`), an SBOM (`.sbom.json`), and an SLSA provenance attestation
-(`multiple.intoto.jsonl`).
-
-### Quick verify with just
-
-```bash
-# Defaults to the latest release; pass a tag to verify a specific one.
-just verify-release
-just verify-release v0.1
-```
-
-### Verify the asset signature with cosign
-
-```bash
-# Replace v0.1 with the tag you want to verify.
-TAG="v0.1"
-curl -L -O "https://github.com/chicks-net/chicks-home/releases/download/${TAG}/chicks-home-${TAG}.tar.gz"
-curl -L -O "https://github.com/chicks-net/chicks-home/releases/download/${TAG}/chicks-home-${TAG}.tar.gz.bundle"
-
-cosign verify-blob \
-  --bundle chicks-home-${TAG}.tar.gz.bundle \
-  --certificate-identity-regexp "https://github.com/chicks-net/chicks-home/.github/workflows/release.yml@refs/tags/${TAG}" \
-  --certificate-oidc-issuer "https://token.actions.githubusercontent.com" \
-  chicks-home-${TAG}.tar.gz
-```
-
-### Verify SLSA build provenance
-
-```bash
-TAG="v0.1"
-curl -L -O "https://github.com/chicks-net/chicks-home/releases/download/${TAG}/chicks-home-${TAG}.tar.gz"
-curl -L -O "https://github.com/chicks-net/chicks-home/releases/download/${TAG}/multiple.intoto.jsonl"
-
-slsa-verifier verify-artifact \
-  --provenance-path multiple.intoto.jsonl \
-  --source-uri github.com/chicks-net/chicks-home \
-  --source-tag "${TAG}" \
-  chicks-home-${TAG}.tar.gz
-```
-
-The signature is produced via keyless signing using GitHub Actions OIDC
-identities, so there are no long-lived signing keys to trust or rotate - you
-only trust the Sigstore Fulcio certificate chain and the workflow identity
-printed above.
+Release artifacts are signed - see
+[.github/SECURITY.md](.github/SECURITY.md) for how to verify signatures and
+provenance.
 
 ## What's Cooking
 
