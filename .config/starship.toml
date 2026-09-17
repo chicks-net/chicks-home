@@ -14,7 +14,8 @@ $git_status\
 $nodejs\
 $rust\
 $golang\
-$php\
+$perl\
+$lua\
 [](fg:#212736 bg:#1d2230)\
 $time\
 [ ](fg:#1d2230)\
@@ -56,10 +57,18 @@ symbol = ""
 style = "bg:#212736"
 format = '[[ $symbol ($version) ](fg:#769ff0 bg:#212736)]($style)'
 
-[php]
+[perl]
+symbol = "🐪"
+style = "bg:#212736"
+format = '[[ $symbol ($version) ](fg:#769ff0 bg:#212736)]($style)'
+
+[lua]
 symbol = ""
 style = "bg:#212736"
 format = '[[ $symbol ($version) ](fg:#769ff0 bg:#212736)]($style)'
+
+[php]
+disabled = true
 
 [time]
 disabled = false
