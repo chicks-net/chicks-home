@@ -18,6 +18,7 @@ $perl\
 $lua\
 $terraform\
 [](fg:#212736 bg:#1d2230)\
+${custom.moon_phase}\
 $time\
 [ ](fg:#1d2230)\
 \n$character"""
@@ -81,3 +82,9 @@ disabled = false
 time_format = "%R" # Hour:Minute Format
 style = "bg:#1d2230"
 format = '[[  $time ](fg:#a0a9cb bg:#1d2230)]($style)'
+
+[custom.moon_phase]
+# synodic month arithmetic; epoch = new moon 2000-01-06 18:14 UTC
+command = 'p=$(( ((( $(date +%s) - 947182440 ) % 2551443 ) * 8 + 1275721) / 2551443 % 8 )); case $p in 0) echo -n "󰽤";; 1) echo -n "󰽧";; 2) echo -n "󰽡";; 3) echo -n "󰽨";; 4) echo -n "󰽢";; 5) echo -n "󰽦";; 6) echo -n "󰽣";; 7) echo -n "󰽥";; esac'
+format = '[$output ](fg:#a0a9cb bg:#1d2230)'
+when = "true"
