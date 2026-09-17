@@ -1,0 +1,24 @@
+#!/usr/bin/env bash
+
+if [[ ! -d .git ]]; then
+	echo not in the root of a git repo
+	exit 1
+fi
+
+if [[ ! -d .just ]]; then
+	echo no .just dir, seems bad
+	exit 2
+fi
+
+echo "sanity checks look ok"
+
+just branch gh-process-9-9
+just update_from_template
+git add .just/claude.just .just/compliance.just .just/copilot.just .just/cue-verify.just .just/gh-process.just .just/lib/common.sh .just/lib/cue_sync.awk .just/lib/generate_checksums.sh .just/lib/install-prerequisites.sh .just/lib/template_update.sh .just/lib/update_pr_body.sh .just/pr-hook.just .just/repo-toml.just .just/shellcheck.just .just/template-sync.just .just/lib/wait_for_copilot.sh .just/lib/template_sync_test.sh
+git stp
+
+gum spin --title "Double checking..." sleep 3
+git cim '🎞️ [just] gh-process v9.9 matured the PR/Copilot lifecycle and added opt-in asciinema recording'
+just pr
+
+echo "$0 completed"
