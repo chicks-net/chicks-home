@@ -93,7 +93,6 @@ pm_to_blib
 .local/
 .nv/
 .pki/
-.cache/
 .ICEauthority
 .dbus/
 .dmrc
