@@ -106,3 +106,26 @@ launchd/*.log
 launchd/*.err
 # and binary
 launchd/daily_desktop_cleanup
+
+# Output of the go coverage tool, specifically when used with LiteIDE
+*.out
+
+# Go workspace file
+go.work
+go.work.sum
+
+# env file
+.env
+
+# repo-level cache for justfiles, etc.
+/.cache
+
+# Generated repo metadata (run 'just repo_toml_generate' to regenerate)
+/.just/repo-toml.sh
+/.just/copilot_backups/
+/.claude/settings.local.json.backup
+
+# opencode
+/.opencode/plans/
+/.opencode/bun.lock
+/.opencode/package.json
