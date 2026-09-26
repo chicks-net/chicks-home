@@ -38,6 +38,8 @@ jobs:
       packages: read
       # To report GitHub Actions status checks
       statuses: write
+      # To write results to PRs as a comment
+      pull-requests: write
 
     ##################
     # Load all steps #
