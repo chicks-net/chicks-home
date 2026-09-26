@@ -38,6 +38,12 @@ jobs:
       packages: read
       # To report GitHub Actions status checks
       statuses: write
+      # To write results to PRs as a comment
+      # (super-linter uses the issues-comments API, which GitHub maps
+      # to the issues permission, and gates under pull-requests when
+      # the subject is a PR)
+      issues: write
+      pull-requests: write
 
     ##################
     # Load all steps #
