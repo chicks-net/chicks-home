@@ -27,3 +27,9 @@ indent_size = 4
 [.claude/*.json]
 indent_style = space
 indent_size = 2
+
+# Verbatim template-synced copy (see .github/workflows/actionlint.yml);
+# upstream (rhysd/actionlint) ships 2-space JSON.
+[.github/actionlint-matcher.json]
+indent_style = space
+indent_size = 2

@@ -5,6 +5,24 @@
 		"helpers:pinGitHubActionDigests"
 	],
 	"schedule": ["after 5am on Monday", "after 5am on Tuesday", "after 5am on Wednesday", "after 5am on Thursday", "after 5am on Friday"],
+	"customManagers": [
+		{
+			"customType": "regex",
+			"managerFilePatterns": ["^\\.github/workflows/actionlint\\.ya?ml$"],
+			"matchStrings": ["ACTIONLINT_VERSION:\\s*(?<currentValue>\\d+\\.\\d+\\.\\d+)"],
+			"datasourceTemplate": "github-releases",
+			"depNameTemplate": "rhysd/actionlint",
+			"extractVersionTemplate": "^v(?<version>.*)$",
+			"versioningTemplate": "semver"
+		},
+		{
+			"customType": "regex",
+			"managerFilePatterns": ["^\\.github/workflows/actionlint\\.ya?ml$"],
+			"matchStrings": ["PYFLAKES_VERSION:\\s*(?<currentValue>\\d+\\.\\d+\\.\\d+)"],
+			"datasourceTemplate": "pypi",
+			"depNameTemplate": "pyflakes"
+		}
+	],
 	"packageRules": [
 		{
 			"matchManagers": ["github-actions"],
@@ -21,6 +39,10 @@
 			"matchDepNames": ["slsa-framework/slsa-github-generator"],
 			"enabled": false,
 			"description": "SLSA generator reusable workflow must be pinned by tag (e.g. @v2.1.0), not SHA. SHA-pinning causes 'Invalid ref' errors in the generator's internal builder checkout. See .github/workflows/release.yml."
+		},
+		{
+			"matchDepNames": ["rhysd/actionlint", "pyflakes"],
+			"minimumReleaseAge": "3 days"
 		}
 	],
 	"prConcurrentLimit": 3,
