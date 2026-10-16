@@ -18,6 +18,7 @@ $perl\
 $lua\
 $terraform\
 [](fg:#212736 bg:#1d2230)\
+$jobs\
 ${custom.moon_phase}\
 $time\
 [ ](fg:#1d2230)\
@@ -76,6 +77,13 @@ format = '[[ $symbol ($version) ](fg:#769ff0 bg:#212736)]($style)'
 
 [php]
 disabled = true
+
+[jobs]
+symbol = "+"
+style = "bg:#1d2230"
+symbol_threshold = 1
+number_threshold = 1
+format = '[[ $symbol$number ](fg:#a0a9cb bg:#1d2230)]($style)'
 
 [time]
 disabled = false
