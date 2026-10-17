@@ -96,14 +96,17 @@ read_token() {
 	elif [[ ! -t 0 ]]; then
 		IFS= read -r token || true
 	else
-		echo -e "${BLUE}New ${secret_name} value for ${org} repos${RESET}"
-		printf 'token: '
+		# prompts go to stderr: stdout of this function is captured
+		# via command substitution by the caller and must contain only
+		# the token value itself
+		echo -e "${BLUE}New ${secret_name} value for ${org} repos${RESET}" >&2
+		printf 'token: ' >&2
 		IFS= read -rs token || true
-		echo
+		echo >&2
 		[[ -n "$token" ]] || carp "empty token"
-		printf 'confirm: '
+		printf 'confirm: ' >&2
 		IFS= read -rs token_confirm || true
-		echo
+		echo >&2
 		[[ "$token" == "$token_confirm" ]] || carp "tokens do not match"
 	fi
 
@@ -146,8 +149,10 @@ fi
 gh auth status &>/dev/null || carp "gh is not authenticated - run: gh auth login"
 
 declare -a repos=()
+repo_desc="repos with ${secret_name}"
 
 if [[ ${#target_repos[@]} -gt 0 ]]; then
+	repo_desc="target repos (${secret_name} presence not verified)"
 	for repo in "${target_repos[@]}"; do
 		if [[ "$repo" == "$org/"* ]]; then
 			repos+=("$repo")
@@ -174,7 +179,7 @@ if [[ ${#repos[@]} -eq 0 ]]; then
 fi
 
 echo
-echo -e "${BLUE}${#repos[@]} repos with ${secret_name}:${RESET}"
+echo -e "${BLUE}${#repos[@]} ${repo_desc}:${RESET}"
 for repo in "${repos[@]}"; do
 	echo "  $repo"
 done
