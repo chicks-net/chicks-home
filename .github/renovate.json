@@ -31,11 +31,6 @@
 			"minimumReleaseAge": "5 days"
 		},
 		{
-			"matchDepNames": ["bridgecrewio/checkov-action"],
-			"overrideDatasource": "git-refs",
-			"overridePackageName": "https://github.com/bridgecrewio/checkov-action"
-		},
-		{
 			"matchDepNames": ["slsa-framework/slsa-github-generator"],
 			"enabled": false,
 			"description": "SLSA generator reusable workflow must be pinned by tag (e.g. @v2.1.0), not SHA. SHA-pinning causes 'Invalid ref' errors in the generator's internal builder checkout. See .github/workflows/release.yml."
