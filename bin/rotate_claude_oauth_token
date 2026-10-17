@@ -49,41 +49,45 @@ carp() {
 	exit 2
 }
 
-# Emit "$org/<repo>" for every non-archived org repo that has the secret.
-# Progress goes to stderr; matching repos go to stdout. A failed secret
-# check is reported as a warning (not treated as a clean negative), so a
-# repo can not be silently skipped during rotation.
+# Populate the global repos[] array with "$org/<repo>" for every non-archived
+# org repo that has the secret, and skipped_repos[] with repos whose secret
+# check failed (rate limit, permissions, network). A check failure is NOT
+# treated as a clean negative - the caller summarizes skipped repos so a
+# stale token can not survive a "successful" run unnoticed. Progress goes to
+# stderr.
 discover_repos() {
-	local limit=1000 index=0 count repo secrets repo_list
+	local limit=1000 index=0 count repo archived secrets repo_list total_fetched=0
 
 	repo_list=$(gh repo list "$org" --limit "$limit" --json name,isArchived \
-		-q '.[] | select(.isArchived == false) | .name') ||
+		-q '.[] | [.name, .isArchived] | @tsv') ||
 		carp "failed to list repos in $org"
 
-	if [[ -z "$repo_list" ]]; then
-		return
+	declare -a all_repos=()
+	if [[ -n "$repo_list" ]]; then
+		while IFS=$'\t' read -r repo archived; do
+			total_fetched=$((total_fetched + 1))
+			if [[ "$archived" != "true" ]]; then
+				all_repos+=("$repo")
+			fi
+		done <<<"$repo_list"
 	fi
 
-	declare -a all_repos=()
-	while read -r repo; do
-		all_repos+=("$repo")
-	done <<<"$repo_list"
+	# --limit applies to the unfiltered fetch, so check truncation against
+	# the total fetched, not the post-archive-filter count
+	if [[ "$total_fetched" -ge "$limit" ]]; then
+		echo -e "${YELLOW}warning: fetched $total_fetched repos - at --limit $limit, discovery may be truncated${RESET}" >&2
+	fi
 
 	count=${#all_repos[@]}
-	if [[ "$count" -ge "$limit" ]]; then
-		echo -e "${YELLOW}warning: $count repos found - at --limit $limit, discovery may be truncated${RESET}" >&2
-	fi
-
 	for repo in "${all_repos[@]}"; do
 		index=$((index + 1))
 		printf '\rchecking repo %s/%s: %-45s' "$index" "$count" "$repo" >&2
 		if secrets=$(gh secret list -R "$org/$repo" --json name -q '.[].name' 2>/dev/null); then
 			if grep -qx "$secret_name" <<<"$secrets"; then
-				echo "$org/$repo"
+				repos+=("$org/$repo")
 			fi
 		else
-			printf '\r%*s\r' 70 '' >&2
-			echo -e "${YELLOW}warning: could not check secrets on $org/$repo - skipped${RESET}" >&2
+			skipped_repos+=("$org/$repo")
 		fi
 	done
 	printf '\r%*s\r' 70 '' >&2
@@ -151,6 +155,7 @@ fi
 gh auth status &>/dev/null || carp "gh is not authenticated - run: gh auth login"
 
 declare -a repos=()
+declare -a skipped_repos=()
 repo_desc="repos with ${secret_name}"
 
 if [[ ${#target_repos[@]} -gt 0 ]]; then
@@ -168,12 +173,7 @@ if [[ ${#target_repos[@]} -gt 0 ]]; then
 	repos=($(printf '%s\n' "${repos[@]}" | sort -u))
 else
 	echo -e "${BLUE}Finding repos in ${org} with ${secret_name}...${RESET}" >&2
-	repo_list=$(discover_repos)
-	if [[ -n "$repo_list" ]]; then
-		while read -r repo; do
-			repos+=("$repo")
-		done <<<"$repo_list"
-	fi
+	discover_repos
 fi
 
 if [[ ${#repos[@]} -eq 0 ]]; then
@@ -186,6 +186,16 @@ echo -e "${BLUE}${#repos[@]} ${repo_desc}:${RESET}"
 for repo in "${repos[@]}"; do
 	echo "  $repo"
 done
+
+# discovery skips must be visible in every mode - a skipped repo keeps its
+# old token and will not appear in any other summary
+if [[ ${#skipped_repos[@]} -gt 0 ]]; then
+	echo
+	echo -e "${YELLOW}Secret check failed (not verified, NOT updated) on ${#skipped_repos[@]} repos:${RESET}"
+	for repo in "${skipped_repos[@]}"; do
+		echo -e "  ${YELLOW}$repo${RESET}"
+	done
+fi
 echo
 
 if $list_only; then
