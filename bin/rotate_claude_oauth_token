@@ -1,0 +1,245 @@
+#!/usr/bin/env bash
+
+# rotate_claude_oauth_token - update the CLAUDE_CODE_OAUTH_TOKEN repo secret
+# across every chicks-net repo that has it.
+#
+# Discovers all repos in the org that currently hold the secret, then runs
+# `gh secret set` on each with the new value. The new token is read from a
+# file (-f), from stdin (piped), or from a hidden prompt - never from the
+# command line, so it stays out of shell history and process listings.
+#
+# --- usage ---
+# Usage:
+#	rotate_claude_oauth_token -l				# list repos with the secret
+#	rotate_claude_oauth_token -n				# dry run, no token needed
+#	rotate_claude_oauth_token -f token.txt		# read new value from file
+#	cat token.txt | rotate_claude_oauth_token	# read new value from stdin
+#	rotate_claude_oauth_token					# hidden interactive prompt
+#	rotate_claude_oauth_token -r repoA -r repoB	# skip discovery, name repos
+#
+# Only the first line of the file/stdin is used and surrounding whitespace is
+# stripped, so a trailing newline never ends up inside the secret.
+#
+# A y/N confirmation is shown before any update whenever stdin is a terminal;
+# a piped-token run proceeds without asking.
+#
+# Requires: gh, authenticated with admin access to the repos
+# --- end usage ---
+
+set -euo pipefail
+
+org="chicks-net"
+secret_name="CLAUDE_CODE_OAUTH_TOKEN"
+
+# Color variables
+BLUE='\033[34m'
+GREEN='\033[32m'
+RED='\033[31m'
+YELLOW='\033[33m'
+RESET='\033[0m'
+
+usage() {
+	sed -n '/^# --- usage ---$/,/^# --- end usage ---$/p' "$0" |
+		sed -e '1d' -e '$d' -e 's/^# \{0,1\}//' -e 's/^\t//'
+	exit "${1:-2}"
+}
+
+carp() {
+	echo -e "${RED}Error: $1${RESET}" >&2
+	exit 2
+}
+
+# Populate the global repos[] array with "$org/<repo>" for every non-archived
+# org repo that has the secret, and skipped_repos[] with repos whose secret
+# check failed (rate limit, permissions, network). A check failure is NOT
+# treated as a clean negative - the caller summarizes skipped repos so a
+# stale token can not survive a "successful" run unnoticed. Progress goes to
+# stderr.
+discover_repos() {
+	local limit=1000 index=0 count repo archived secrets repo_list total_fetched=0
+
+	repo_list=$(gh repo list "$org" --limit "$limit" --json name,isArchived \
+		-q '.[] | [.name, .isArchived] | @tsv') ||
+		carp "failed to list repos in $org"
+
+	declare -a all_repos=()
+	if [[ -n "$repo_list" ]]; then
+		while IFS=$'\t' read -r repo archived; do
+			total_fetched=$((total_fetched + 1))
+			if [[ "$archived" != "true" ]]; then
+				all_repos+=("$repo")
+			fi
+		done <<<"$repo_list"
+	fi
+
+	# --limit applies to the unfiltered fetch, so check truncation against
+	# the total fetched, not the post-archive-filter count
+	if [[ "$total_fetched" -ge "$limit" ]]; then
+		echo -e "${YELLOW}warning: fetched $total_fetched repos - at --limit $limit, discovery may be truncated${RESET}" >&2
+	fi
+
+	count=${#all_repos[@]}
+	for repo in "${all_repos[@]}"; do
+		index=$((index + 1))
+		printf '\rchecking repo %s/%s: %-45s' "$index" "$count" "$repo" >&2
+		if secrets=$(gh secret list -R "$org/$repo" --json name -q '.[].name' 2>/dev/null); then
+			if grep -qx "$secret_name" <<<"$secrets"; then
+				repos+=("$org/$repo")
+			fi
+		else
+			skipped_repos+=("$org/$repo")
+		fi
+	done
+	printf '\r%*s\r' 70 '' >&2
+}
+
+# Read the new secret value. Prefer a file, then a pipe, else prompt.
+read_token() {
+	local token token_confirm
+
+	if [[ -n "$token_file" ]]; then
+		[[ -f "$token_file" ]] || carp "token file not found: $token_file"
+		IFS= read -r token <"$token_file" || true
+	elif [[ ! -t 0 ]]; then
+		IFS= read -r token || true
+	else
+		# prompts go to stderr: stdout of this function is captured
+		# via command substitution by the caller and must contain only
+		# the token value itself
+		echo -e "${BLUE}New ${secret_name} value for ${org} repos${RESET}" >&2
+		printf 'token: ' >&2
+		IFS= read -rs token || true
+		echo >&2
+		[[ -n "$token" ]] || carp "empty token"
+		printf 'confirm: ' >&2
+		IFS= read -rs token_confirm || true
+		echo >&2
+		[[ "$token" == "$token_confirm" ]] || carp "tokens do not match"
+	fi
+
+	# strip surrounding whitespace (POSIX [:space:] covers CR too)
+	token="${token#"${token%%[![:space:]]*}"}"
+	token="${token%"${token##*[![:space:]]}"}"
+
+	[[ -n "$token" ]] || carp "empty token"
+
+	if [[ "$token" != sk-ant-oat* ]]; then
+		echo -e "${YELLOW}warning: value does not start with sk-ant-oat - is it really a Claude OAuth token?${RESET}" >&2
+	fi
+
+	echo "$token"
+}
+
+list_only=false
+dry_run=false
+token_file=""
+declare -a target_repos=()
+
+while getopts ":lnf:r:h" opt; do
+	case "$opt" in
+	l) list_only=true ;;
+	n) dry_run=true ;;
+	f) token_file="$OPTARG" ;;
+	r) target_repos+=("$OPTARG") ;;
+	h) usage 0 ;;
+	\?) usage ;;
+	:) carp "option -$OPTARG requires an argument" ;;
+	esac
+done
+shift $((OPTIND - 1))
+
+# Check for required commands
+if ! command -v gh &>/dev/null; then
+	carp "gh not found"
+fi
+gh auth status &>/dev/null || carp "gh is not authenticated - run: gh auth login"
+
+declare -a repos=()
+declare -a skipped_repos=()
+repo_desc="repos with ${secret_name}"
+
+if [[ ${#target_repos[@]} -gt 0 ]]; then
+	repo_desc="target repos (${secret_name} presence not verified)"
+	for repo in "${target_repos[@]}"; do
+		if [[ "$repo" == */* ]]; then
+			# already fully qualified (possibly another org) - use as-is
+			repos+=("$repo")
+		else
+			repos+=("$org/$repo")
+		fi
+	done
+	# drop duplicate -r entries; repo names contain no spaces
+	# shellcheck disable=SC2207
+	repos=($(printf '%s\n' "${repos[@]}" | sort -u))
+else
+	echo -e "${BLUE}Finding repos in ${org} with ${secret_name}...${RESET}" >&2
+	discover_repos
+fi
+
+if [[ ${#repos[@]} -eq 0 ]]; then
+	echo -e "${YELLOW}No repos found with ${secret_name} - nothing to do.${RESET}"
+	exit 0
+fi
+
+echo
+echo -e "${BLUE}${#repos[@]} ${repo_desc}:${RESET}"
+for repo in "${repos[@]}"; do
+	echo "  $repo"
+done
+
+# discovery skips must be visible in every mode - a skipped repo keeps its
+# old token and will not appear in any other summary
+if [[ ${#skipped_repos[@]} -gt 0 ]]; then
+	echo
+	echo -e "${YELLOW}Secret check failed (not verified, NOT updated) on ${#skipped_repos[@]} repos:${RESET}"
+	for repo in "${skipped_repos[@]}"; do
+		echo -e "  ${YELLOW}$repo${RESET}"
+	done
+fi
+echo
+
+if $list_only; then
+	exit 0
+fi
+
+if $dry_run; then
+	echo -e "${BLUE}Dry run - would update ${secret_name} on ${#repos[@]} repos.${RESET}"
+	exit 0
+fi
+
+# last-chance confirmation when a human is present; runs with a piped
+# token (stdin not a TTY) proceed without a prompt
+if [[ -t 0 ]]; then
+	printf 'Update %s on %s repos? [y/N] ' "$secret_name" "${#repos[@]}" >&2
+	IFS= read -r proceed || true
+	if [[ ! "$proceed" =~ ^[yY] ]]; then
+		echo -e "${YELLOW}Aborted - nothing changed.${RESET}" >&2
+		exit 0
+	fi
+fi
+
+token=$(read_token)
+
+success_count=0
+declare -a failed_repos=()
+
+for repo in "${repos[@]}"; do
+	echo -e "${BLUE}updating${RESET} $repo"
+	if printf '%s' "$token" | gh secret set "$secret_name" -R "$repo"; then
+		success_count=$((success_count + 1))
+	else
+		echo -e "  ${RED}failed${RESET}" >&2
+		failed_repos+=("$repo")
+	fi
+done
+
+echo
+echo -e "${GREEN}Updated ${secret_name} on ${success_count}/${#repos[@]} repos.${RESET}"
+
+if [[ ${#failed_repos[@]} -gt 0 ]]; then
+	echo -e "${RED}Failed on ${#failed_repos[@]} repos:${RESET}" >&2
+	for repo in "${failed_repos[@]}"; do
+		echo -e "  ${RED}$repo${RESET}" >&2
+	done
+	exit 1
+fi
