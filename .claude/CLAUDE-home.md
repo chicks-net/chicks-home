@@ -1,11 +1,21 @@
-# Global Instructions for Claude
+# Global Instructions for AI Coding Agents
 
 This file is expected to be available as `~/.claude/CLAUDE.md`
 and each project should have its own file in the repo
 as `/CLAUDE.md` and usually maintained with `/init` subcommand.
 
+OpenCode also loads this file globally for every project via the
+`instructions` array in `~/.config/opencode/opencode.json`.
+
 This file is named `CLAUDE-home.md` so that it won't get confused with
 project/repo-level `/.claude/CLAUDE.md` files.
+
+## Dependency Bot Pull Requests
+
+- Never close, delete, or revert a pull request opened by a dependency bot
+  (Renovate, Dependabot), even if its checks are failing.
+- If such a PR is failing or unwanted, leave it open and report the problem
+  instead of closing it.
 
 ## Writing Style
 
