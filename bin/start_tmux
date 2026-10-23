@@ -32,12 +32,12 @@ case $(hostname) in
 		our_new_window fruity www-chicks ~/Documents/git/www-chicks-net
 		our_new_window fruity www-fini ~/Documents/git/www-fini-net
 		our_new_window fruity Down ~/Downloads
-		our_new_window fruity data ~/Documents/git/data-curated
-		our_new_window fruity gh ~/Documents/git/gh-observer
+		our_new_window fruity data ~/LocalDocuments/git/data-curated
+		our_new_window fruity gh ~/LocalDocuments/git/gh-observer
 		our_new_window fruity home ~/Documents/git/chicks-home
 		our_new_window fruity mans ~/LocalDocuments/git/my-user-manuals
 		our_new_window fruity infra ~/Documents/git/fini-infra
-		our_new_window fruity other ~/Documents/git/
+		our_new_window fruity other ~/LocalDocuments/git/
 		our_attach fruity
 
 		;;
