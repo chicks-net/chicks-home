@@ -29,6 +29,7 @@ if [[ -f "$template_just_file" ]]; then
 else
 	template_just_checksum=""
 	template_version=""
+	echo -e "${YELLOW}Warning: template not found at $template_just_file - .just checks disabled${RESET}"
 fi
 
 # Array to store repos with modified files
