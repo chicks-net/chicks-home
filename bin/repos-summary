@@ -19,7 +19,7 @@ gitdir=~/Documents/git
 cd "$gitdir" || carp "failed to chdir; $!"
 
 # Template repo for .just file comparison
-template_repo=~/Documents/git/template-repo
+template_repo=~/LocalDocuments/git/template-repo
 template_just_file="$template_repo/.just/gh-process.just"
 
 # Calculate checksum of template .just file if it exists
