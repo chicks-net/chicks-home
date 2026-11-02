@@ -5,7 +5,8 @@
   },
   "alwaysThinkingEnabled": true,
   "effortLevel": "high",
+  "theme": "light",
   "installMethod": "native",
   "autoUpdates": false,
-  "theme": "light"
+  "tui": "fullscreen"
 }
