@@ -46,8 +46,8 @@ just merge            # Squash-merges PR, deletes branch, returns to main
   checks (shortcut for iterating after `just pr`)
 - `just release <version>` - Create a GitHub release with auto-generated notes
 - `just release_age` - Check how long ago the last release was
-- `just verify-release [tag]` - Verify a release's cosign signature and SLSA
-  provenance (defaults to latest tag)
+- `just verify-release [tag]` - Verify a release's cosign signature, SLSA
+  provenance, and GitHub attestations (defaults to latest tag)
 - `just mergepdf <dest> <src...>` - Merge PDF files (macOS only)
 
 **Claude Code Commands**:
