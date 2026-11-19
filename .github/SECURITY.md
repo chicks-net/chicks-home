@@ -31,7 +31,8 @@ Each tagged release (e.g. `v0.1`) ships an asset bundle
 `.functions`, `justfile`, and `.just/` modules - the things you'd actually
 cherry-pick), a `checksums.txt` file, a cosign keyless signature
 (`.bundle`), an SBOM (`.sbom.json`), and an SLSA provenance attestation
-(`multiple.intoto.jsonl`).
+(`multiple.intoto.jsonl`). The release workflow also registers GitHub-native
+artifact attestations, so `gh attestation verify` works on the signed assets.
 
 ### Quick verify with just
 
@@ -68,6 +69,15 @@ slsa-verifier verify-artifact \
   --source-uri github.com/chicks-net/chicks-home \
   --source-tag "${TAG}" \
   chicks-home-${TAG}.tar.gz
+```
+
+### Verify the GitHub-native attestation
+
+```bash
+TAG="v0.1"
+curl -L -O "https://github.com/chicks-net/chicks-home/releases/download/${TAG}/chicks-home-${TAG}.tar.gz"
+
+gh attestation verify chicks-home-${TAG}.tar.gz --repo chicks-net/chicks-home
 ```
 
 The signature is produced via keyless signing using GitHub Actions OIDC
