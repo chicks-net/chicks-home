@@ -1,0 +1,18 @@
+{
+	"filters": {
+		"comments": true,
+		"allowlist": {
+			"allow": [
+				"repo",
+				"bash",
+				"git",
+				"awk",
+				"curl",
+				"README"
+			]
+		}
+	},
+	"rules": {
+		"terminology": true
+	}
+}
