@@ -31,6 +31,11 @@ just pr               # Creates PR, pushes branch, watches checks automatically
 just merge            # Squash-merges PR, deletes branch, returns to main
 ```
 
+**PR title format**: the commit subject becomes the PR title and must match
+`emoji [topic] details...` (enforced by `pr-title-format.yml`), e.g.
+`🧐 [gha] keep super-linter green when configs change`. Renovate PRs are
+exempt; human PRs are not.
+
 **Other Commands**:
 
 - `just sync` - Return to main branch and pull latest changes
@@ -197,10 +202,24 @@ markdownlint-cli2 "**/*.md"
 - `opencode.yml` - OpenCode agent integration
 - `actionlint.yml` - GitHub Actions workflow validation
 - `checkov.yml` - Security scanning with Checkov
-- `linter.yml` - General linting
+- `linter.yml` - Super-linter (v9; lints only the files a PR touches)
 - `auto-assign.yml` - Auto-assign PR reviewers
 - `gitleaks.yml` - Secret scanning
+- `pr-title-format.yml` - PR titles must match `emoji [topic] details...`
+- `release.yml` - Sign release assets (cosign, SLSA, attestations) on tag push
 - `scorecards.yml` - OpenSSF Scorecard (added by `bin/add-scorecards`)
+
+**No-regression rule**: we expect no regressions on our GitHub Actions - every
+check must pass before a PR merges, and workflow or linter config changes must
+not leave any check red. Super-linter runs with `VALIDATE_ALL_CODEBASE: false`,
+so it lints only the files a PR touches; lint debt in an untouched file
+surfaces on the first PR that edits it, so read the full check list before
+merging. Two known false-positive sources are configured away: the
+NATURAL_LANGUAGE terminology rule fights the house writing style, so the terms
+repo, bash, git, awk, curl, and README are allowlisted in
+`.github/linters/.textlintrc`; and justfiles are excluded via
+`FILTER_REGEX_EXCLUDE` in `linter.yml` because just syntax is not bash -
+recipe bodies are shellchecked by `just shellcheck` instead.
 
 **Standards**: See `docs/github-actions.md` for GitHub Actions requirements and
 standards. See `docs/writing-style-economist.md` for documentation style guidance
