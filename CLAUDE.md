@@ -8,6 +8,8 @@ code in this repository.
 This is Christopher Hicks' home directory configuration repository for managing
 Unix/Linux environments across multiple servers: shell dotfiles, ~50 utility
 scripts in `bin/`, and the automation that keeps them linted and released.
+macOS is the primary development platform; Linux servers (CentOS/RHEL,
+Debian/Ubuntu/Mint) are handled by the cross-platform helpers in `.functions`.
 
 **Personal Configuration Note**: Paths and settings are specific to Christopher
 Hicks' environment. Many scripts assume the home directory is symlinked to repo
@@ -167,6 +169,6 @@ instead.
 
 ## Maintaining This File
 
-`bin/claude-init` regenerates this file non-interactively
-(`claude --permission-mode acceptEdits -p "/init"`) and stages the result. Run
-it when the repo structure changes significantly.
+`bin/claude-init` creates a `claude-init` feature branch, regenerates this
+file non-interactively (`claude --permission-mode acceptEdits -p "/init"`),
+and stages the result. Run it when the repo structure changes significantly.
