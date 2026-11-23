@@ -161,8 +161,9 @@ style, so the terms repo, bash, git, awk, curl, and README are allowlisted in
 `FILTER_REGEX_EXCLUDE` in `linter.yml` because just syntax is not bash -
 recipe bodies are shellchecked by `just shellcheck` instead.
 
-Dependency updates come from Renovate. Per the global instructions, never
-close a Renovate PR even when it is failing - report the problem instead.
+Dependency updates come from Renovate. Never close, delete, or revert a
+Renovate PR, even when it is failing - leave it open and report the problem
+instead.
 
 ## Maintaining This File
 
