@@ -44,7 +44,7 @@ whitespace stripped, so a trailing newline never ends up inside the secret.
 | `-r repo` | Skip discovery and target specific repos; repeatable. A bare name is qualified to `chicks-net/`, an `owner/repo` is used as-is. Secret presence is not verified. Duplicate entries are collapsed. |
 | `-h` | Print usage and exit. |
 
-Without `-f`, `-r`, or a piped stdin, the script prompts for the token with
+Without `-f` or a piped stdin, the script prompts for the token with
 echo disabled and asks for it twice to confirm.
 
 ## Examples
