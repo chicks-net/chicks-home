@@ -6,21 +6,27 @@ code in this repository.
 ## Repository Overview
 
 This is Christopher Hicks' home directory configuration repository for managing
-Unix/Linux environments across multiple servers. The repo includes shell
-configuration, utility scripts, and automation tools for maintaining consistent
-development environments.
+Unix/Linux environments across multiple servers: shell dotfiles, ~50 utility
+scripts in `bin/`, and the automation that keeps them linted and released.
 
-**Personal Configuration Note**: This is a personal configuration repository
-with paths and settings specific to Christopher Hicks' environment. Many
-scripts assume symlinks from home directory to repo contents. The repository
-intentionally avoids Ansible due to maintainer preferences.
+**Personal Configuration Note**: Paths and settings are specific to Christopher
+Hicks' environment. Many scripts assume the home directory is symlinked to repo
+contents (e.g. `.bashrc` sources `/home/chicks/.functions` and
+`/home/chicks/.aliases` by absolute path). The repository intentionally avoids
+Ansible due to maintainer preferences.
+
+`AGENTS.md` holds the per-language style rules (bash, Perl, Python, just,
+GitHub Actions, Markdown) - read it before writing code in a language you
+haven't touched here yet. Highlights: Perl follows `.perltidyrc`
+(`-l=128 -i=8 -et=8 -ce -nola -t`) with `use strict` and POD docs; Python
+follows `.pylintrc` (tabs, 100-char lines).
 
 ## Development Commands
 
-### Just Commands
-
-This repository uses [just](https://github.com/casey/just) as the primary task
-runner. The justfile imports 11 modular recipe files from `.just/`.
+This repository uses [just](https://github.com/casey/just) as the task runner.
+`just --list` shows everything; the root `justfile` imports 11 modules from
+`.just/`. Run `.just/lib/install-prerequisites.sh` to install the required tools
+(just, gh, shellcheck, markdownlint-cli2, jq) on macOS or Linux.
 
 **Standard PR Workflow** (use this pattern for all changes):
 
@@ -28,6 +34,7 @@ runner. The justfile imports 11 modular recipe files from `.just/`.
 just branch <name>    # Creates timestamped branch: chicks/YYYY-MM-DD-<name>
 # Make your changes and commit
 just pr               # Creates PR, pushes branch, watches checks automatically
+just again            # After more commits: push, refresh PR body, watch checks
 just merge            # Squash-merges PR, deletes branch, returns to main
 ```
 
@@ -36,282 +43,129 @@ just merge            # Squash-merges PR, deletes branch, returns to main
 `🧐 [gha] keep super-linter green when configs change`. Renovate PRs are
 exempt; human PRs are not.
 
-**Other Commands**:
+**Linting / validation** (there is no formal test suite):
 
-- `just sync` - Return to main branch and pull latest changes
-- `just compliance_check` - Verify repo has expected documentation and
-  configuration files. See AGENTS.md for guidance for agentic coding assistants.
-- `just shellcheck` - Run shellcheck on shell scripts, including bash embedded
-  in just recipes (extracts via awk before linting)
-- `just prweb` - View current PR in web browser
-- `just pr_update` - Update the Done section of the PR description with
-  current commits
-- `just pr_verify` - Append to the PR's Verify section from stdin
-- `just again` - Push changes, update the PR description, and watch GHA
-  checks (shortcut for iterating after `just pr`)
-- `just release <version>` - Create a GitHub release with auto-generated notes
-- `just release_age` - Check how long ago the last release was
-- `just verify-release [tag]` - Verify a release's cosign signature, SLSA
-  provenance, and GitHub attestations (defaults to latest tag)
-- `just mergepdf <dest> <src...>` - Merge PDF files (macOS only)
+- `just shellcheck` - shellcheck on shell scripts, including bash embedded in
+  just recipes (extracted via awk before linting)
+- `markdownlint-cli2 "**/*.md"` - required to pass before merge
+- `just compliance_check` - verify expected docs/config files exist
+- `just cue-verify` - validate `.repo.toml` against `docs/repo-toml.cue`
+- `just editorconfig_check`, `just launchd-validate`
+- `bin/test_lib` - manual smoke test of `spinner()` from `bin/lib.sh`
 
-**Claude Code Commands**:
+**Other recipes worth knowing**:
 
-- `just claude_permissions_sort` - Sorts `.claude/settings.local.json`
-  permissions into canonical order (Bash → WebFetch → WebSearch → Other),
-  creates a backup first. Runs automatically as part of `_pr-hook` before
-  every PR.
-- `just claude_permissions_check` - Validates the permissions structure and
-  shows counts by type (Bash/WebFetch/WebSearch/Other)
+- `just sync` - return to main and pull
+- `just pr_update` / `just pr_verify` - rewrite the PR's Done section from
+  commits / append stdin to its Verify section
+- `just pr_checks`, `just claude_review`, `just copilot_pick`,
+  `just copilot_refresh` - inspect checks and AI review comments
+- `just release <version>`, `just release_age`, `just verify-release [tag]` -
+  releases are signed by `release.yml` (cosign, SLSA provenance, GitHub
+  attestations); `verify-release` checks all three plus `checksums.txt`
+- `just claude_permissions_sort` / `just claude_permissions_check` - keep
+  `.claude/settings.local.json` permissions in canonical order (Bash →
+  WebFetch → WebSearch → Other)
+- `just mergepdf <dest> <src...>` - macOS only
 
-### Git Configuration
+### `just pr` internals
 
-Custom git aliases defined in `.gitconfig`:
+`just pr` checks the branch has commits, runs `_pr-hook` (in
+`.just/pr-hook.just`: `just shellcheck` then `just claude_permissions_sort` -
+add new pre-PR gates there), pushes with `git pushup`, builds the PR body from
+the last commit message, then watches `gh pr checks` and prints Copilot and
+Claude review comments. `just merge` squash-merges (`-s -d`) and runs `sync`.
 
-- `git stp` - Status in porcelain format for scripting
-- `git pushup` - Push current branch and set upstream (`push -u origin HEAD`)
-- `git cim <message>` - Commit with message (safety: only works on
-  non-main/master branches)
-- `git hh` - Show abbreviated commit history (last 15 commits with graph)
-- `git hist` - Full commit history with graph visualization
+### Git aliases (`.gitconfig`)
 
-**Important**: The `cim` alias intentionally prevents commits on main/master
-branches. Always work on feature branches using the `just branch` workflow.
+`git stp` (porcelain status), `git pushup` (`push -u origin HEAD`), `git hh` /
+`git hist` (graph history), and `git cim <msg>`, which refuses to commit on
+main/master. Never commit directly to main.
 
-## Core Architecture
+## Architecture
 
-### Cross-Platform Package Management (`.functions`)
+### `.just/` is vendored from template-repo
 
-The `.functions` library provides distro-agnostic package management:
+The `.just/` modules and `.just/lib/*.sh` helpers are synced from
+[`fini-net/template-repo`](https://github.com/fini-net/template-repo), with
+per-file versions tracked in `.just/CHECKSUMS.json`. Local edits drift from
+upstream and show up in `just checksums_verify`; fixes generally belong in
+template-repo and come back via `just update_from_template`. The numbered
+`github/gh-process-*` scripts are one-shot migrations that branch, run
+`update_from_template`, and commit a specific template release. Repo-specific
+recipes (`verify-release`, `mergepdf`) live in the root `justfile`, and
+`launchd.just` is local to this repo.
 
-- **`check_os`** - Detects OS and sets `$CHICKOS` environment variable
-  (RPM_CENTOS, DEB_MINT, or broken_shit)
-- **`check_packages`** - Verifies required packages are installed; uses
-  timestamp caching (1-hour) to avoid repeated checks
-- **`check_packages -i`** - Auto-installs missing packages via appropriate
-  package manager (yum/apt-get)
-- **`check_all_permissions`** - Validates SSH directory and file permissions
-  (700 for `.ssh/`, 600 for private keys, 644 for public keys)
+### Shell environment
 
-**Package Lists**:
+- `.bashrc` / `.bash_profile` source `.functions`, `.aliases`, and
+  `.git-prompt.sh`
+- `.functions` - distro-agnostic helpers: `check_os` sets `$CHICKOS`
+  (`RPM_CENTOS`, `DEB_MINT`, or `broken_shit`); `check_packages [-i]` checks or
+  installs `UNIVERSAL_PKGS` plus `RPM_PKGS`/`DEB_PKGS` with a 1-hour timestamp
+  cache; `check_all_permissions` enforces `.ssh` modes (700/600/644)
+- `bin/lib.sh` - shared shell functions such as `spinner <pid>`
+- `.aliae.yaml` - cross-shell aliases, env, and PATH (OS-conditional)
+- `.config/starship.toml` - starship prompt (Tokyo Night based; timeouts are
+  deliberately raised above the defaults)
+- `Brewfile` - macOS packages
 
-- `UNIVERSAL_PKGS` - Cross-distro essentials (mtr, screen, tmux, perl, bash,
-  curl, wget, git, git-svn)
-- `RPM_PKGS` - Red Hat specific (vim-enhanced, pcre, jwhois)
-- `DEB_PKGS` - Debian/Ubuntu specific (vim, pcregrep, whois, libdatetime-perl)
+### `bin/` and its docs
 
-### Shared Shell Library (`bin/lib.sh`)
+Every top-level script in `bin/` has a page in `docs/bin/<script>.md`, indexed
+by category in `docs/bin/README.md`. When adding or renaming a script, add or
+update both. The legacy subdirectories (`bin/openx/`, `bin/perfect_audience/`,
+`bin/telmate/`, `bin/threads/`) are not documented there. Scripts are a mix of
+bash, Perl, Python (`bin/Pipfile`), and Go.
 
-Contains reusable shell functions:
+`github/` (top level, not under `bin/`) holds GitHub API tooling:
+`apply-ruleset` with `github/rulesets/*.json`, `github_fix_https`, and the
+gh-process migration scripts. See `github/README.md`.
 
-- **`spinner()`** - Visual progress indicator for long-running commands; pass
-  PID as argument
+### Scheduled jobs
 
-## Directory Structure
+- `bin/do_home_cron` is a Perl dispatcher that runs every script in
+  `cron.d/daily/` or `cron.d/hourly/`; `cron.d/hourly/home-git-pull` keeps this
+  repo current on each host.
+- macOS: `bin/daily_desktop_cleanup.go` is built by `just launchd-build` into
+  `launchd/daily_desktop_cleanup` and run via
+  `launchd/net.chicks.daily-desktop-cleanup.plist`. Use the `just launchd-*`
+  recipes to install, reload, run, and inspect it.
 
-### `bin/` - Command-Line Utilities (50+)
+### Other directories
 
-**Text Processing**:
+- `google/AppScript/` - Google Apps Script for Docs/Sheets automation
+- `docs/` - `github-actions.md` (workflow standards), `writing-style-economist.md`
+  (prose style for chicks.net content), `repo-toml.cue` (schema)
+- `.repo.toml` - repo metadata and feature flags (`claude`, `claude-review`,
+  `copilot-review`, `standard-release`); regenerate with
+  `just repo_toml_generate`
 
-- `ruler` - Visual character counting on command line
-- `comify` - Convert newlines to comma-separated lists
-- `closefh` - Close inherited file handles cleanly
+## GitHub Actions
 
-**Network & Security**:
+Workflows in `.github/workflows/`: `actionlint`, `auto-assign`, `checkov`,
+`claude`, `claude-code-review`, `gitleaks`, `linter` (super-linter v9),
+`markdownlint`, `opencode`, `pr-title-format`, `release`, `renovate-validate`,
+`scorecards`, and `zizmor` (GHA security analysis). New workflows must follow
+`docs/github-actions.md` (notably a global `permissions: {}` before
+`jobs:`).
 
-- `check_ssl` - Check SSL certificate expiration dates for multiple endpoints
-- `watch_constate` - Monitor network connection states (like vmstat but for
-  connections)
-- `watch_zk_conns` - Monitor ZooKeeper connections
-
-**GitHub Workflow**:
-
-- `repos-summary` - Generate summary reports across multiple repositories
-- Located in `github/` directory:
-  - `github_fix_https` - Convert HTTPS remotes to SSH for password-free
-    operations
-  - `apply-ruleset` - Apply repository rulesets via GitHub API
-  - `rulesets/` - Pre-configured ruleset definitions (require-pr.json,
-    default-linear.json)
-
-**Utilities**:
-
-- `roll` - D&D-style dice roller (Python implementation in `roll.py`)
-- `countdown` - Timer utility
-- `whenis` - Date calculation helper
-
-**Experimental/WIP**:
-
-- `daily_mysql_backup` - MySQL backup automation (work in progress)
-- `start_tmux` - tmux initialization automation (also see
-  [libtmux](https://github.com/chicks-net/libtmux) project)
-
-**Documentation Maintenance**:
-
-- `bin/claude-init` - Runs `claude --permission-mode acceptEdits -p "/init"`
-  to regenerate/update CLAUDE.md, then stages the result. Run when the repo
-  structure changes significantly.
-
-### `google/` - Google Workspace Automation
-
-`google/AppScript/` contains Google Apps Script code for automating Google
-Docs, Sheets, and other Workspace tasks. Includes day-of-week updater scripts
-with comprehensive documentation links.
-
-### `.just/` - Modular Justfile Components
-
-These recipes are synced from [`fini-net/template-repo`](https://github.com/fini-net/template-repo)
-via the numbered `github/gh-process-*` automation scripts. Run
-`.just/lib/install-prerequisites.sh` to install required tools (just, gh,
-shellcheck, markdownlint-cli2, jq) on macOS or Linux before using any just
-recipes.
-
-- **`gh-process.just`** - Git/GitHub PR workflow (branch/pr/merge/sync)
-- **`compliance.just`** - Checks for README, LICENSE, templates, CODEOWNERS,
-  config files with color-coded feedback
-- **`shellcheck.just`** - Validates shell scripts and bash embedded in just
-  recipes (uses awk to extract indented shell blocks)
-- **`claude.just`** - Claude Code permission management
-  (`claude_permissions_sort`, `claude_permissions_check`)
-- **`copilot.just`** - Interactive Copilot suggestion picker (`copilot_pick`),
-  requires `gum`
-- **`pr-hook.just`** - Pre-PR gate (`_pr-hook`): runs shellcheck then
-  `claude_permissions_sort` before every PR; add more checks here
-- **`launchd.just`** - macOS launchd service management for the
-  `daily_desktop_cleanup` Go binary (`launchd-install`, `launchd-status`,
-  `launchd-reload`, `launchd-logs`, `launchd-validate`)
-- **`template-sync.just`** - Keep `.just/` modules in sync with template-repo
-  (`checksums_generate`, `checksums_verify`, `update_from_template`)
-- **`repo-toml.just`** - Generate `.repo.toml` metadata from repo state
-- **`cue-verify.just`** - Validate `.repo.toml` against its CUE schema
-  (`docs/repo-toml.cue`)
-- **`test.just`** - Placeholder for future test recipes
-
-## GitHub Actions Workflows
-
-All Markdown must pass `markdownlint-cli2` before merge:
-
-```bash
-markdownlint-cli2 "**/*.md"
-```
-
-**Active Workflows**:
-
-- `markdownlint.yml` - Markdown linting (DavidAnson/markdownlint-cli2-action)
-- `claude-code-review.yml` - Automated Claude Code PR reviews
-- `opencode.yml` - OpenCode agent integration
-- `actionlint.yml` - GitHub Actions workflow validation
-- `checkov.yml` - Security scanning with Checkov
-- `linter.yml` - Super-linter (v9; lints only the files a PR touches)
-- `auto-assign.yml` - Auto-assign PR reviewers
-- `gitleaks.yml` - Secret scanning
-- `pr-title-format.yml` - PR titles must match `emoji [topic] details...`
-- `release.yml` - Sign release assets (cosign, SLSA, attestations) on tag push
-- `scorecards.yml` - OpenSSF Scorecard (added by `bin/add-scorecards`)
-
-**No-regression rule**: we expect no regressions on our GitHub Actions - every
-check must pass before a PR merges, and workflow or linter config changes must
-not leave any check red. Super-linter runs with `VALIDATE_ALL_CODEBASE: false`,
-so it lints only the files a PR touches; lint debt in an untouched file
-surfaces on the first PR that edits it, so read the full check list before
-merging. Two known false-positive sources are configured away: the
-NATURAL_LANGUAGE terminology rule fights the house writing style, so the terms
-repo, bash, git, awk, curl, and README are allowlisted in
+**No-regression rule**: every check must pass before a PR merges, and workflow
+or linter config changes must not leave any check red. Super-linter runs with
+`VALIDATE_ALL_CODEBASE: false`, so it lints only the files a PR touches; lint
+debt in an untouched file surfaces on the first PR that edits it, so read the
+full check list before merging. Two known false-positive sources are
+configured away: the NATURAL_LANGUAGE terminology rule fights the house writing
+style, so the terms repo, bash, git, awk, curl, and README are allowlisted in
 `.github/linters/.textlintrc`; and justfiles are excluded via
 `FILTER_REGEX_EXCLUDE` in `linter.yml` because just syntax is not bash -
 recipe bodies are shellchecked by `just shellcheck` instead.
 
-**Standards**: See `docs/github-actions.md` for GitHub Actions requirements and
-standards. See `docs/writing-style-economist.md` for documentation style guidance
-(based on The Economist's style guide, with a "For Technical Writing" section
-applied to chicks.net content).
+Dependency updates come from Renovate. Per the global instructions, never
+close a Renovate PR even when it is failing - report the problem instead.
 
-## Code Style and Quality
+## Maintaining This File
 
-### Shell Scripts
-
-- Use bash strict mode when appropriate: `set -euo pipefail`
-- Include shebang lines: `#!/bin/bash` or `#!/usr/bin/env bash`
-- Source shared functions from `.functions` for package management utilities
-- Source `bin/lib.sh` for spinner() and other shared utilities
-
-### Markdown
-
-All Markdown files must pass `markdownlint-cli2` validation:
-
-```bash
-markdownlint-cli2 "**/*.md"
-```
-
-This runs automatically in GitHub Actions on all PRs.
-
-## Branch Protection
-
-- **No direct commits to main branch** - Use `just branch <name>` workflow
-- **Pull requests required** - All changes go through PR process
-- **Automated reviews** - Claude Code review runs on all PRs
-- **Linear history preferred** - Use squash merge (enforced by `just merge`)
-- **Safety checks** - The `git cim` alias and just recipes prevent accidental
-  commits to main/master
-
-## Platform Compatibility
-
-**Supported Platforms**:
-
-- **macOS** - Primary development platform (see `uname -n` detection in
-  gh-process.just)
-- **Linux** - CentOS/RHEL (RPM-based) and Debian/Ubuntu/Mint (DEB-based)
-- Cross-platform package management handles distro differences automatically
-
-**Detection**: Use `check_os` function from `.functions` to set `$CHICKOS`
-variable for platform-specific logic.
-
-## PR Workflow Details
-
-The `just pr` command performs these steps:
-
-1. Runs `_has_commits` check to ensure branch has commits
-2. Runs `_pr-hook` (shellcheck + claude_permissions_sort)
-3. Pushes branch with `git pushup`
-4. Creates PR body using heredoc with last commit message
-5. Sleeps 10s for GitHub API lag
-6. Watches PR checks with `gh pr checks --watch -i 5`
-7. Queries Copilot PR reviewer comments via GitHub GraphQL API
-8. Displays Claude PR review comments
-
-The `just merge` command:
-
-1. Verifies you're on a branch (not main)
-2. Merges PR with squash (`-s`) and deletes branch (`-d`)
-3. Returns to main and pulls latest via `sync`
-
-## macOS Automation
-
-### launchd Service (`launchd/`)
-
-A daily desktop cleanup Go binary (`launchd/daily_desktop_cleanup`) is
-managed as a launchd service via
-`launchd/net.chicks.daily-desktop-cleanup.plist`. Use the `just launchd-*`
-recipes to install, reload, and inspect it.
-
-### Cron Jobs (`cron.d/`)
-
-`cron.d/daily/` and `cron.d/hourly/` hold scripts run by `bin/do_home_cron`,
-a Perl dispatcher that executes all scripts in the appropriate subdirectory.
-`cron.d/daily/home-git-pull` pulls this repo automatically each day.
-
-## Repository Metadata
-
-`.repo.toml` stores structured metadata (description, topics, feature flags
-like `claude`, `claude-review`, `copilot-review`, `standard-release`).
-Validate it with `just cue-verify` against the CUE schema in
-`docs/repo-toml.cue`. Regenerate it with `just repo_toml_generate`.
-
-## Configuration Files
-
-- `.bashrc`, `.bash_profile` - Shell initialization (source `.functions` here)
-- `.tmux.conf` - tmux configuration
-- `.gitconfig` - Git configuration with custom aliases
-- `.editorconfig` - Editor configuration for tabs/spaces consistency
-- `.gitignore` - Standard ignore patterns
-- `.gitattributes` - Line ending and binary file handling
+`bin/claude-init` regenerates this file non-interactively
+(`claude --permission-mode acceptEdits -p "/init"`) and stages the result. Run
+it when the repo structure changes significantly.
