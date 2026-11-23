@@ -98,8 +98,8 @@ recipes (`verify-release`, `mergepdf`) live in the root `justfile`, and
 
 ### Shell environment
 
-- `.bashrc` / `.bash_profile` source `.functions`, `.aliases`, and
-  `.git-prompt.sh`
+- `.bash_profile` sources `.bashrc`, which sources `.functions`, `.aliases`,
+  and `.git-prompt.sh`
 - `.functions` - distro-agnostic helpers: `check_os` sets `$CHICKOS`
   (`RPM_CENTOS`, `DEB_MINT`, or `broken_shit`); `check_packages [-i]` checks or
   installs `UNIVERSAL_PKGS` plus `RPM_PKGS`/`DEB_PKGS` with a 1-hour timestamp
