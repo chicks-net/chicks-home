@@ -15,6 +15,7 @@ nor are the `Pipfile` / `Pipfile.lock` dependency manifests.
 | [gpsu](gpsu.md) | Push the current branch to `origin` with `--set-upstream` (refuses `master`). |
 | [renovate-summary](renovate-summary.md) | Report dependency updates across GitHub repos via Renovate (read-only). |
 | [repos-summary](repos-summary.md) | Audit local `git` repos for hygiene issues (releases, branches, `.just` files). |
+| [rotate_claude_oauth_token](rotate_claude_oauth_token.md) | Rotate the `CLAUDE_CODE_OAUTH_TOKEN` secret across every org repo that has it. |
 
 ## Text utilities
 
