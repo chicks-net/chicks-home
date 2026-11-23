@@ -56,6 +56,7 @@ rotate_claude_oauth_token -f token.txt        # read new value from a file
 cat token.txt | rotate_claude_oauth_token     # read new value from stdin
 rotate_claude_oauth_token                     # hidden interactive prompt
 rotate_claude_oauth_token -r repoA -r repoB   # skip discovery, name repos
+rotate_claude_oauth_token -n -r repoA         # preview a targeted rotation
 ```
 
 ## Notes
