@@ -171,6 +171,15 @@ echo "{{RED}}Error occurred{{NORMAL}}" >&2
 ## Git Workflow
 
 - **No direct commits to main** - Always use feature branches
+- **Commit subject format** - The first commit on a branch becomes the PR
+  title (`just pr` uses its subject verbatim) and must match
+  `emoji [topic] description`, e.g.
+  `🧐 [gha] keep super-linter green when configs change`. The topic is a
+  lowercase slug matching `[a-z0-9][a-z0-9/._-]*` - `.` `_` `-` and `/`
+  subpaths are fine, e.g. `gha` or `post/readme` - and a description after
+  the topic is required. A title rewritten with `gh pr edit` must still
+  match; Renovate and Dependabot PRs are exempt. See
+  `.github/workflows/pr-title-format.yml`.
 - **PR process required** - Use `just pr` workflow
 - **Squash merges** - Use `just merge` for clean history
 - **Automated reviews** - Claude Code review runs on all PRs
