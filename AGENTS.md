@@ -171,6 +171,8 @@ echo "{{RED}}Error occurred{{NORMAL}}" >&2
 ## Git Workflow
 
 - **No direct commits to main** - Always use feature branches
+- In fini-net/chicks-net repos, the first commit on a branch should follow the
+  `emoji [topic] description` format as checked in the pr-title-format github action.
 - **PR process required** - Use `just pr` workflow
 - **Squash merges** - Use `just merge` for clean history
 - **Automated reviews** - Claude Code review runs on all PRs
