@@ -32,10 +32,7 @@ This file provides guidance for agentic coding agents working in this repository
 - **Shebang**: Use `#!/bin/bash` or `#!/usr/bin/env bash`
 - **Strict Mode**: Use `set -euo pipefail` in scripts and just recipes
 - **Indentation**: Tabs (preferred for consistency with .editorconfig)
-- **Line Length**: ommit subject format** - The commit subject becomes the PR title and must match
-  `emoji [topic] description` (lowercase slug topic), e.g.
-  `🧐 [gha] keep super-linter green when configs change`. See
-  `.github/workflows/pr-title-format.yml`.
+- **Line Length**: No strict limit, but aim for readability
 - **Functions**: Use `function name()` format from `.functions`
 - **Variables**: UPPERCASE for exports, lowercase for local variables
 - **Error Handling**: Check command exit codes, use conditional execution
@@ -174,7 +171,10 @@ echo "{{RED}}Error occurred{{NORMAL}}" >&2
 ## Git Workflow
 
 - **No direct commits to main** - Always use feature branches
-
+- **Commit subject format** - The first commit on a branch becomes the PR
+  title and must match `emoji [topic] description` (lowercase slug topic),
+  e.g. `🧐 [gha] keep super-linter green when configs change`. See
+  `.github/workflows/pr-title-format.yml`.
 - **PR process required** - Use `just pr` workflow
 - **Squash merges** - Use `just merge` for clean history
 - **Automated reviews** - Claude Code review runs on all PRs
