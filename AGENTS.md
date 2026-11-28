@@ -188,8 +188,6 @@ echo "{{RED}}Error occurred{{NORMAL}}" >&2
 
 ## Testing Philosophy
 
-- `just test` runs the test suite; `just coverage` mirrors
-  `.github/workflows/codecov.yml` locally
 - Manual testing of bin/ utilities expected
 - Use `just shellcheck` for static analysis
 - Validate Markdown with `markdownlint-cli2`

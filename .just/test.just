@@ -15,7 +15,8 @@ test:
         echo "{{BLUE}}go not found, skipping Go tests.  No judgment.{{NORMAL}}"
     fi
 
-# generate coverage reports locally, mirroring .github/workflows/codecov.yml
+# generate coverage reports locally, like .github/workflows/codecov.yml
+# (the workflow additionally normalizes Go profile paths for upload)
 # (Devel::Cover is not core perl; install with
 #   cpanm --local-lib ~/perl5 Devel::Cover Devel::Cover::Report::Cobertura)
 [group('Testing/Automation')]
