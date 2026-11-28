@@ -1,0 +1,72 @@
+# Codecov
+
+# Uploads coverage reports to codecov.io using OIDC authentication via the
+# Codecov GitHub App (installed for this repo, so no upload token is needed).
+# Coverage is a work in progress, so statuses are informational; see
+# .codecov.yml.  https://docs.codecov.com/docs/github-actions
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+# global permissions
+permissions: {}
+
+jobs:
+  coverage:
+    name: coverage
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      # OIDC token for codecov uploads (use_oidc below)
+      id-token: write
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      # The Go files in bin/ are standalone scripts (no go.mod), so the
+      # test files are passed explicitly rather than as a package path.
+      - name: Go coverage
+        run: |
+          go test -coverprofile=go-coverage.out bin/hello.go bin/hello_test.go
+          # go records absolute paths; codecov maps repo-relative ones
+          sed -i "s|$PWD/||" go-coverage.out
+
+      - name: Install Devel::Cover
+        run: |
+          curl -L --fail https://cpanmin.us | perl - --local-lib "$HOME/perl5" --notest Devel::Cover Devel::Cover::Report::Cobertura
+          echo "$HOME/perl5/bin" >> "$GITHUB_PATH"
+          echo "PERL5LIB=$HOME/perl5/lib/perl5" >> "$GITHUB_ENV"
+
+      # The Cobertura reporter emits everything in the coverage db, so
+      # system paths (prove) and the test files themselves are filtered
+      # out at collection time rather than at report time.
+      - name: Perl coverage
+        run: |
+          PERL5OPT='-MDevel::Cover=-ignore,/usr/,-ignore,^t/' prove t/
+          cover -silent -report cobertura
+
+      - name: Upload Go coverage to Codecov
+        uses: codecov/codecov-action@303a32d7a59b442fa8d48b6a1cc6825c09c847a5 # v7.1.1
+        with:
+          use_oidc: true
+          files: go-coverage.out
+          flags: go
+          disable_search: true
+          fail_ci_if_error: true
+
+      - name: Upload Perl coverage to Codecov
+        uses: codecov/codecov-action@303a32d7a59b442fa8d48b6a1cc6825c09c847a5 # v7.1.1
+        with:
+          use_oidc: true
+          files: cover_db/cobertura.xml
+          flags: perl
+          disable_search: true
+          fail_ci_if_error: true

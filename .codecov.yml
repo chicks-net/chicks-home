@@ -1,0 +1,13 @@
+# Codecov configuration
+# https://docs.codecov.com/docs/codecov-yaml
+coverage:
+  status:
+    # Coverage is a future project, so PRs aren't gated on a thin
+    # baseline.  Flip to real gates (informational: false) when the
+    # numbers mean something.
+    project:
+      default:
+        informational: true
+    patch:
+      default:
+        informational: true
