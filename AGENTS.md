@@ -21,7 +21,9 @@ This file provides guidance for agentic coding agents working in this repository
 
 ### Testing
 
-- No formal test suite currently exists
+- `just test` - run the perl tests in `t/` plus the Go tests in `bin/`
+- `just coverage` - generate coverage reports locally (mirrors the
+  Codecov workflow)
 - Use `just shellcheck` to validate shell scripts
 - Manual testing of bin/ utilities expected
 

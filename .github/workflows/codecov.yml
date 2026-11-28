@@ -1,0 +1,128 @@
+name: Codecov
+
+# Uploads coverage reports to codecov.io using OIDC authentication via the
+# Codecov GitHub App (installed for this repo, so no upload token is needed).
+# Coverage is a work in progress, so statuses are informational; see
+# .codecov.yml.  https://docs.codecov.com/docs/github-actions
+#
+# Two jobs: coverage generation runs the tests and the cpanm-installed
+# tooling with no elevated permissions; only the upload job holds the
+# OIDC permission, and its steps are all pinned first-party or codecov
+# actions.  The upload job checks the reports out through an artifact
+# so the OIDC token never shares a job with CPAN-installed code.
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+# cancel superseded runs of this workflow on the same PR (rapid pushes
+# don't queue up stale jobs); main runs always complete so every commit
+# keeps a Codecov baseline
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+# global permissions
+permissions: {}
+
+jobs:
+  coverage:
+    name: coverage
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      # The Go files in bin/ are standalone scripts (no go.mod), so the
+      # test files are passed explicitly rather than as a package path.
+      - name: Go coverage
+        run: |
+          go test -coverprofile=go-coverage.out bin/hello.go bin/hello_test.go
+          # go records absolute paths; codecov maps repo-relative ones
+          sed -i "s|$PWD/||" go-coverage.out
+
+      # shell: bash so pipefail applies: a truncated download must fail
+      # here instead of exiting 0 on empty stdin and confusing the next
+      # step with "Can't locate Devel/Cover".  cpanm fetches dists from
+      # cpan.org and verifies their CHECKSUMS; the root-level package
+      # install that apt would need is forbidden by the compliance check.
+      - name: Install Devel::Cover
+        shell: bash
+        run: |
+          curl -L --fail https://cpanmin.us | perl - --local-lib "$HOME/perl5" --notest Devel::Cover Devel::Cover::Report::Cobertura
+          echo "$HOME/perl5/bin" >> "$GITHUB_PATH"
+          echo "PERL5LIB=$HOME/perl5/lib/perl5" >> "$GITHUB_ENV"
+
+      # The Cobertura reporter emits everything in the coverage db, so
+      # system paths (prove) and the test files themselves are filtered
+      # out at collection time rather than at report time.
+      - name: Perl coverage
+        run: |
+          PERL5OPT='-MDevel::Cover=-ignore,/usr/,-ignore,^t/' prove t/
+          cover -silent -report cobertura
+
+      - name: Save coverage reports
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: coverage-reports
+          # fail here rather than confusingly inside the codecov upload
+          if-no-files-found: error
+          path: |
+            go-coverage.out
+            cover_db/cobertura.xml
+
+  upload:
+    name: codecov upload
+    needs: coverage
+    # fork PRs don't get id-token: write, so uploads would fail; the
+    # coverage job still ran the tests, the statuses just don't apply
+    if: github.event.pull_request.head.repo.fork != true
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: read
+      # OIDC token for codecov uploads (use_oidc below)
+      id-token: write
+    steps:
+      # checkout is required: the codecov CLI builds its upload payload
+      # from the git workspace (repo file tree, .codecov.yml); without it
+      # the upload is accepted but processing errors with no data
+      - name: Checkout Code
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Restore coverage reports
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: coverage-reports
+
+      # fail_ci_if_error is deliberate: .codecov.yml statuses are
+      # informational, but an upload that silently stops working should
+      # be visible while this pipeline is young
+      - name: Upload Go coverage to Codecov
+        uses: codecov/codecov-action@303a32d7a59b442fa8d48b6a1cc6825c09c847a5 # v7.1.1
+        with:
+          use_oidc: true
+          files: go-coverage.out
+          flags: go
+          disable_search: true
+          fail_ci_if_error: true
+
+      - name: Upload Perl coverage to Codecov
+        uses: codecov/codecov-action@303a32d7a59b442fa8d48b6a1cc6825c09c847a5 # v7.1.1
+        with:
+          use_oidc: true
+          files: cover_db/cobertura.xml
+          flags: perl
+          disable_search: true
+          fail_ci_if_error: true
