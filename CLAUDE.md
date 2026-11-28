@@ -45,7 +45,14 @@ just merge            # Squash-merges PR, deletes branch, returns to main
 `🧐 [gha] keep super-linter green when configs change`. Renovate PRs are
 exempt; human PRs are not.
 
-**Linting / validation** (there is no formal test suite):
+**Testing** (`t/roll.t` plus the Go tests in `bin/`):
+
+- `just test` - run the test suite (best effort: Go tests skip when go
+  is not installed)
+- `just coverage` - generate coverage reports locally, mirroring
+  `.github/workflows/codecov.yml` (needs Devel::Cover)
+
+**Linting / validation**:
 
 - `just shellcheck` - shellcheck on shell scripts, including bash embedded in
   just recipes (extracted via awk before linting)

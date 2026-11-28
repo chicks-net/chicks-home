@@ -13,6 +13,12 @@ on:
     branches: [main]
   workflow_dispatch:
 
+# cancel superseded runs of this workflow on the same ref (rapid PR
+# pushes don't queue up stale coverage jobs)
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 # global permissions
 permissions: {}
 
@@ -20,6 +26,7 @@ jobs:
   coverage:
     name: coverage
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     permissions:
       contents: read
       # OIDC token for codecov uploads (use_oidc below)
@@ -39,7 +46,13 @@ jobs:
           # go records absolute paths; codecov maps repo-relative ones
           sed -i "s|$PWD/||" go-coverage.out
 
+      # shell: bash so pipefail applies: a truncated download must fail
+      # here instead of exiting 0 on empty stdin and confusing the next
+      # step with "Can't locate Devel/Cover".  cpanm fetches dists from
+      # cpan.org and verifies their CHECKSUMS; the sudo that apt would
+      # need is forbidden by the repo's compliance check.
       - name: Install Devel::Cover
+        shell: bash
         run: |
           curl -L --fail https://cpanmin.us | perl - --local-lib "$HOME/perl5" --notest Devel::Cover Devel::Cover::Report::Cobertura
           echo "$HOME/perl5/bin" >> "$GITHUB_PATH"
@@ -53,7 +66,10 @@ jobs:
           PERL5OPT='-MDevel::Cover=-ignore,/usr/,-ignore,^t/' prove t/
           cover -silent -report cobertura
 
+      # fork PRs don't get id-token: write, so uploads would fail; tests
+      # still run above, the codecov statuses just don't apply there
       - name: Upload Go coverage to Codecov
+        if: github.event.pull_request.head.repo.fork != true
         uses: codecov/codecov-action@303a32d7a59b442fa8d48b6a1cc6825c09c847a5 # v7.1.1
         with:
           use_oidc: true
@@ -63,6 +79,7 @@ jobs:
           fail_ci_if_error: true
 
       - name: Upload Perl coverage to Codecov
+        if: github.event.pull_request.head.repo.fork != true
         uses: codecov/codecov-action@303a32d7a59b442fa8d48b6a1cc6825c09c847a5 # v7.1.1
         with:
           use_oidc: true
