@@ -53,8 +53,8 @@ jobs:
       # shell: bash so pipefail applies: a truncated download must fail
       # here instead of exiting 0 on empty stdin and confusing the next
       # step with "Can't locate Devel/Cover".  cpanm fetches dists from
-      # cpan.org and verifies their CHECKSUMS; the sudo that apt would
-      # need is forbidden by the repo's compliance check.
+      # cpan.org and verifies their CHECKSUMS; the root-level package
+      # install that apt would need is forbidden by the compliance check.
       - name: Install Devel::Cover
         shell: bash
         run: |
@@ -74,6 +74,8 @@ jobs:
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: coverage-reports
+          # fail here rather than confusingly inside the codecov upload
+          if-no-files-found: error
           path: |
             go-coverage.out
             cover_db/cobertura.xml
